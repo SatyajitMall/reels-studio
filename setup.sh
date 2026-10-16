@@ -53,6 +53,9 @@ npx -y skills add heygen-com/hyperframes -a claude-code -y \
 npx -y skills add sergebulaev/instagram-skills -a claude-code -y \
   || warn "instagram skills: install manually with  npx skills add sergebulaev/instagram-skills"
 
+# Starter LUTs / SFX / grain (regenerable, git-ignored). Skipped if the director already has LUTs.
+ls assets/luts/*.cube >/dev/null 2>&1 || ./.venv/bin/python scripts/gemini_generate_starter_pack.py
+
 step "5/6  API keys"
 if [ ! -f .env ]; then cp .env.example .env; warn "Created .env — add your ELEVENLABS_API_KEY for word-level transcripts."; fi
 # video-use looks for .env in its own folder too

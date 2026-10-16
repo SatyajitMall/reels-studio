@@ -7,7 +7,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 
 | # | Claim | Verify by | Status |
 |---|---|---|---|
-| G1 | `assets/` is empty, so the LUT / SFX / grain steps have nothing to use. A starter pack generator is offered | Already true: assets are empty. Decide between a generated starter pack and real licensed assets | open |
+| G1 | `assets/` is empty, so the LUT / SFX / grain steps have nothing to use. A starter pack generator is offered | Already true: assets are empty. Decide between a generated starter pack and real licensed assets | **done** v0.2.3: starter pack adopted, with 2 LUT fixes. Real licensed assets can be added alongside it at any time |
 | G2 | `transcribe.py` exits when there's no ElevenLabs key. A local Whisper fallback is offered | Read `.vendor/video-use/helpers/transcribe.py`. Test the fallback on a talking-head pilot | open |
 | G3 | There's no loudness or beat-grid measurement. A librosa analyser is offered | Review the script, then run it on the first music-montage pilot | **partly adopted** v0.2.0: the beat grid was reviewed and tested on a 120 BPM click track (read 117.5 BPM, beats placed within about 1 frame). Used by §4c. The loudness half hasn't been reviewed |
 | G4 | HyperFrames graphics on V2 sit under the V3 grade and get discoloured | Valid concern. Decide on a track layout change (graphics above the grade) | **rejected** 2026-10-16 by the director. Graphics stay on V2, under the grade |

@@ -10,7 +10,7 @@ so no user files are ever overwritten):
    - gemini_teal_and_orange.cube
    - gemini_moody_desat.cube
    - gemini_clean_bright.cube
-   - gemini_log_to_rec709.cube
+   - gemini_flat_contrast_boost.cube  (creative contrast/sat boost for flat footage; NOT a camera log conversion)
 
 2. 6 synthesized 48kHz 16-bit stereo .wav SFX matching `effects-playbook.md` §F:
    - gemini_whoosh_soft.wav
@@ -101,7 +101,9 @@ def generate_luts() -> None:
         r_c = s_curve(r, contrast=1.20, pivot=0.48)
         g_c = s_curve(g, contrast=1.18, pivot=0.48)
         b_c = s_curve(b, contrast=1.18, pivot=0.48)
-        shadow_w = (1.0 - luma) ** 1.6
+        # Fade the tint in from black so true black stays neutral (night footage would go navy otherwise)
+        black_guard = np.clip(luma / 0.12, 0.0, 1.0) ** 2
+        shadow_w = (1.0 - luma) ** 1.6 * black_guard
         high_w = luma ** 1.4
         r_out = r_c - 0.045 * shadow_w + 0.045 * high_w
         g_out = g_c + 0.010 * shadow_w + 0.012 * high_w
@@ -126,8 +128,9 @@ def generate_luts() -> None:
         luma = (0.2126 * curved[:, 0] + 0.7152 * curved[:, 1] + 0.0722 * curved[:, 2])[:, None]
         return luma + 1.08 * (curved - luma)
 
-    # 5. Log to Rec.709 (normalizes flat/log profiles with contrast expansion + saturation recovery)
-    def log_to_rec709(rgb: np.ndarray) -> np.ndarray:
+    # 5. Flat Contrast Boost (contrast expansion + saturation recovery for flat footage).
+    # Not a camera log->Rec709 conversion: use the camera maker's LUT for that (CLAUDE.md §2.5).
+    def flat_contrast_boost(rgb: np.ndarray) -> np.ndarray:
         curved = s_curve(rgb, contrast=1.42, pivot=0.46)
         luma = (0.2126 * curved[:, 0] + 0.7152 * curved[:, 1] + 0.0722 * curved[:, 2])[:, None]
         return luma + 1.22 * (curved - luma)
@@ -136,7 +139,7 @@ def generate_luts() -> None:
     write_cube_lut(LUTS_DIR / "gemini_teal_and_orange.cube", "Gemini Teal & Orange", teal_orange)
     write_cube_lut(LUTS_DIR / "gemini_moody_desat.cube", "Gemini Moody Desat", moody_desat)
     write_cube_lut(LUTS_DIR / "gemini_clean_bright.cube", "Gemini Clean Bright", clean_bright)
-    write_cube_lut(LUTS_DIR / "gemini_log_to_rec709.cube", "Gemini Log to Rec709", log_to_rec709)
+    write_cube_lut(LUTS_DIR / "gemini_flat_contrast_boost.cube", "Gemini Flat Contrast Boost", flat_contrast_boost)
 
 
 def save_stereo_wav(path: Path, left: np.ndarray, right: np.ndarray, sr: int = 48000) -> None:

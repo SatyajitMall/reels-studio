@@ -1,5 +1,20 @@
 # Studio Changelog
 
+## 0.2.3 — 2026-10-16
+- **Starter asset pack adopted (G1).** `scripts/gemini_generate_starter_pack.py` was reviewed and run. It generates:
+  - 5 LUTs in `assets/luts/`;
+  - 6 SFX in `assets/sfx/`;
+  - a 16mm grain loop in `assets/overlays/`.
+
+  The files are git-ignored and can be regenerated. `setup.sh` now generates them when no LUTs exist.
+- **Fixes to the generator after testing on real `my-reel` frames:**
+  - Teal & Orange turned pure black navy. The tint now fades in from black.
+  - The "Log to Rec709" LUT was a contrast curve, not a real camera conversion. It's renamed `gemini_flat_contrast_boost.cube` so it can't be mistaken for the clip-level log LUT that CLAUDE.md §2.5 allows.
+- **Playbook:**
+  - §A3 maps each look to its LUT file, with notes from the test;
+  - §A4 adds a stronger grain range (40–60 %), because 30 % is barely visible;
+  - §F names each SFX file and notes they're placeholders.
+
 ## 0.2.2 — 2026-10-16
 Found while preparing the first pilot (`my-reel`: 77 iPhone 17 / Blackmagic Cam clips, mostly 25 fps).
 - **Rule: sequence frame rate matches the footage** (CLAUDE.md §3, skill Phase 3).
