@@ -59,13 +59,14 @@ Full detail is in `studio/ARCHITECTURE.md`.
 MCP server: `premiere-pro` (npm `adobe-premiere-pro-mcp`, from hetpatel-11/Adobe_Premiere_Pro_MCP). With `PREMIERE_MCP_TOOLSET=full` all ~283 tools are listed; otherwise use `search_tools` → `invoke_tool`.
 
 1. **Verify the bridge first.** Start every session with `verify_premiere_connection` (read-only). No mutations until Premiere reports connected. If it fails, tell the director to open `Window > Extensions > MCP Bridge (CEP)`, check Temp Directory = `/tmp/premiere-mcp-bridge`, click **Start Bridge**.
-2. **Read the server's own instructions once per session**: resource `premiere://config/get_instructions`.
+2. **Read the server's own instructions once per session**: resource `premiere://config/get_instructions`. Then read `.claude/skills/cinematic-reel/premiere-mcp-reality.md`. It lists which tools are broken on this Premiere/MCP version and the verified fallbacks.
+2a. **Verify by render, never by the tool's reply.** Many tools report success without doing the work. After every colour, transition, opacity, blend or audio change, export a still (and check audio after every export) and confirm the change numerically and by eye. Read ExtendScript results by writing them to a file (reality doc, Rule 2).
 3. **Duplicate before mutating.** `duplicate_sequence` before any razor / ripple delete / batch effect. The director's original sequence is the rollback point and is never edited.
 4. **Read back after structural edits.** After `razor_timeline_at_time`, `ripple_delete`, `trim_clip`, `set_clip_properties`, `speed_change`: call `get_timeline_summary` or `get_timeline_gaps` and check the result matches the intent. QE can quantize to frame boundaries or quietly reject edits.
 5. **Effects can't be removed via script.** Premiere's ExtendScript DOM has no "remove one effect" call, so plan before you apply:
-   - **`color_correct` adds a new Lumetri every time it's called.** Call it exactly **once per clip**, with all values in that call. Fine-tune afterwards with `set_effect_property` on that same Lumetri. Check with `list_clip_effects` before touching a clip.
+   - **`color_correct` adds a new Lumetri every time it's called.** Call it exactly **once per clip**, and only with `contrast`, `temperature` and `tint`. It ignores the other values, and `saturation` turns the clip black and white. Set exposure, highlights, shadows and saturation on that same Lumetri by script (reality doc: Lumetri recipe). Check with `list_clip_effects` before touching a clip.
    - Per-clip *primary* correction (exposure, white balance, contrast) goes on the clip. Never put creative LUTs or stylised looks on V1/V2 clips.
-   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3** (`add_adjustment_layer`).
+   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3**. `add_adjustment_layer` doesn't make a real one, so the director creates it with one manual click (reality doc). Custom `.cube` LUTs can't be loaded by script: apply the look's built-in Lumetri preset (playbook §A3), or ask the director to load the `.cube` by hand.
    - Exception: a camera log→Rec709 conversion LUT may be a clip's single Lumetri, applied with `apply_lut`.
 6. **A sequence created by `duplicate_sequence` must be opened in the timeline** before QE-based tools (e.g. `delete_track`) can reach it.
 7. **`detect_silence` runs ffmpeg on the source file**, not on the timeline. Convert its source-time ranges to sequence time before cutting.
@@ -77,7 +78,7 @@ Correct tool names (the original architecture doc had two wrong):
 
 ## 3. 9:16 track architecture (every reel)
 
-Sequence: **1080×1920**. **Frame rate = the most common frame rate in the footage** (from `analysis/summary.md`): 25 fps footage → 25 fps sequence, 29.97 → 29.97, 23.976/24 → 23.976. Never put 25 fps footage on a 30 fps timeline: every 5th frame repeats and motion stutters. Conform outlier clips (e.g. a few 24 fps clips in a 25 fps shoot) with `speed_change` to play frame-for-frame, and note it in `project.md`. Only footage shot at ≥ 2× the sequence rate has true slow-mo headroom.
+Sequence: **1080×1920**. **Frame rate = the most common frame rate in the footage** (from `analysis/summary.md`): 25 fps footage → 25 fps sequence, 29.97 → 29.97, 23.976/24 → 23.976. Never put 25 fps footage on a 30 fps timeline: every 5th frame repeats and motion stutters. Conform outlier clips (e.g. a few 24 fps clips in a 25 fps shoot) **by interpretation, before placing them**: `set_override_frame_rate {projectItemId, frameRate: <sequence fps>}`. Every frame then plays once and durations stay exact. Scale source in/out times by original_fps / sequence_fps, and note it in `project.md`. Interpreted audio shifts pitch about 4 %: fine for muted natural sound, but flag it on dialogue. Use `speed_change` only for creative speed. Only footage shot at ≥ 2× the sequence rate has true slow-mo headroom.
 
 | Track | Content | Rules |
 |---|---|---|

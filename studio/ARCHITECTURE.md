@@ -24,6 +24,8 @@ Always open sessions at the `reels-studio/` root, never inside `projects/<reel>/
 | `.claude/` (skills, hooks, settings) | HQ | The harness |
 | `scripts/` | HQ | Shared tooling |
 | `studio/` | HQ | Except the two carve-outs below |
+| `studio/director-profile.md` | HQ | Director's branding and preferences. Every reel reads it; changes arrive by CR |
+| `studio/upstream/` | HQ | Drafted bug reports for third-party tools. Filing them is the director's call |
 | `studio/change-requests/` | Any session | Reel sessions file requests here |
 | `studio/retros/` | Any session | Reel sessions copy their finished retro here |
 | `projects/_template/` | HQ | New reels are copied from it |

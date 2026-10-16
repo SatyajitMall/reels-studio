@@ -15,6 +15,13 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 | G6 | Premiere tone-maps iPhone HLG before grading, so a Log LUT blows it out | Check on the first iPhone HDR clip in a pilot | open. `my-reel` footage is Rec.709 SDR, so it isn't tested there |
 | G7 | `scripts/gemini_setup_premiere_mcp.sh` (added 2026-10-16): setup with an npm fallback for a root-owned `/usr/local`, plus CEP debug mode for CSXS 9–16 (doctor covers 10–12) | Fold its npm-prefix fallback into `setup.sh`. Enable more CSXS versions only if the panel doesn't show in Premiere | open. File left untracked |
 
+## From the my-reel retro (deferred)
+- Template `.prproj` with a pre-made 1080×1920 adjustment layer and sequence presets. This would remove the one manual step (CR color-tools 3b).
+- Root cause of the silent Premiere export (upstream draft #15). Needs a minimal repro project.
+- Map built-in Lumetri presets for Teal & Orange, Moody Desat, Clean Bright and Mono Drama (playbook §A3) as reels verify them.
+- MCP smoke test: extend `check_tool_names.sh` to import and delete a dummy file in a scratch project, so tool regressions are caught after upgrades.
+- File the upstream issues (the director decides).
+
 ## Known gaps
 - Music-montage runs on CLAUDE.md §4c rules, which haven't been tested in Premiere yet. The first pilot validates them.
 - The guard hook was installed 2026-10-16. Its deny path hasn't been confirmed from a real reel session yet. The first pilot should hit it once, on purpose.

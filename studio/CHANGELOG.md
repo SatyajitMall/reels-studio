@@ -1,5 +1,26 @@
 # Studio Changelog
 
+## 0.3.1 — 2026-10-16
+The rest of the first pilot's feedback (`my-reel` retro + 5 CRs). Main lesson: **many Premiere MCP tools report success without doing the work.**
+- **New `.claude/skills/cinematic-reel/premiere-mcp-reality.md`:** every broken or partly working tool on Premiere 26.5.2 / MCP 1.2.9, with the fallback the pilot verified. It covers import, delete, colour, adjustment layer, LUT, blend mode, transitions, volume, slip, razor, export presets, silent export and script results. CLAUDE.md §2 now requires **verify by render, never by the tool's reply**.
+- **Conform by interpretation (CLAUDE.md §3):** outlier frame rates are fixed with `set_override_frame_rate` before placement, not with `speed_change`.
+- **Colour (CLAUDE.md §2.5, playbook §A1/§A3/§A4):**
+  - `color_correct` only for contrast / temperature / tint, plus a Lumetri script recipe for the rest;
+  - the adjustment layer is one manual step for the director;
+  - looks use built-in Lumetri presets (custom `.cube` files can't be loaded by script);
+  - blend-mode enum documented;
+  - V4 fades with the picture.
+- **Transitions / sound / export:**
+  - QE transition snippet and Dip-to-Black fades;
+  - volume formula;
+  - built-in `.epr` paths;
+  - mandatory audio check after export;
+  - new **`scripts/mix_from_edl.py`**, the fallback that rebuilds the mix and muxes it onto the picture.
+- **Type:** new **`scripts/render_type_cards.py`** renders PNG word and end cards with a safe-zone guard and a system-font fallback. End cards must be checked over the real outro frame.
+- **New `studio/director-profile.md`:** handle, type style and working preferences, read by every reel in Phase 0, so branding is asked once.
+- **Speed ramp recipe** rewritten for how `speed_change` actually behaves.
+- **Upstream:** 15 issues drafted in `studio/upstream/premiere-mcp-issues.md` (not filed).
+
 ## 0.3.0 — 2026-10-16
 First pilot feedback applied. Both change requests are from `my-reel`.
 - **CR-20261016-my-reel-beat-summary → `gemini_audio_and_beat_analyzer.py`:**

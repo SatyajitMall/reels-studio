@@ -22,7 +22,15 @@ When the architecture falls short:
 - log the workaround in `project.md`;
 - file a CR from `studio/change-requests/_TEMPLATE.md`.
 
-Never patch `CLAUDE.md`, skills, scripts or the template. If `project.md` says `Pilot: yes`, append to `## Friction log` whenever something:
+Never patch `CLAUDE.md`, skills, scripts or the template.
+
+**Two files to read once per reel:**
+- `studio/director-profile.md`: handle, type style and working preferences. Don't re-ask anything it answers.
+- `premiere-mcp-reality.md` (this folder): which Premiere tools are broken and the verified fallbacks.
+
+**Any manual step for the director** goes out as a short numbered list naming the panel and menu path, ending "come back and say done".
+
+ If `project.md` says `Pilot: yes`, append to `## Friction log` whenever something:
 - is slow;
 - fails;
 - needs a guess;
@@ -32,7 +40,7 @@ Never patch `CLAUDE.md`, skills, scripts or the template. If `project.md` says `
 ---
 
 ## Phase 0: Interview the director
-Read `project.md` first. If a round is already in progress, resume it. Check `Arch version` against `studio/VERSION`. If they differ:
+Read `project.md` and `studio/director-profile.md` first. If a round is already in progress, resume it. Check `Arch version` against `studio/VERSION`. If they differ:
 - check `studio/CHANGELOG.md` for changes since then;
 - adopt minor or patch changes at the start of the next round;
 - ask the director before adopting a major change.
@@ -44,7 +52,8 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 2. What should viewers feel or do at the end? (laugh · learn · be inspired · follow · save · click link)
 3. Who's it for?
 4. Length? (15–20 s · 30–45 s · 60 s · whatever the story needs)
-5. References: 1–3 reels or creators whose *feel* they want. Ask them to drop video files in `projects/<name>/references/` or paste links. Instagram links often can't be fetched, so ask for a screen recording or the downloaded file.
+5. Branding, only if `studio/director-profile.md` doesn't already answer it: handle, type style, brand colours. Ask now, not at the end card. Anything new goes into `project.md` and a CR to update the profile.
+6. References: 1–3 reels or creators whose *feel* they want. Ask them to drop video files in `projects/<name>/references/` or paste links. Instagram links often can't be fetched, so ask for a screen recording or the downloaded file.
 
 **Round 2: taste (ask after analysing footage and references, so the options are concrete)**
 Offer choices that fit *this* footage, for example:
@@ -53,7 +62,6 @@ Offer choices that fit *this* footage, for example:
 - Effects intensity: subtle · signature moments only · heavy / stylised
 - Captions: none · Clean · Bold Kinetic · Editorial
 - Music: their file in `assets/music/` · mood + BPM for you to suggest
-- Branding: handle, fonts, brand colours (once only, then remember in `project.md`)
 - Anything that must or must not happen
 
 ## Phase 1: Preflight & footage analysis
@@ -61,7 +69,7 @@ Offer choices that fit *this* footage, for example:
 2. `get_project_info`, `list_sequences`, `list_project_items`.
    - **Premiere sample media:** Premiere 2026's New Project screen imports Adobe sample clips by default (`mediaPath` under `/Users/Shared/Adobe/Premiere Pro/*/Sample Media/`), plus an auto-built `Sequence 01`.
      - If you find them, list them for the director and ask before removing anything.
-     - On a yes, remove them with `delete_multiple_project_items` and `delete_sequence`. Only the project references go; Adobe's sample files on disk stay untouched.
+     - On a yes, remove them with the temp-bin delete in `premiere-mcp-reality.md` (`delete_multiple_project_items` and `delete_project_item` are broken), plus `delete_sequence`. Confirm with `list_project_items`. Only the project references go; Adobe's sample files on disk stay untouched.
      - Never delete a sequence the director made.
 3. If the director's footage lives outside the studio, link it in rather than copying it. The originals stay untouched:
    ```
@@ -84,7 +92,8 @@ Offer choices that fit *this* footage, for example:
      .venv/bin/python scripts/gemini_audio_and_beat_analyzer.py --music assets/music/<track> -o projects/<name>/analysis
      ```
      Then read `analysis/audio_summary.md`. Use its **Energy / sections** table and **Candidate cuts** (best start/end for 15/30/45/60 s) to pick the music section. Check the labels by ear, since they're heuristic. No music yet: ask for it in Round 2. The EDL can't be planned without it.
-5. `create_bin` (`01_A-Roll`, `02_B-Roll`, `03_Graphics`, `04_Textures`, `05_SFX`, `06_Music`) and `import_media` everything.
+5. `create_bin` (`01_A-Roll`, `02_B-Roll`, `03_Graphics`, `04_Textures`, `05_SFX`, `06_Music`), then import everything with the ExtendScript `importFiles` snippet in the reality doc. `import_folder` is broken, and `import_media` ignores `binName`. Confirm with `list_project_items`.
+6. Conform outlier frame rates now, before anything is placed: `set_override_frame_rate` to the sequence fps (CLAUDE.md §3).
 
 → Now ask **Round 2** of the interview.
 
@@ -99,17 +108,17 @@ Offer choices that fit *this* footage, for example:
 Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Wait for a yes or for changes.
 
 ## Phase 3: Rough cut (V1 / A1)
-1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline.
+1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline. `create_sequence` needs an `.sqpreset`, so use `create_sequence_from_clips` on a clip that has the target size and fps.
 2. Assemble the approved EDL with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
 3. Reframe to 9:16 (`auto_reframe_sequence` or `set_clip_scale` / `set_clip_position`).
 4. Check with `get_timeline_gaps` (zero unintended gaps) and `get_timeline_summary` (matches the EDL).
 5. A1: Constant Power crossfade at every cut (`batch_add_transitions`, ~1 frame). `save_project`.
 
 ## Phase 4: Colour (playbook §A, strictly in order)
-1. **A1 primary correction**: one `color_correct` per clip, all values in that single call, based on the analysis. Copy to same-setup clips with `copy_effects_between_clips`.
+1. **A1 primary correction**: one `color_correct` per clip with contrast, temperature and tint only, then set exposure, highlights, shadows and saturation by script (playbook §A1, reality doc). Copy to same-setup clips with `copy_effects_between_clips`. Check the first clip by exported still before copying.
 2. **A2 shot match**: compare adjacent shots and fine-tune with `set_effect_property`.
-3. **A3 creative look**: V3 adjustment layer with `apply_lut` + `color_correct` + vignette.
-4. **A4 texture**: grain / leaks on V4 with `set_blend_mode` + `set_clip_opacity`.
+3. **A3 creative look**: ask the director for the one manual step (create an Adjustment Layer), place it on V3, apply the look's built-in Lumetri preset and set its intensity (playbook §A3).
+4. **A4 texture**: grain / leaks on V4, with the blend mode set by script (enum in the reality doc) + `set_clip_opacity`. Fade V4 with the picture at every fade to black.
 5. Export 3–4 still frames (or a short preview) and check skin tones and contrast with your own eyes. `save_project`.
 
 ## Phase 5: Motion, effects, B-roll, graphics, captions
@@ -134,7 +143,8 @@ Execute the Treatment from the brief, beat by beat:
 
 ## Phase 7: QA & export
 1. `validate_project_for_export`, `check_offline_media`, `get_timeline_gaps`, `set_sequence_in_out_points`.
-2. `export_sequence`: H.264 1080×1920, high bitrate → `renders/exports/<name>_v<round>.mp4`.
+2. Export H.264 1080×1920, high bitrate → `renders/exports/<name>_v<round>.mp4`, using a built-in `.epr` (paths in the reality doc).
+   **Check the audio straight away** (`ffmpeg -af volumedetect`, max_volume > −20 dB). If it's silent, write `analysis/mix.json` and rebuild the audio with `scripts/mix_from_edl.py`. Note it in the round summary.
 3. Run `analyze_footage.py` on the export, look at its contact sheet, and check the first 3 s plus 2–3 risky cuts with `scripts/cut_view.sh`.
 
 ### ⏸ Checkpoint 2: review the cut
