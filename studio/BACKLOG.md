@@ -16,4 +16,4 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 
 ## Known gaps
 - Music-montage runs on CLAUDE.md §4b rules, which haven't been tested in Premiere yet. The first pilot validates them.
-- The hook enforcement only works once `studio/harness/settings.json` is installed as `.claude/settings.json`.
+- The guard hook was installed 2026-10-16. Its deny path hasn't been confirmed from a real reel session yet. The first pilot should hit it once, on purpose.
