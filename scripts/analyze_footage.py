@@ -178,7 +178,8 @@ def main() -> None:
     files: list[Path] = []
     for p in args.inputs:
         if p.is_dir():
-            files += sorted(f for f in p.iterdir() if f.suffix.lower() in VIDEO_EXT)
+            files += sorted(f for f in p.iterdir()
+                           if f.suffix.lower() in VIDEO_EXT and not f.name.startswith("._"))  # skip macOS metadata
         elif p.suffix.lower() in VIDEO_EXT:
             files.append(p)
     if not files:

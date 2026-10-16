@@ -35,7 +35,10 @@ Open every session at the `reels-studio/` root. Details are in `studio/ARCHITECT
 ```bash
 scripts/new_reel.sh gym-morning-routine
 ```
-1. Put your main or talking-head clips in `projects/gym-morning-routine/raw/a-roll/` and cutaways in `raw/b-roll/`. For a music-only reel, all clips can go in `raw/b-roll/`.
+1. Put your main or talking-head clips in `projects/gym-morning-routine/raw/a-roll/` and cutaways in `raw/b-roll/`. For a music-only reel, all clips can go in `raw/b-roll/`. If your footage already lives somewhere else, link it in without copying it:
+   ```bash
+   scripts/link_footage.sh gym-morning-routine "/path/to/your/footage"
+   ```
 2. Optionally, put reference reels you like in `references/`. Screen recordings are fine.
 3. Open Premiere with a project open and the bridge started.
 4. Open a **new** Code session at the `reels-studio/` root and say **`/cinematic-reel gym-morning-routine`**.

@@ -59,7 +59,11 @@ Offer choices that fit *this* footage, for example:
 ## Phase 1: Preflight & footage analysis
 1. `verify_premiere_connection`. If it fails, stop and give the CEP panel steps. Read `premiere://config/get_instructions` once.
 2. `get_project_info`, `list_sequences`, `list_project_items`.
-3. Run the analysers (no API key needed):
+3. If the director's footage lives outside the studio, link it in rather than copying it. The originals stay untouched:
+   ```
+   scripts/link_footage.sh <name> "<source folder>" [a-roll|b-roll]
+   ```
+   Then run the analysers (no API key needed):
    ```
    .venv/bin/python scripts/analyze_footage.py projects/<name>/raw/a-roll projects/<name>/raw/b-roll -o projects/<name>/analysis
    .venv/bin/python scripts/analyze_footage.py projects/<name>/references -o projects/<name>/analysis/references --reference
@@ -87,7 +91,7 @@ Offer choices that fit *this* footage, for example:
 Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Wait for a yes or for changes.
 
 ## Phase 3: Rough cut (V1 / A1)
-1. `duplicate_sequence`, or create a 1080×1920 sequence → `Reel_<name>_v<round>`, then open it in the timeline.
+1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline.
 2. Assemble the approved EDL with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
 3. Reframe to 9:16 (`auto_reframe_sequence` or `set_clip_scale` / `set_clip_position`).
 4. Check with `get_timeline_gaps` (zero unintended gaps) and `get_timeline_summary` (matches the EDL).

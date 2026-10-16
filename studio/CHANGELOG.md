@@ -1,5 +1,18 @@
 # Studio Changelog
 
+## 0.2.2 — 2026-10-16
+Found while preparing the first pilot (`my-reel`: 77 iPhone 17 / Blackmagic Cam clips, mostly 25 fps).
+- **Rule: sequence frame rate matches the footage** (CLAUDE.md §3, skill Phase 3).
+  - The most common frame rate in the footage wins.
+  - Outlier clips are conformed with `speed_change`.
+  - This replaces the old "30 fps default", which would have made 25 fps footage stutter.
+- **New: `scripts/link_footage.sh <reel> <dir> [a-roll|b-roll]`.**
+  - Symlinks footage that lives outside the studio into `raw/` and records it in `raw/SOURCES.md`.
+  - Originals are never copied or moved.
+  - Skips macOS `._*` files and camera `Proxy/` folders.
+  - Safe to re-run.
+- **Fix: `analyze_footage.py` skips `._*` metadata files** when scanning a folder.
+
 ## 0.2.1 — 2026-10-16
 - **New: `scripts/check_tool_names.sh`.** It lists the Premiere MCP server's tools over stdio and fails if any tool name in `CLAUDE.md` or the cinematic-reel skill and playbook doesn't exist. Premiere doesn't need to be running. Result today: all 52 names are valid against server 1.2.9 (283 tools).
 - **Gemini review triage.**

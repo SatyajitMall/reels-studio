@@ -77,7 +77,7 @@ Correct tool names (the original architecture doc had two wrong):
 
 ## 3. 9:16 track architecture (every reel)
 
-Sequence: **1080×1920**, 30 fps (or 23.976 if the director asks for "film" feel and footage supports it).
+Sequence: **1080×1920**. **Frame rate = the most common frame rate in the footage** (from `analysis/summary.md`): 25 fps footage → 25 fps sequence, 29.97 → 29.97, 23.976/24 → 23.976. Never put 25 fps footage on a 30 fps timeline: every 5th frame repeats and motion stutters. Conform outlier clips (e.g. a few 24 fps clips in a 25 fps shoot) with `speed_change` to play frame-for-frame, and note it in `project.md`. Only footage shot at ≥ 2× the sequence rate has true slow-mo headroom.
 
 | Track | Content | Rules |
 |---|---|---|
