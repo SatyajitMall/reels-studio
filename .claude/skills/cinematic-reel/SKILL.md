@@ -68,7 +68,7 @@ Offer choices that fit *this* footage, for example:
    .venv/bin/python scripts/analyze_footage.py projects/<name>/raw/a-roll projects/<name>/raw/b-roll -o projects/<name>/analysis
    .venv/bin/python scripts/analyze_footage.py projects/<name>/references -o projects/<name>/analysis/references --reference
    ```
-   **Look at every `contact.png` yourself** and read `summary.md`. Note per clip: exposure, colour cast, flat/log, fps (slow-mo headroom), orientation, what's actually in the shot, hero moments.
+   **Look at every `contact.png` yourself** and read `summary.md`. If a reference's contact sheet shows more distinct shots than the cut count, rerun it with `--scene-threshold 0.1`. Trust the count once two thresholds agree. Note per clip: exposure, colour cast, flat/log, fps (slow-mo headroom), orientation, what's actually in the shot, hero moments.
 4. Timing source, by reel type (CLAUDE.md §4):
    - `talking-head` / `hybrid`: transcribe dialogue with `scripts/transcribe_reel.sh <name>`, which produces `transcripts/takes_packed.md`. If there's no ElevenLabs key, use `detect_silence` and tell the director word-level cutting is off.
    - `music-montage` / `hybrid`: run the beat grid on the music track:

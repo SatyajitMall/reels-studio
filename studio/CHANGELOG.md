@@ -1,5 +1,14 @@
 # Studio Changelog
 
+## 0.2.4 — 2026-10-16
+- **`link_footage.sh`:**
+  - new `references` role, which links into `projects/<reel>/references/`;
+  - footage roles now skip reference folders (`*ref*rence*`, which also matches the director's "Refference" spelling), so a reference reel can't be linked in as footage.
+- **`analyze_footage.py`: default `--scene-threshold` lowered from 0.3 to 0.15.**
+  - On `my-reel`'s dark, beam-lit reference, 0.3 found 3 cuts (5.4 s average).
+  - The count settles at 8 cuts from 0.15 down to 0.1 (2.4 s average, 1.6 s median), which matches the contact sheet.
+- **Skill Phase 1:** cross-check the reference cut count against its contact sheet.
+
 ## 0.2.3 — 2026-10-16
 - **Starter asset pack adopted (G1).** `scripts/gemini_generate_starter_pack.py` was reviewed and run. It generates:
   - 5 LUTs in `assets/luts/`;

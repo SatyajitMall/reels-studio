@@ -5,7 +5,7 @@
 | Reel name | my-reel |
 | Status | brief → proposal → approved → rough cut → polish → exported → packaged → done |
 | Reel type | talking-head · music-montage · hybrid |
-| Arch version | 0.2.3 |
+| Arch version | 0.2.4 |
 | Pilot | yes |
 | Current round | 0 |
 | Premiere project | |

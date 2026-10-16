@@ -172,7 +172,7 @@ def main() -> None:
     ap.add_argument("-o", "--out", type=Path, required=True)
     ap.add_argument("-n", "--frames", type=int, default=12)
     ap.add_argument("--reference", action="store_true", help="also measure pacing (cut detection)")
-    ap.add_argument("--scene-threshold", type=float, default=0.3)
+    ap.add_argument("--scene-threshold", type=float, default=0.15)  # 0.3 missed over half the cuts in a dark night-light reference (v0.2.4)
     args = ap.parse_args()
 
     files: list[Path] = []
