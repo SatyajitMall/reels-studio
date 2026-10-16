@@ -1,5 +1,12 @@
 # Studio Changelog
 
+## 0.2.1 — 2026-10-16
+- **New: `scripts/check_tool_names.sh`.** It lists the Premiere MCP server's tools over stdio and fails if any tool name in `CLAUDE.md` or the cinematic-reel skill and playbook doesn't exist. Premiere doesn't need to be running. Result today: all 52 names are valid against server 1.2.9 (283 tools).
+- **Gemini review triage.**
+  - G4 (move graphics above the grade): rejected by the director.
+  - G5 (wrong tool names): rejected; the check above shows the claim is false.
+- Guard hook installed (`.claude/settings.json`).
+
 ## 0.2.0 — 2026-10-15
 - **HQ / reel-session split.**
   - Each reel is its own sub-project, edited in its own session.

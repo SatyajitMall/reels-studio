@@ -31,7 +31,10 @@ You are the studio's **architect**. Reel sessions make reels. You make the syste
    - new reels' files → `projects/_template/`;
    - enforcement → `.claude/hooks/`.
 3. Keep `CLAUDE.md`, `SKILL.md`, `ARCHITECTURE.md` and `README.md` consistent with each other. A rule lives in one place, and the others point to it.
-4. **Test what can be tested**: run changed scripts on real footage from a reel folder, and pipe sample JSON into hooks.
+4. **Test what can be tested**:
+   - run changed scripts on real footage from a reel folder;
+   - pipe sample JSON into hooks;
+   - after any rule edit that names Premiere tools, or after an MCP upgrade, run `scripts/check_tool_names.sh`.
 5. **Version it:**
    - bump `studio/VERSION` (semver rules in ARCHITECTURE §5);
    - add a dated `CHANGELOG.md` entry;
