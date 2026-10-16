@@ -1,0 +1,26 @@
+# Media and generated output: tracked by the director, not git
+projects/*/raw/
+projects/*/references/
+projects/*/renders/
+projects/*/analysis/
+projects/*/transcripts/
+assets/**/*
+!assets/**/
+!assets/**/.gitkeep
+
+# Environments, secrets, vendored tools, local state
+.env
+.venv/
+.vendor/
+.claude/state/
+.DS_Store
+*.prproj.lock
+
+# Third-party skills: reinstalled by setup.sh, pinned in skills-lock.json. Studio-owned skills stay tracked.
+.claude/skills/*
+!.claude/skills/cinematic-reel/
+!.claude/skills/studio-hq/
+
+# Keep the template's empty folders
+!projects/_template/**
+**/.DS_Store
