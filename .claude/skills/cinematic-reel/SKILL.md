@@ -59,6 +59,10 @@ Offer choices that fit *this* footage, for example:
 ## Phase 1: Preflight & footage analysis
 1. `verify_premiere_connection`. If it fails, stop and give the CEP panel steps. Read `premiere://config/get_instructions` once.
 2. `get_project_info`, `list_sequences`, `list_project_items`.
+   - **Premiere sample media:** Premiere 2026's New Project screen imports Adobe sample clips by default (`mediaPath` under `/Users/Shared/Adobe/Premiere Pro/*/Sample Media/`), plus an auto-built `Sequence 01`.
+     - If you find them, list them for the director and ask before removing anything.
+     - On a yes, remove them with `delete_multiple_project_items` and `delete_sequence`. Only the project references go; Adobe's sample files on disk stay untouched.
+     - Never delete a sequence the director made.
 3. If the director's footage lives outside the studio, link it in rather than copying it. The originals stay untouched:
    ```
    scripts/link_footage.sh <name> "<source folder>" [a-roll|b-roll]

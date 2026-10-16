@@ -1,5 +1,11 @@
 # Studio Changelog
 
+## 0.2.5 — 2026-10-16
+- **Skill Phase 1: handle Premiere sample media.**
+  - Premiere 2026's New Project screen imports 17 Adobe sample clips and a `Sequence 01` by default. This was found in `my-reel.prproj`.
+  - The reel session now lists them and asks the director before removing the project references.
+- **Bridge verified end to end:** `verify_premiere_connection` → connected (Premiere 26.5.2).
+
 ## 0.2.4 — 2026-10-16
 - **`link_footage.sh`:**
   - new `references` role, which links into `projects/<reel>/references/`;
