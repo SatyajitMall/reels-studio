@@ -1,5 +1,21 @@
 # Studio Changelog
 
+## 0.3.0 — 2026-10-16
+First pilot feedback applied. Both change requests are from `my-reel`.
+- **CR-20261016-my-reel-beat-summary → `gemini_audio_and_beat_analyzer.py`:**
+  - "4-Bar Downbeats" is renamed "Bar downbeats (every 4th beat)", and the bar length is shown;
+  - the beat range is stated (the beatless intro and outro are now visible);
+  - a new **Energy / sections** table labels intro, build, drop, breakdown and outro from per-bar loudness;
+  - new **Candidate cuts** give the best 3 start/end pairs for 15/30/45/60 s, scored on energy, first hit ≤ 3 s, a clean ending and starting on a phrase;
+  - the dialogue table only appears when clips are passed.
+
+  Tested on Dum Durga: the sections match the pilot's hand-made map, and the 30 s candidates include its chosen 61.9 s start.
+- **CR-20261016-my-reel-footage-overview → `analyze_footage.py`:**
+  - new `overview_<n>.jpg`: labelled mid-frame thumbnails, 20 per sheet, built from frames already grabbed (no extra decoding);
+  - new `--norm auto|talking-head|shoot`: by default, a shoot with median exposure < 0.30 is judged relative to its own median. On `my-reel` that's 19 darker and 7 brighter clips, instead of 70/77 "underexposed".
+  - **Not done: auto upside-down detection.** On the pilot's 5 known upside-down clips, the top-vs-bottom brightness and detail heuristics were spread across the whole range, and the metadata of upside-down and upright clips is identical apart from timestamps. Upside-down clips are spotted on the overview sheets instead. That check found 3 more likely ones (C014, C015, C020).
+- **Skill Phase 1:** look at the overview sheets first, then the candidates' contact sheets; use the energy/sections table and candidate cuts to pick the music section.
+
 ## 0.2.5 — 2026-10-16
 - **Skill Phase 1: handle Premiere sample media.**
   - Premiere 2026's New Project screen imports 17 Adobe sample clips and a `Sequence 01` by default. This was found in `my-reel.prproj`.

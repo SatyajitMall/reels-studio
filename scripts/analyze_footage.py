@@ -4,7 +4,13 @@
 For each video it writes, into <out_dir>/<clip_stem>/:
   contact.png   - grid of evenly spaced frames, timecode-stamped
   stats.json    - technical metadata + per-sample exposure / white-balance / saturation readings
-and one <out_dir>/summary.md covering every clip (read this first).
+plus, in <out_dir>/:
+  overview_<n>.jpg - labelled mid-frame thumbnails of every clip, 20 per sheet (look at these first)
+  summary.md       - one table covering every clip
+
+Exposure is judged against a talking-head norm (0.40-0.50 mean luma) unless the shoot is dark:
+with --norm auto (default) a shoot whose median exposure is below 0.30 (night, stage, candle-lit)
+is judged relative to its own median instead, so "underexposed" still means something.
 
 With --reference it also detects cuts and reports shot lengths (pacing),
 which is how a reference reel is turned into concrete editing parameters.
@@ -23,10 +29,12 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 VIDEO_EXT = {".mp4", ".mov", ".m4v", ".mxf", ".mkv", ".avi", ".webm"}
 THUMB_W = 270  # 9:16 thumb = 270x480
+OVERVIEW_PER_SHEET, OVERVIEW_COLS = 20, 5
+DARK_SHOOT_MEDIAN = 0.30
 
 
 def probe(path: Path) -> dict:
@@ -96,9 +104,14 @@ def frame_stats(img: Image.Image) -> dict:
     }
 
 
-def describe(s: dict) -> list[str]:
+def describe(s: dict, shoot_median: float | None = None) -> list[str]:
+    """shoot_median set → exposure is judged relative to the shoot instead of the talking-head band."""
     notes = []
-    if s["luma_mean"] < 0.30: notes.append("underexposed")
+    if shoot_median:
+        rel = s["luma_mean"] / max(shoot_median, 1e-6)
+        if rel < 0.6: notes.append(f"darker than the shoot ({rel:.0%} of median)")
+        elif rel > 1.6: notes.append(f"brighter than the shoot ({rel:.0%} of median)")
+    elif s["luma_mean"] < 0.30: notes.append("underexposed")
     elif s["luma_mean"] > 0.62: notes.append("bright / possibly overexposed")
     if s["luma_p98"] - s["luma_p02"] < 0.55: notes.append("flat / low contrast (log-like?)")
     if s["clipped_highlights_pct"] > 3: notes.append(f"{s['clipped_highlights_pct']}% clipped highlights")
@@ -127,6 +140,36 @@ def contact_sheet(frames: list[tuple[float, Image.Image]], cols: int) -> Image.I
         d.rectangle([x, y, x + 78, y + 16], fill=(0, 0, 0))
         d.text((x + 4, y + 2), label, fill=(255, 255, 0))
     return sheet
+
+
+def overview_sheets(rows: list[dict], out_dir: Path) -> list[Path]:
+    """Tile each clip's middle frame, labelled with a short name and duration, 20 per sheet."""
+    thumbs = [(r, r.pop("_mid")) for r in rows if r.get("_mid") is not None]
+    if not thumbs:
+        return []
+    try:
+        font = ImageFont.load_default(size=22)
+    except TypeError:  # Pillow < 10.1
+        font = ImageFont.load_default()
+    tw = THUMB_W
+    th = max(img.height for _, img in thumbs)
+    paths = []
+    for n, start in enumerate(range(0, len(thumbs), OVERVIEW_PER_SHEET), 1):
+        chunk = thumbs[start:start + OVERVIEW_PER_SHEET]
+        rows_n = (len(chunk) + OVERVIEW_COLS - 1) // OVERVIEW_COLS
+        sheet = Image.new("RGB", (OVERVIEW_COLS * tw, rows_n * th), (20, 20, 20))
+        d = ImageDraw.Draw(sheet)
+        for i, (r, img) in enumerate(chunk):
+            x, y = (i % OVERVIEW_COLS) * tw, (i // OVERVIEW_COLS) * th
+            sheet.paste(img.resize((tw, int(img.height * tw / img.width))), (x, y))
+            short = Path(r["file"]).stem.split("_")[-1]  # A001_10150145_C001 → C001
+            label = f"{short}  {r['duration_s']}s"
+            d.rectangle([x, y, x + tw, y + 30], fill=(0, 0, 0))
+            d.text((x + 6, y + 3), label, fill=(255, 255, 0), font=font)
+        p = out_dir / f"overview_{n}.jpg"
+        sheet.save(p, quality=85)
+        paths.append(p)
+    return paths
 
 
 def detect_cuts(path: Path, threshold: float) -> list[float]:
@@ -163,6 +206,7 @@ def analyse(path: Path, out_dir: Path, n_frames: int, reference: bool, threshold
             "cut_times": [round(c, 2) for c in cuts],
         }
     (d / "stats.json").write_text(json.dumps(result, indent=2))
+    result["_mid"] = frames[len(frames) // 2][1] if frames else None  # for overview sheets; not saved
     return result
 
 
@@ -172,6 +216,8 @@ def main() -> None:
     ap.add_argument("-o", "--out", type=Path, required=True)
     ap.add_argument("-n", "--frames", type=int, default=12)
     ap.add_argument("--reference", action="store_true", help="also measure pacing (cut detection)")
+    ap.add_argument("--norm", choices=["auto", "talking-head", "shoot"], default="auto",
+                    help="exposure norm: talking-head band, relative to the shoot's median, or auto (shoot if the median is dark)")
     ap.add_argument("--scene-threshold", type=float, default=0.15)  # 0.3 missed over half the cuts in a dark night-light reference (v0.2.4)
     args = ap.parse_args()
 
@@ -191,7 +237,23 @@ def main() -> None:
         print(f"▸ {f.name}", flush=True)
         rows.append(analyse(f, args.out, args.frames, args.reference, args.scene_threshold))
 
+    # Exposure norm: re-judge every clip against the shoot when it's a dark shoot (or when asked).
+    lumas = [r["average"]["luma_mean"] for r in rows if r.get("average")]
+    shoot_median = float(np.median(lumas)) if lumas else None
+    relative = args.norm == "shoot" or (args.norm == "auto" and shoot_median is not None and shoot_median < DARK_SHOOT_MEDIAN)
+    for r in rows:
+        if r.get("average"):
+            r["read"] = describe(r["average"], shoot_median if relative else None)
+            stats = {k: v for k, v in r.items() if k != "_mid"}
+            (args.out / Path(r["file"]).stem / "stats.json").write_text(json.dumps(stats, indent=2))
+    sheets = overview_sheets(rows, args.out)
+
+    norm_note = (f"Exposure judged **relative to this shoot** (median {shoot_median:.3f}; dark shoot)." if relative
+                 else "Exposure judged against the talking-head band (≈0.40–0.50 mean luma).")
     lines = ["# Footage analysis", "",
+             f"Overview sheets (look first): {', '.join(f'`{p.name}`' for p in sheets) or 'none'}. "
+             "Scan them for upside-down or sideways clips too; orientation isn't detected automatically.", "",
+             norm_note, "",
              "| Clip | Dur | Res | fps | Slow-mo | Bit depth | Exposure | Contrast range | Warm/Cool | Read |",
              "|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
@@ -208,8 +270,7 @@ def main() -> None:
             if p:
                 lines.append(f"| {r['file']} | {p['cuts']} | {p['avg_shot_s']}s | {p['median_shot_s']}s | "
                              f"{p['shortest_s']}s | {p['first_cut_s']}s |")
-    lines += ["", "Exposure = mean luma 0–1 (≈0.40–0.50 is a healthy talking-head). "
-              "Warm/Cool: + warm, − cool. Contact sheets: `<clip>/contact.png`."]
+    lines += ["", "Exposure = mean luma 0–1. Warm/Cool: + warm, − cool. Contact sheets: `<clip>/contact.png`."]
     (args.out / "summary.md").write_text("\n".join(lines) + "\n")
     print(f"✓ {args.out / 'summary.md'}")
 

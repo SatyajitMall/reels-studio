@@ -27,6 +27,7 @@ assets/**/*
 
 # Premiere project files, auto-saves and caches (saved by Premiere, not versioned here)
 *.prproj
+*.prin
 **/Adobe Premiere Pro Auto-Save/
 **/Adobe Premiere Pro Audio Previews/
 **/Adobe Premiere Pro Video Previews/
