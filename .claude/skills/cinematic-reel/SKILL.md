@@ -145,6 +145,15 @@ Execute the Treatment from the brief, beat by beat:
 5. Captions on V5, in the style from the brief and inside the safe zone.
 6. After each group: `get_timeline_summary`, `list_clip_effects` on 2–3 clips to confirm nothing stacked twice, then `save_project`.
 
+## Phase 5b: After Effects finishing (optional)
+For shots that need **denoise, a real speed-ramp curve, Timewarp slow-mo or glow/halation**, follow `after-effects.md` (same folder):
+1. Write `analysis/ae_jobs.json` from the EDL.
+2. Run `scripts/ae_roundtrip.py`, in the background, at about 4 min per shot.
+3. Check every `_compare.png` and the before/after reports.
+4. Swap the ProRes renders in at the same timeline positions.
+
+Plan which shots go through After Effects in the brief's Treatment, and say so in the round summary. Stabilisation stays in Premiere (Phase 5): AE's Warp Stabilizer can't be run by script.
+
 ## Phase 6: Sound design & mix
 - SFX on A2 for every visual event the playbook §F lists (−14…−18 dB).
 - Music on A3:

@@ -22,6 +22,13 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - MCP smoke test: extend `check_tool_names.sh` to import and delete a dummy file in a scratch project, so tool regressions are caught after upgrades.
 - File the upstream issues (the director decides).
 
+## After Effects (from v0.4.0)
+- Option: `@kumoproductions/mcp-aftereffects` (MIT, released 2026-10-16, 1 contributor, no panel needed). It's a richer AE MCP; adopting it is a dependency call for the director. Revisit once it has more history.
+- AE 26.5 ships Adobe's own MCP server (`Contents/Required/MCP Server.plugin`). It's disabled behind a beta gate; recheck in later AE builds.
+- Paid plugins (director decides): Neat Video (much stronger denoise than Remove Grain), Twixtor, RSMB, Deep Glow.
+- `aerender` starts a second AE per shot (about 4 min each). If render time hurts, try `-reuse` or rendering from AE's own queue.
+- ProRes 422 HQ needs a custom output-module template made once in AE's UI; today we use "High Quality" (ProRes 422).
+
 ## Known gaps
 - Music-montage runs on CLAUDE.md §4c rules, which haven't been tested in Premiere yet. The first pilot validates them.
 - The guard hook was installed 2026-10-16. Its deny path hasn't been confirmed from a real reel session yet. The first pilot should hit it once, on purpose.

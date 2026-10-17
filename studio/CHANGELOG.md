@@ -1,5 +1,22 @@
 # Studio Changelog
 
+## 0.4.0 — 2026-10-17
+**After Effects finishing** (CR-20261017-my-reel-after-effects-bridge).
+- **New `scripts/ae_bridge.py`:**
+  - runs ExtendScript in the director's running AE via osascript `DoScript` with a file loader, and returns JSON;
+  - `verify` checks the connection, and `effects` checks effect match names.
+- **New `scripts/ae_roundtrip.py`:** jobs JSON → one AE project per shot → `aerender` ProRes 422 → before/after still + log.
+  - Ops: `denoise`, `timewarp`, `time_remap` (true eased speed ramps), `glow`, `grain`.
+  - Safety: it never touches another open AE project.
+- **Verified by render on my-reel footage:**
+  - Remove Grain needs Viewing Mode 4; it gets studio defaults that keep texture;
+  - Timewarp and the time-remap ramp are clean;
+  - Glow is `ADBE Glo2`.
+- **Rejected:** Warp Stabilizer by script. It never analyses and renders a "Click Analyze to begin." banner, so stabilising stays in Premiere.
+- **New `.claude/skills/cinematic-reel/after-effects.md`** + skill **Phase 5b**, and a `CLAUDE.md` tooling line.
+- **Fix:** `shake_report.py` / `colour_report.py` crashed on files where ffprobe lists the stream twice (found testing ProRes output).
+- **Backlog:** kumoproductions AE MCP (dependency decision), Adobe's own AE MCP (beta-gated), paid plugins (Neat Video, Twixtor, RSMB, Deep Glow), aerender speed, a ProRes 422 HQ template.
+
 ## 0.3.2 — 2026-10-17
 Montage craft from my-reel rounds 2–6 (CR-20261016-my-reel-montage-craft).
 - **Brief (skill Phase 2, CLAUDE.md §4c):** music-montage briefs state an **energy arc** (default: slow open → build → full → breath → payoff → outro) and a **motion style**. Never one shot per bar throughout.

@@ -129,5 +129,6 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Transcription: `.vendor/video-use/helpers/transcribe.py` (ElevenLabs Scribe — needs `ELEVENLABS_API_KEY` in `.env`). Wrapped by `scripts/transcribe_reel.sh <reel-name>`.
 - Packing: `pack_transcripts.py` → `projects/<name>/transcripts/takes_packed.md`. Read this, not raw frames.
 - Cut inspection: `.vendor/video-use/helpers/timeline_view.py <video> <start> <end> -o out.png`.
+- After Effects finishing (denoise, speed-ramp curves, Timewarp, glow): `scripts/ae_roundtrip.py` via `scripts/ae_bridge.py`. Rules and verified settings are in `.claude/skills/cinematic-reel/after-effects.md` (skill Phase 5b).
 - Motion graphics: HyperFrames skills (`/hyperframes`, `/motion-graphics`, `/embedded-captions`, `/talking-head-recut`), rendered to `projects/<name>/renders/overlays/` as 1080×1920 (alpha `.mov` when it overlays footage).
 - Instagram packaging: `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist`, `ig-humanizer` skills.

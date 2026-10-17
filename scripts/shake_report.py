@@ -36,7 +36,7 @@ EDGE = 3  # frames ignored at each shot edge (cuts / transitions)
 def fps_of(path: Path) -> float:
     out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate",
                           "-of", "csv=p=0", str(path)], capture_output=True, text=True).stdout.strip()
-    n, d = (out or "25/1").split("/")
+    n, d = ((out.splitlines() or ["25/1"])[0] or "25/1").split("/")  # some files list the stream twice
     return float(n) / float(d) if float(d) else 25.0
 
 
