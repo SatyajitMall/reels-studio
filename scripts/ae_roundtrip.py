@@ -7,7 +7,8 @@ For each shot in a jobs file it:
   2. applies the ops in order,
   3. saves projects/<reel>/renders/ae/<name>.aep and renders <name>.mov headlessly with aerender
      (default output module "High Quality" = ProRes 422; pass --om for another template),
-  4. writes <name>_compare.png (source vs AE output, same moment) for checking by eye, and logs
+  4. checks that output frame 0 matches the source at the in-point (frame_match in the log),
+     writes <name>_compare.png (source vs AE output, same moment) for checking by eye, and logs
      everything to projects/<reel>/analysis/ae_log.json.
 The reel session then imports the .mov in Premiere and swaps it in for the original clip.
 
@@ -20,7 +21,7 @@ Jobs file (projects/<reel>/analysis/ae_jobs.json):
      "ops": [{"op": "denoise"},
              {"op": "timewarp", "speed": 50},
              {"op": "time_remap", "points": [[0, 0], [0.6, 1.5], [2.0, 2.0]], "ease": 75},
-             {"op": "glow", "threshold": 70, "radius": 25, "intensity": 0.5},
+             {"op": "glow", "threshold": 80, "radius": 25, "intensity": 0.25},
              {"op": "grain", "intensity": 0.3}]}
   ]
 }
@@ -33,7 +34,7 @@ Ops (built-in effects only; match names verified on AE 26.5 with `ae_bridge.py e
   stabilise   NOT SUPPORTED. Added by script, Warp Stabilizer never analyses: every rendered frame
               carried a "Click Analyze to begin." banner (tested 2026-10-17). Stabilise in Premiere
               (skill Phase 5), or have the director click Analyze in AE by hand.
-  glow        Glow (ADBE Glo2) on highlights: threshold %, radius, intensity
+  glow        Glow (ADBE Glo2) on highlights: threshold % (80), radius (25), intensity (0.25)
   grain       Add Grain (VISINF Grain Implant) at a low intensity, after denoise if you want texture back
 
 Usage:
@@ -47,6 +48,8 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ae_bridge import run_jsx  # noqa: E402
@@ -72,7 +75,9 @@ proj.items.addFolder(MARK);
 try {
 
 var src = proj.importFile(new ImportOptions(new File(S.source)));
+var timeScale = 1;   // AE time → file time (≠ 1 when a 24 fps clip is conformed to 25)
 if (src.frameRate && Math.abs(src.frameRate - S.fps) > 0.01 && Math.abs(src.frameRate - S.fps) < 2) {
+    timeScale = S.fps / src.frameRate;
     src.mainSource.conformFrameRate = S.fps;   // e.g. 24 → 25: frame-for-frame, like Premiere's interpretation
 }
 var srcDur = S.out_s - S.in_s;
@@ -84,23 +89,31 @@ for (var i = 0; i < S.ops.length; i++) {
 }
 if (tw) compDur = srcDur / (tw.speed / 100);
 if (tr) compDur = tr.points[tr.points.length - 1][0];
-var comp = proj.items.addComp(S.name, S.width, S.height, 1, compDur, S.fps);
-var layer = comp.layers.add(src);
-layer.startTime = -S.in_s;          // source in-point lands at comp 0
-if (layer.outPoint < compDur) layer.outPoint = compDur;
-if (S.rotate) layer.property("ADBE Transform Group").property("ADBE Rotate Z").setValue(S.rotate);
+// The footage goes into a source comp that starts exactly at the shot's in-point; every op works on
+// that nested comp. Retiming the footage layer directly was wrong: with layer.startTime = -in_s,
+// Timewarp sampled source (t + in_s) × speed instead of in_s + t × speed (found in my-reel v7).
+var srcComp = proj.items.addComp(S.name + "_src", S.width, S.height, 1, Math.max(srcDur, compDur), S.fps);
+var fl = srcComp.layers.add(src);
+fl.startTime = -S.in_s;             // source in-point lands at source-comp 0
+try { if (fl.outPoint < srcComp.duration) fl.outPoint = srcComp.duration; } catch (e) {}  // a trimmed file can't extend; Timewarp only samples [0, srcDur] anyway
+if (S.rotate) fl.property("ADBE Transform Group").property("ADBE Rotate Z").setValue(S.rotate);
 if (S.fill !== false) {
-    var w = src.width, h = src.height, r = layer.sourceRectAtTime(0, false);
+    var r = fl.sourceRectAtTime(0, false);
     var sc = Math.max(S.width / r.width, S.height / r.height) * 100;
-    layer.property("ADBE Transform Group").property("ADBE Scale").setValue([sc, sc]);
+    fl.property("ADBE Transform Group").property("ADBE Scale").setValue([sc, sc]);
 }
+var comp = proj.items.addComp(S.name, S.width, S.height, 1, compDur, S.fps);
+var layer = comp.layers.add(srcComp);   // layer time 0 = source in-point
+if (layer.outPoint < compDur) layer.outPoint = compDur;
 
 // Source moment shown at the middle of the comp (for the before/after still).
 var mid = compDur / 2, srcMid = S.in_s + mid;
 if (tw) srcMid = S.in_s + mid * tw.speed / 100;
 if (tr) { for (var k = 1; k < tr.points.length; k++) { var a = tr.points[k - 1], b = tr.points[k];
           if (mid <= b[0]) { srcMid = S.in_s + a[1] + (b[1] - a[1]) * (mid - a[0]) / (b[0] - a[0]); break; } } }
-var report = {name: S.name, compDur: compDur, srcMid: srcMid, applied: [], warnings: [], params: {}};
+var srcStart = S.in_s + (tr ? tr.points[0][1] : 0);   // source moment of output frame 0
+var report = {name: S.name, compDur: compDur, srcMid: srcMid * timeScale, srcStart: srcStart * timeScale,
+              timeScale: timeScale, applied: [], warnings: [], params: {}};
 function setByName(fx, name, value) {
     for (var k = 1; k <= fx.numProperties; k++) {
         var p = fx.property(k);
@@ -137,7 +150,7 @@ for (var i = 0; i < S.ops.length; i++) {
         // Add ours first, then drop AE's two default keys: removing every key hides the property
         // ("Can not set value at time … property is hidden").
         var want = {};
-        for (var k = 0; k < op.points.length; k++) { trp.setValueAtTime(op.points[k][0], S.in_s + op.points[k][1]); want[op.points[k][0].toFixed(3)] = 1; }
+        for (var k = 0; k < op.points.length; k++) { trp.setValueAtTime(op.points[k][0], op.points[k][1]); want[op.points[k][0].toFixed(3)] = 1; }  // source comp starts at in_s
         for (var k = trp.numKeys; k >= 1; k--) if (!want[trp.keyTime(k).toFixed(3)]) trp.removeKey(k);
         var ease = new KeyframeEase(0, op.ease || 75);
         for (var k = 1; k <= trp.numKeys; k++) {
@@ -151,9 +164,10 @@ for (var i = 0; i < S.ops.length; i++) {
         throw new Error("stabilise isn't supported by script: Warp Stabilizer never analyses and renders a 'Click Analyze to begin.' banner. Stabilise in Premiere instead (skill Phase 5).");
     } else if (op.op == "glow") {
         fx = fxGroup.addProperty("ADBE Glo2");
-        if (op.threshold !== undefined) setByName(fx, "Glow Threshold", op.threshold);
-        if (op.radius !== undefined) setByName(fx, "Glow Radius", op.radius);
-        if (op.intensity !== undefined) setByName(fx, "Glow Intensity", op.intensity);
+        // 80 / 25 / 0.25: 70 / 0.5 clipped 21–54 % of pixels on ungraded night shots (my-reel v7)
+        setByName(fx, "Glow Threshold", op.threshold !== undefined ? op.threshold : 80);
+        setByName(fx, "Glow Radius", op.radius !== undefined ? op.radius : 25);
+        setByName(fx, "Glow Intensity", op.intensity !== undefined ? op.intensity : 0.25);
     } else if (op.op == "grain") {
         fx = fxGroup.addProperty("VISINF Grain Implant");
         if (op.intensity !== undefined) setByName(fx, "Intensity", op.intensity);
@@ -198,6 +212,29 @@ def compare_still(source: Path, src_mid: float, out_mov: Path, png: Path, comp_d
                         str(png)], check=False)
     for t in (tmp_a, tmp_b):
         t.unlink(missing_ok=True)
+
+
+def frame_match(source: Path, src_t: float, out_mov: Path) -> dict:
+    """Is output frame 0 the source frame at src_t? Compares it with source frames around src_t.
+
+    Effects (denoise, glow) change pixels, so this is relative: the nearest source moment should be
+    src_t itself. A best offset ≠ 0 means the shot was retimed from the wrong place.
+    """
+    def grab(path: Path, t: float) -> np.ndarray | None:
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{max(t, 0):.3f}", "-i", str(path), "-frames:v", "1",
+                              "-vf", "scale=72:128,format=gray", "-f", "rawvideo", "-"], capture_output=True).stdout
+        return np.frombuffer(raw, np.uint8).astype(float) if len(raw) == 72 * 128 else None
+    out0 = grab(out_mov, 0.0)
+    if out0 is None:
+        return {"ok": False, "error": "couldn't read output frame 0"}
+    diffs = {}
+    for off in (-2.0, -1.0, -0.5, -0.2, 0.0, 0.2, 0.5, 1.0, 2.0):
+        f = grab(source, src_t + off)
+        if f is not None and src_t + off >= 0:
+            diffs[off] = float(np.abs(f - out0).mean())
+    best = min(diffs, key=diffs.get)
+    return {"ok": best == 0.0, "expected_source_s": round(src_t, 3), "best_offset_s": best,
+            "diffs": {str(k): round(v, 2) for k, v in diffs.items()}}
 
 
 def main() -> None:
@@ -251,6 +288,10 @@ def main() -> None:
         entry["output"] = {"mov": str(mov.relative_to(ROOT)), "probe": json.loads(probe or "{}")}
         png = out_dir / f"{shot['name']}_compare.png"
         compare_still(Path(spec["source"]), rep["srcMid"], mov, png, rep["compDur"])
+        entry["frame_match"] = fm = frame_match(Path(spec["source"]), rep["srcStart"], mov)
+        if not fm.get("ok"):
+            print(f"  ! FRAME MISMATCH: output frame 0 looks like source {fm.get('expected_source_s')} {fm.get('best_offset_s'):+} s, "
+                  "not the in-point. Don't use this render; report it to HQ.")
         entry["compare_png"] = str(png.relative_to(ROOT)) if png.exists() else None
         log.append(entry)
         print(f"✓ {mov.relative_to(ROOT)}  · compare: {entry['compare_png']}")

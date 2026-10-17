@@ -23,6 +23,7 @@ Verified on **After Effects 26.5 (26.5x89)**, 2026-10-17. Re-verify after an AE 
    - Each shot takes about **4 minutes**: aerender starts its own copy of AE.
    - Run batches in the background.
 3. **Check every shot before using it:**
+   - read `frame_match` in `ae_log.json` (and the console). It confirms that output frame 0 is the source at the in-point. On a mismatch, don't use the render: report it to HQ;
    - look at `_compare.png`;
    - for denoise, compare a 1:1 crop of a dark area;
    - for stabilise, run `scripts/shake_report.py` on the source vs the output;
@@ -32,16 +33,16 @@ Verified on **After Effects 26.5 (26.5x89)**, 2026-10-17. Re-verify after an AE 
    - replace the original shot at the same timeline position;
    - check with `get_timeline_gaps`.
 
-   AE renders the comp starting at the shot's in-point, so place the `.mov` from its start.
+   AE renders the comp starting at the shot's in-point, so place the `.mov` from its start. No need to pre-trim sources: point `source` at the original clip and set `in_s` / `out_s`.
 
 ## Ops: what they do and what we learned
 | Op | Effect | Defaults and verified notes |
 |---|---|---|
-| `denoise` | Remove Grain (`VISINF Grain Removal`) | **Viewing Mode must be 4 (Final Output)**: 3 renders a black matte, 1 shows only a preview box. AE's default strength (1.0, 3 passes) cut noise 30 % on C027 but smeared texture. The studio default (0.6, 2 passes, `"temporal": true`) cut noise 19 % and kept texture. It's a modest denoiser: **Neat Video** (paid plugin) is far stronger if the director buys it. |
-| `timewarp` | Timewarp (`ADBE Timewarp`), Method 3 = Pixel Motion | Verified: 1.5 s of C011 at 50 % → exactly 3.0 s, no visible warping on a calm shot. Calm shots only; check fast or crossing motion for warping. |
+| `denoise` | Remove Grain (`VISINF Grain Removal`) | Measured on 7 my-reel v7 shots: −12…−29 % dark-area noise. **Viewing Mode must be 4 (Final Output)**: 3 renders a black matte, 1 shows only a preview box. AE's default strength (1.0, 3 passes) cut noise 30 % on C027 but smeared texture. The studio default (0.6, 2 passes, `"temporal": true`) cut noise 19 % and kept texture. It's a modest denoiser: **Neat Video** (paid plugin) is far stronger if the director buys it. |
+| `timewarp` | Timewarp (`ADBE Timewarp`), Method 3 = Pixel Motion | Counts from the shot's in-point since v0.4.1. v0.4.0 retimed from the start of the file, which the pilot caught on C076. Verified: C076 in 15.96 s at 60 % → 3.52 s, frame 0 = in-point; a pre-trimmed source gives the same result with no black tail. Calm shots only; check fast or crossing motion for warping. |
 | `time_remap` | layer time remapping, Bezier keys with ease | Verified on C077: one clip, smooth ease, replacing Premiere's two-clip fake. `points` are `[comp_s, source_s]`. Output can run 1 frame long (2.52 s for 2.5), so trim in Premiere. Never delete all of AE's default keys first: that hides the property ("Can not set value at time"). |
 | `stabilise` | — | **Not supported; the script refuses it.** Added by script, Warp Stabilizer never analyses: every frame rendered with a blue "Click Analyze to begin." banner. Its jitter numbers even looked better, because the tracker locked onto the fixed banner. Stabilise in Premiere (skill Phase 5), or have the director click **Analyze** in AE by hand. |
-| `glow` | Glow (`ADBE Glo2`; `ADBE GloH` doesn't exist on 26.5) | Halation on diyas and lamps: threshold 70 %, radius 25, intensity 0.5 to start |
+| `glow` | Glow (`ADBE Glo2`; `ADBE GloH` doesn't exist on 26.5) | Halation on diyas and lamps. Defaults are threshold 80 %, radius 25, intensity 0.25: the pilot found 70 % / 0.5 clipped 21–54 % of pixels on ungraded night shots. Glow shots still needed exposure trims of +0.09…+0.13 luma in Premiere afterwards, so check them with `colour_report.py` against their neighbours. |
 | `grain` | Add Grain (`VISINF Grain Implant`) | Bring back a little texture after denoise, if wanted |
 
 ## Optional paid plugins (the director decides)

@@ -1,5 +1,17 @@
 # Studio Changelog
 
+## 0.4.1 — 2026-10-17
+After Effects fixes from my-reel v7 (pilot reports).
+- **Fix: Timewarp retimed from the start of the source file, not the shot's in-point.**
+  - With `layer.startTime = -in_s`, Timewarp sampled (t + in_s) × speed. On C076 (in 15.96 s, 60 %) the output showed source 9.6–11.7 s.
+  - Every shot is now built as a source comp starting at the in-point, and all ops apply to that nested comp.
+  - Verified: frame 0 = in-point on C076 and on the C077 ramp (in 7.6 s); duration 2.11 s ÷ 0.6 = 3.52 s.
+  - My v0.4.0 check missed this: its stills didn't match, and I blamed the still's timing instead of the render.
+- **Fix: a pre-trimmed source went black after its media ended** on slow-mo shots. The source comp outlasts the output, so it's fixed; verified, no black tail. Pre-trimming is no longer needed.
+- **New `frame_match` check** in `ae_roundtrip.py`: output frame 0 vs the source around the in-point, accounting for 24→25 fps conforms. It warns loudly on a mismatch, and the result is logged.
+- **Glow defaults** are now threshold 80 / radius 25 / intensity 0.25, after 70 / 0.5 clipped 21–54 % of pixels on night shots. The docs note that glow shots need exposure checks against their neighbours.
+- **Docs:** v7 denoise results (−12…−29 % dark-area noise), the frame_match step, and pre-trimming no longer needed.
+
 ## 0.4.0 — 2026-10-17
 **After Effects finishing** (CR-20261017-my-reel-after-effects-bridge).
 - **New `scripts/ae_bridge.py`:**
