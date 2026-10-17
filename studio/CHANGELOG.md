@@ -1,5 +1,21 @@
 # Studio Changelog
 
+## 0.5.0 — 2026-10-17
+**Review gate + watch**, from the "Claude edits every video" workflow (Nishant Chahar), adapted to this studio.
+- **New `scripts/watch.py`:** samples any video at N fps into labelled contact sheets, one per shot (`--shots`) or per section, with the audio waveform under each sheet, plus `index.md` / `index.json`. Takes about 9 s for a 50 s reel.
+- **New `scripts/frame_scan.py`:** checks every frame for blur or smear dips, frozen frames, flicker and black or white frames. Takes about 2 s. It catches what 2 fps sheets can't: on my-reel v8 it flagged C073's camera jerks (30.40 and 30.88 s) and C076's Timewarp smear (37.96 s) to within a few frames.
+- **New `.claude/agents/reel-reviewer.md`:** an independent reviewer on a **different model** (Fable) that judges a render blind against the brief and the director profile, and returns a verdict plus a defect table.
+- **New skill Phase 7b + `review-gate.md`:** every version goes through the gate before Checkpoint 2.
+  - Step 0 keeps `brief.md` current.
+  - At most 2 fix loops.
+  - Every blocker and major is answered as fixed, intended or disagree.
+- **Calibration on my-reel v8**, blind vs the pilot's frame-by-frame QA:
+  - 5 of 8 failing shots caught fully, 2 partly, 1 missed (ray haze);
+  - 12 extra real issues found;
+  - the misses led to the frame scan and a haze check.
+- **Fix: `ae_roundtrip.py` `frame_match` and the compare still now rotate the source like the job.** v0.4.1 falsely failed `rotate: 180` shots; v8 s06 and s09 now pass.
+- `CLAUDE.md` tooling lines for watch and the review gate.
+
 ## 0.4.1 — 2026-10-17
 After Effects fixes from my-reel v7 (pilot reports).
 - **Fix: Timewarp retimed from the start of the source file, not the shot's in-point.**

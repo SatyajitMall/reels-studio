@@ -199,12 +199,18 @@ def jsx(template: str, spec: dict) -> str:
     return template.replace("__SPEC__", json.dumps(spec))
 
 
-def compare_still(source: Path, src_mid: float, out_mov: Path, png: Path, comp_dur: float) -> None:
+def rotate_vf(rotate: float) -> str:
+    """ffmpeg filter matching the job's extra rotation (AE Rotate Z, clockwise), so source and output compare like for like."""
+    r = int(round(rotate or 0)) % 360
+    return {0: "", 90: "transpose=1,", 180: "hflip,vflip,", 270: "transpose=2,"}.get(r, "")
+
+
+def compare_still(source: Path, src_mid: float, out_mov: Path, png: Path, comp_dur: float, rotate: float = 0) -> None:
     """Source vs AE render at the same moment (middle of the shot, mapped through any retime), side by side."""
     mid = comp_dur / 2
     tmp_a, tmp_b = png.with_suffix(".a.png"), png.with_suffix(".b.png")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(src_mid), "-i", str(source), "-frames:v", "1",
-                    "-vf", "scale=540:960:force_original_aspect_ratio=increase,crop=540:960", str(tmp_a)], check=False)
+                    "-vf", rotate_vf(rotate) + "scale=540:960:force_original_aspect_ratio=increase,crop=540:960", str(tmp_a)], check=False)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(mid), "-i", str(out_mov), "-frames:v", "1",
                     "-vf", "scale=540:960", str(tmp_b)], check=False)
     if tmp_a.exists() and tmp_b.exists():
@@ -214,22 +220,22 @@ def compare_still(source: Path, src_mid: float, out_mov: Path, png: Path, comp_d
         t.unlink(missing_ok=True)
 
 
-def frame_match(source: Path, src_t: float, out_mov: Path) -> dict:
+def frame_match(source: Path, src_t: float, out_mov: Path, rotate: float = 0) -> dict:
     """Is output frame 0 the source frame at src_t? Compares it with source frames around src_t.
 
     Effects (denoise, glow) change pixels, so this is relative: the nearest source moment should be
     src_t itself. A best offset ≠ 0 means the shot was retimed from the wrong place.
     """
-    def grab(path: Path, t: float) -> np.ndarray | None:
+    def grab(path: Path, t: float, rot: float = 0) -> np.ndarray | None:
         raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{max(t, 0):.3f}", "-i", str(path), "-frames:v", "1",
-                              "-vf", "scale=72:128,format=gray", "-f", "rawvideo", "-"], capture_output=True).stdout
+                              "-vf", rotate_vf(rot) + "scale=72:128,format=gray", "-f", "rawvideo", "-"], capture_output=True).stdout
         return np.frombuffer(raw, np.uint8).astype(float) if len(raw) == 72 * 128 else None
     out0 = grab(out_mov, 0.0)
     if out0 is None:
         return {"ok": False, "error": "couldn't read output frame 0"}
     diffs = {}
     for off in (-2.0, -1.0, -0.5, -0.2, 0.0, 0.2, 0.5, 1.0, 2.0):
-        f = grab(source, src_t + off)
+        f = grab(source, src_t + off, rotate)  # rotate the source like the job did (v0.4.1 falsely flagged rotate: 180 shots)
         if f is not None and src_t + off >= 0:
             diffs[off] = float(np.abs(f - out0).mean())
     best = min(diffs, key=diffs.get)
@@ -287,8 +293,8 @@ def main() -> None:
                                 "-of", "json", str(mov)], capture_output=True, text=True).stdout
         entry["output"] = {"mov": str(mov.relative_to(ROOT)), "probe": json.loads(probe or "{}")}
         png = out_dir / f"{shot['name']}_compare.png"
-        compare_still(Path(spec["source"]), rep["srcMid"], mov, png, rep["compDur"])
-        entry["frame_match"] = fm = frame_match(Path(spec["source"]), rep["srcStart"], mov)
+        compare_still(Path(spec["source"]), rep["srcMid"], mov, png, rep["compDur"], shot.get("rotate", 0))
+        entry["frame_match"] = fm = frame_match(Path(spec["source"]), rep["srcStart"], mov, shot.get("rotate", 0))
         if not fm.get("ok"):
             print(f"  ! FRAME MISMATCH: output frame 0 looks like source {fm.get('expected_source_s')} {fm.get('best_offset_s'):+} s, "
                   "not the in-point. Don't use this render; report it to HQ.")

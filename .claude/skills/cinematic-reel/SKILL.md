@@ -171,6 +171,16 @@ Plan which shots go through After Effects in the brief's Treatment, and say so i
    **Check the audio straight away** (`ffmpeg -af volumedetect`, max_volume > −20 dB). If it's silent, write `analysis/mix.json` and rebuild the audio with `scripts/mix_from_edl.py`. Note it in the round summary.
 3. Run `analyze_footage.py` on the export, look at its contact sheet, and check the first 3 s plus 2–3 risky cuts with `scripts/cut_view.sh`.
 
+## Phase 7b: Review gate (every version, before the director sees it)
+Follow `review-gate.md` (same folder):
+1. Make the shot list.
+2. Run `scripts/watch.py` on the export.
+3. Have the `reel-reviewer` agent on a **different model** judge it blind.
+4. Save the report.
+5. Fix or answer every blocker and major.
+6. Re-run the gate, at most 2 loops.
+Never skip it because your own metrics passed: in the pilot, every shipped defect had passed metric QA.
+
 ### ⏸ Checkpoint 2: review the cut
 Send the export path, runtime and a 3-line "what I did" summary. Ask the director to **watch it full-screen on a phone with sound**, then ask one question before accepting approval: "What would make it more cinematic?" (In the pilot, v1 was approved and then reopened five times.) On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes.
 
