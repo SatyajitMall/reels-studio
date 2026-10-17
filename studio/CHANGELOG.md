@@ -1,5 +1,23 @@
 # Studio Changelog
 
+## 0.3.2 — 2026-10-17
+Montage craft from my-reel rounds 2–6 (CR-20261016-my-reel-montage-craft).
+- **Brief (skill Phase 2, CLAUDE.md §4c):** music-montage briefs state an **energy arc** (default: slow open → build → full → breath → payoff → outro) and a **motion style**. Never one shot per bar throughout.
+- **New scripts**, generalised from the pilot's and tested on v6 (numbers match the pilot's reports):
+  - `selects_score.py`: best 1 s moments per clip, shoot-wide ranking;
+  - `motion_holds.py`: static holds and pans per clip;
+  - `shake_report.py`: per-shot jitter for before/after stabilisation;
+  - `colour_report.py`: per-frame colour QA with montage targets and a gold-hue check.
+- **Playbook:**
+  - no shake or snap zoom on handheld footage (push/pull on holds instead);
+  - Optical Flow slow-mo allowed at 25 fps on calm shots;
+  - grain 10–15 % by default;
+  - warm-look red-push warning;
+  - music-montage words default to title + end card.
+- **Skill Phase 5:** Warp Stabilizer on handheld moves by default (nest recipe for speed-changed or interpreted clips), then re-measure and scan for Warp banners.
+- **Skill Phase 4:** colour QA on every frame before review.
+- **Checkpoint 2:** the director watches full-screen with sound, and gets one "what would make it more cinematic?" question.
+
 ## 0.3.1 — 2026-10-16
 The rest of the first pilot's feedback (`my-reel` retro + 5 CRs). Main lesson: **many Premiere MCP tools report success without doing the work.**
 - **New `.claude/skills/cinematic-reel/premiere-mcp-reality.md`:** every broken or partly working tool on Premiere 26.5.2 / MCP 1.2.9, with the fallback the pilot verified. It covers import, delete, colour, adjustment layer, LUT, blend mode, transitions, volume, slip, razor, export presets, silent export and script results. CLAUDE.md §2 now requires **verify by render, never by the tool's reply**.

@@ -34,6 +34,8 @@ One adjustment layer across the reel. `add_adjustment_layer` doesn't make a real
 - look contrast / temperature: on the same Lumetri, by script
 - vignette via the Lumetri vignette properties (`set_effect_property`), amount −0.5…−1.5
 
+**Warm looks push red.** Kodak 2393-style presets push oranges toward red. Correct with look-layer temperature plus a little green tint. Don't cool the clips: that turns orange skin and gold pink. Check with `colour_report.py --gold` (midtone hue 30–45°).
+
 Look presets to propose:
 | Name | Recipe |
 |---|---|
@@ -65,13 +67,15 @@ Look presets to propose:
 Grain, dust, light leaks and film burns from `assets/overlays/` go on V4 in a blend mode:
 - `set_blend_mode` is broken, so set the mode by script with the enum: Overlay 19, Soft Light 23, Screen 22 (reality doc).
 - **Fade V4 texture together with V1 at every fade to or from black.** Grain in Overlay over black reads as a grey veil (frame luma 0.24 instead of about 0 in the pilot).
-- grain → Overlay or Soft Light, `set_clip_opacity` 15–35 % (subtle) or 40–60 % (visible texture). Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
+- grain → Overlay or Soft Light, `set_clip_opacity` **10–15 % by default**; go higher only if the director asks. The pilot's 40 % was "too much grain" on dark 8-bit footage that's already noisy. Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
 - light leaks → Screen, 40–80 %, on transitions or emotional beats
 - film burn / flash → Screen or Add, 3–8 frames, on hard cuts
 
 ---
 
-## B. Motion on V1 (the talking head)
+## B. Motion on V1 (the talking head / hero shots)
+
+**Handheld footage:** no impact shake and no snap zoom. On top of real hand movement they read as jumps or shakes, which is how the director described them in the pilot. Put push/pull on the static holds from `motion.json` instead, and stabilise handheld moves (skill Phase 5).
 
 | Move | Recipe | Use for |
 |---|---|---|
@@ -86,7 +90,7 @@ Grain, dust, light leaks and film burns from `assets/overlays/` go on V4 in a bl
 
 | Move | Recipe | Notes |
 |---|---|---|
-| **Slow-mo B-roll** | `speed_change` 0.4–0.8 + `set_frame_blend` (Optical Flow) | only if source fps ≥ 50 (see analyser "Slow-mo") |
+| **Slow-mo B-roll** | `speed_change` 0.4–0.8 + `set_frame_blend` (Optical Flow) | Best with source fps ≥ 50. At 25 fps, Optical Flow slow-mo works on **calm shots** (holds, slow pans, little crossing motion), but check it in motion for warping |
 | **Speed ramp** | razor the clip into parts → `speed_change` on the fast part. With this MCP it **keeps the timeline length and uses more source** (2.0 = 2× source) → `slip_edit {deltaSeconds}` the next part forward by the extra source used, so motion stays continuous | Real time-remap curves aren't scriptable. Recipe verified in `my-reel`; recheck if the MCP changes |
 | **Freeze + text** | `freeze_frame` on the beat, then a title / HyperFrames card on top | "this is me 2 years ago" moments |
 | **Rewind** | `reverse_clip` 0.3–0.6 s + rewind SFX | callbacks, "wait, go back" |
@@ -108,6 +112,7 @@ Default is a **hard cut**. Transitions are seasoning: at most 3–4 non-cut tran
 
 ## E. Type, graphics, captions (V5 + V2)
 
+- **Music-montage words:** title + end card by default. Beat words only when the director supplies words that mean something (the pilot's "DUM · DUM · DURGA" read as meaningless and were cut).
 - Captions: phrase-aware, 2–4 words, safe zone (clear of top 220 px, bottom 320 px, right 120 px). Styles: *Clean* (white, subtle shadow), *Bold Kinetic* (key word highlighted in brand colour, pop-in), *Editorial* (serif, lower-third). Use `/embedded-captions` for animated styles, `create_caption_track` for clean ones.
 - HyperFrames cards (`/motion-graphics`): stat callouts, lists, step numbers, maps, quotes. Render 1080×1920 alpha `.mov` → `renders/overlays/`.
 - **Word cards (default for 1–2-word kinetic type):** `scripts/render_type_cards.py` renders 1080×1920 transparent PNGs. It handles the font, glow and shadow, and fails if the text leaves the safe zone. Place them on V5 with a 3-frame scale pop (Motion keyframes). Use HyperFrames for anything animated beyond a pop.

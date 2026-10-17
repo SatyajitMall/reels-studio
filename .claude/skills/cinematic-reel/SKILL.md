@@ -60,7 +60,7 @@ Offer choices that fit *this* footage, for example:
 - Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference
 - Pace: calm (3–5 s shots) · medium (2–3 s) · fast (1–2 s), pre-selecting what the reference measured
 - Effects intensity: subtle · signature moments only · heavy / stylised
-- Captions: none · Clean · Bold Kinetic · Editorial
+- Captions / words: none · Clean · Bold Kinetic · Editorial. For music-montage, default to **title + end card only**. Use beat words only when the director supplies words that mean something; never invent filler words.
 - Music: their file in `assets/music/` · mood + BPM for you to suggest
 - Anything that must or must not happen
 
@@ -94,11 +94,20 @@ Offer choices that fit *this* footage, for example:
      Then read `analysis/audio_summary.md`. Use its **Energy / sections** table and **Candidate cuts** (best start/end for 15/30/45/60 s) to pick the music section. Check the labels by ear, since they're heuristic. No music yet: ask for it in Round 2. The EDL can't be planned without it.
 5. `create_bin` (`01_A-Roll`, `02_B-Roll`, `03_Graphics`, `04_Textures`, `05_SFX`, `06_Music`), then import everything with the ExtendScript `importFiles` snippet in the reality doc. `import_folder` is broken, and `import_media` ignores `binName`. Confirm with `list_project_items`.
 6. Conform outlier frame rates now, before anything is placed: `set_override_frame_rate` to the sequence fps (CLAUDE.md §3).
+7. **Selects and motion** (music-montage / hybrid: always; talking-head: for B-roll). Run these in the background while Round 2 is asked:
+   ```
+   .venv/bin/python scripts/selects_score.py projects/<name>/raw/b-roll -o projects/<name>/analysis --skip <unusable ids>
+   .venv/bin/python scripts/motion_holds.py projects/<name>/raw/b-roll -o projects/<name>/analysis --skip <unusable ids>
+   ```
+   `selects.md` ranks every clip's best 1 s moments (sharp, colourful, steady). `motion.json` gives each clip's static holds and pans. **Review the top moments by eye** (contact sheets / stills) before writing the EDL. The score can't judge meaning, faces or composition. In the pilot, this found better shots than picking from mid-frames.
 
 → Now ask **Round 2** of the interview.
 
 ## Phase 2: Write the brief + cut plan
 1. Fill in `projects/<name>/brief.md` completely: idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
+   For **music-montage**, the Treatment must also include:
+   - **Energy arc:** which song sections go up or down and where the shot length changes. Default: slow open → build → full → breath → payoff → outro. **Never one shot per bar for the whole reel.** That read as mechanical in the pilot. The music may be edited (e.g. intro joined to the main section on a downbeat).
+   - **Motion style:** which shots stay as handheld movement, which are held, and where digital push/pull goes (only on `motion.json` holds). Plus where slow-mo goes (calm shots only).
 2. In `project.md`, under `## Round 1 — Proposal`:
    - 3 hook options with a recommendation. Talking-head hooks quote the line and its source timecode. Music-montage hooks give the shot, its source timecode and the accent beat it lands on;
    - EDL table: `# | clip | in | out | text / action | V1 move | V2/V5 | transition out | SFX`;
@@ -120,10 +129,16 @@ Give the director a short summary in chat: the concept, hook, look, 4–6 signat
 3. **A3 creative look**: ask the director for the one manual step (create an Adjustment Layer), place it on V3, apply the look's built-in Lumetri preset and set its intensity (playbook §A3).
 4. **A4 texture**: grain / leaks on V4, with the blend mode set by script (enum in the reality doc) + `set_clip_opacity`. Fade V4 with the picture at every fade to black.
 5. Export 3–4 still frames (or a short preview) and check skin tones and contrast with your own eyes. `save_project`.
+6. **Colour QA on every frame** before review: `scripts/colour_report.py <export> -o analysis/colour_v<N>.json --shots <shots.json> [--gold]`.
+   - Targets: shots within ±0.03 of the montage luma, crushed < 25 % (except true-black skies), clipped < 2 %, gold midtone hue 30–45°, blue shots G−M ≈ 0.
+   - Fix the unintended flags. Note the deliberate ones in `project.md`.
 
 ## Phase 5: Motion, effects, B-roll, graphics, captions
 Execute the Treatment from the brief, beat by beat:
-1. V1 moves (punch-ins, slow pushes, snap zooms, shakes), playbook §B.
+1. V1 moves (punch-ins, slow pushes, snap zooms, shakes), playbook §B. **Not on handheld footage**: shakes and snap zooms read as "jumps" there, so use push/pull on holds.
+   Stabilise handheld moving shots by default with Warp Stabilizer. For speed-changed or interpreted clips, nest first: `seq.setInPoint/OutPoint`, target only V1, `createSubsequence(false)`, swap the nest in, then Warp the nest. Afterwards:
+   - re-measure with `scripts/shake_report.py` (before vs after);
+   - scan the export for Warp's "Analyzing" banner, a text band mid-frame.
 2. B-roll on V2 at the trigger words, with time effects (slow-mo, ramps, freeze, reverse), §C.
 3. Transitions at the planned cuts, §D. Hard cut is the default; keep it to 3–4 non-cut transitions per 30 s.
 4. Graphics: HyperFrames cards rendered to `renders/overlays/`, placed on V2.
@@ -148,7 +163,7 @@ Execute the Treatment from the brief, beat by beat:
 3. Run `analyze_footage.py` on the export, look at its contact sheet, and check the first 3 s plus 2–3 risky cuts with `scripts/cut_view.sh`.
 
 ### ⏸ Checkpoint 2: review the cut
-Send the export path, runtime and a 3-line "what I did" summary. On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes.
+Send the export path, runtime and a 3-line "what I did" summary. Ask the director to **watch it full-screen on a phone with sound**, then ask one question before accepting approval: "What would make it more cinematic?" (In the pilot, v1 was approved and then reopened five times.) On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes.
 
 ## Phase 8: Instagram package (after final approval)
 Using `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist` and `ig-humanizer`, write to `project.md`:

@@ -15,12 +15,16 @@ Premiere 26.5.2, adobe-premiere-pro-mcp, Phases 5–7:
 3. `slip_edit` only works with `deltaSeconds`; `offset` is silently ignored (`deltaSeconds:0`).
 4. `set_clip_volume {volumeDb:-16}` → Level 0 (silent). Premiere's Level is linear: 0.17783 = 0 dB; dB = 20·log10(v) + 15.
 5. `get_encoder_presets` finds nothing (no user presets). `seq.exportAsMediaDirect(out, epr, 0)` with Premiere's `IngestPresets/Transcode/Match Source - H.264 High Bitrate.epr` and AME's `00 - Match Source - High bitrate.epr` both produce correct picture but **silent AAC (−91 dB)**, with all audio tracks unmuted and clip levels verified.
+7. `set_time_interpolation {interpolation:"optical_flow"}` → Frame Blending (timeInterpolationType 1). Optical Flow needs QE `qe…getItemAt(i).setTimeInterpolationType(2)`.
 6. `razor_timeline_at_time {videoTrackIndices:[0], audioTrackIndices:[]}` still cut all audio tracks (empty array treated as "all").
+
+8. Warp Stabilizer via `stabilize_clip`: fine on 100 % clips (analysis completes, `AnalysisStatusCounter=408`, label shows auto-scale). On speed-changed clips it burns a red "can't be used on same clip" banner into renders; on a 24→25 fps interpreted clip it burned "New frames need analyzing; click Analyze". `nest_clips` doesn't create a real nest.
 
 ## Workaround used in the reel
 - Transitions: remove with `videoTracks[i].transitions[j].remove(true,true)`, add with QE `qe.project.getActiveSequence().getVideoTrackAt(t).getItemAt(k).addTransition(qe.project.getVideoTransitionByName(name), atStart, "00;00;00;FF")` — note `true` = start, `false` = end. Verify with `track.transitions[j].start/end`.
 - Fades: Dip to Black transitions instead of opacity keyframes.
 - Volume: `Level = 10^((dB−15)/20)` set by script.
+- Stabilising speed / interpreted clips: rebuild the clip, nest it with `seq.setInPoint/OutPoint` + only V1 targeted + `createSubsequence(false)`, swap the nest in, Warp the nest. Always scan an export for Warp banners (text band mid-frame).
 - Export audio: rebuilt the mix in ffmpeg from the EDL (music section + SFX at timeline times/levels, limiter −1 dBFS) and muxed it with `-c:v copy` onto Premiere's picture.
 
 ## Proposed change

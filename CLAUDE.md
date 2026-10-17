@@ -114,7 +114,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
   - Fast sections can cut on every beat or every 2nd beat.
   - Never cut off the grid unless it's a deliberate hold.
 - **Hook.** The strongest-looking shot plus motion, landing on the first accent. Trim the music so the reel opens close to its energy, not on a slow intro, unless the brief asks for a build.
-- **Shot length follows the music's energy.** Use the reference's measured pacing as the target.
+- **Shot length follows the music's energy.** Use the reference's measured pacing as the target. The brief states an **energy arc** and a **motion style** (skill Phase 2). Never cut one shot per bar for the whole reel: the pilot's v1 read as mechanical.
 - **Pick the best moment, not the whole clip.** For each shot, choose the part with the most motion or the cleanest composition (from the contact sheet).
 - **Audio.**
   - Music on A3 at full level, with peaks around −1 to −3 dB and no ducking.
