@@ -1,5 +1,28 @@
 # Studio Changelog
 
+## 0.5.2 — 2026-10-18
+**AI video moved to OpenRouter, with a cost structure** (director's decision).
+- **`scripts/gen_video.py` rewritten:**
+  - default provider is OpenRouter (`OPENROUTER_API_KEY`), model `google/veo-3.1-lite`, **audio off**;
+  - Google Gemini API direct stays as a fallback (`--provider google`; it always bills audio);
+  - **draft** mode (720p, 4 s, ≈ $0.12) and **final** mode (1080p, 8 s, ≈ $0.40), replacing the old 1080p-with-audio default (≈ $0.96);
+  - **prices are read live** from OpenRouter's public video model list on every run, so they never go stale;
+  - unsupported durations and resolutions are rejected before sending;
+  - the ledger records **the actual cost OpenRouter reports** per job;
+  - optional `--first-frame` / `--last-frame` stills from the director's footage.
+- **Caps** (`studio/ai-budget.json`), all checked before anything is sent:
+  - $10/month;
+  - per reel: $2, 2 final shots, 16 s of generated footage;
+  - per shot: 3 drafts + 1 final.
+
+  All were tested against a temporary ledger; failed or uncharged jobs don't count.
+- **Utilisation structure** (`motion-and-ai.md` §3):
+  - no raw footage ever goes to a paid API; all analysis is local;
+  - the reviewer sees contact sheets only;
+  - only stills go up as first or last frames;
+  - generated shots stay under 25 % of a reel's runtime.
+- The director profile and `CLAUDE.md` are updated, and `OPENROUTER_API_KEY` placeholders added to `.env` and `.env.example`.
+
 ## 0.5.1 — 2026-10-18
 **Motion graphics, text behind the subject, AI video**, from the YouTube workflow review. The director approved tests A and B and setup C.
 - **A, motion graphics** (HyperFrames `/motion-graphics`):

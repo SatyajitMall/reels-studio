@@ -43,29 +43,44 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 - The word is fixed to the screen, so only use it on **steady holds** (`motion_holds.py`).
 - The model is trained on people, so check every new subject type on a still first. Running `remove-background` on a single `.png` takes seconds.
 
-## 3. AI-generated video (Google Veo 3.1, Gemini API)
+## 3. AI-generated video (OpenRouter → Google Veo 3.1 Lite, no audio)
 **Policy** (director, 2026-10-18):
 - **Only** for shots the director's own footage can't provide.
-- Every generated shot is listed in `brief.md` as **"AI-generated"**, with its prompt, why it's needed and its cost.
-- The director approves them at **Checkpoint 1**.
-- Never use it for the subject itself (the idol, the people): use the real footage.
+- **Never** for the subject itself (the idol, the people).
+- Every generated shot is listed in `brief.md` as **"AI-generated"**, with its prompt, why it's needed and its cost. The director approves it at **Checkpoint 1**, and approves the chosen draft before its final.
+- **No raw footage is ever sent.** At most one or two stills from the director's footage go up as first or last frames, to anchor the look. Everything else (selects, motion, QA, cut-outs, graphics) runs locally and free; the reviewer sees only contact sheets.
 
-**Budget:** `studio/ai-budget.json`, **$10/month**. Every paid call is logged in `studio/ledger/ai-spend.jsonl`. The script refuses any call that would exceed the month's remaining budget.
+**Cost structure** (`studio/ai-budget.json`; `scripts/gen_video.py` enforces it before sending anything):
+
+| | Settings | Cost |
+|---|---|---|
+| **draft** (default) | 720p · 4 s · no audio · Veo 3.1 Lite | ≈ $0.12 |
+| **final** | 1080p · 8 s · no audio · Veo 3.1 Lite | ≈ $0.40 |
+| per shot | at most 3 drafts + 1 final | ≈ $0.76 |
+| per reel | at most **$2**, **2 final shots**, **16 s** of generated footage (and keep it under 25 % of the runtime) | |
+| per month | at most **$10** (about 5 reels with AI shots) | |
+
+- Audio is **off** by default: reels use the director's music, and audio costs about 60 % more on Lite.
+- Prices are read **live** from OpenRouter on every run.
+- The ledger (`studio/ledger/ai-spend.jsonl`) records the **actual** charged cost that OpenRouter reports per job.
+- Failed generations aren't charged and don't count.
 
 **How:**
-1. Dry run: `./.venv/bin/python scripts/gen_video.py --reel <reel> --name <shot> --why "<why footage can't>" --prompt "<prompt>" [--model fast|lite|standard] [--res 1080p|720p] [--duration 8|6|4] [--negative ...] [--image first_frame.png]`. It prints the cost and the remaining budget, and spends nothing.
-2. Put the shot and its cost in the brief, and get the director's yes.
-3. Re-run with `--yes`. The file lands in `projects/<reel>/renders/gen/` with a `.json` sidecar (the prompt and the "AI-generated" label).
+1. Pick a still from the director's footage that the shot should continue from (optional, but it cuts retries). Export it with `ffmpeg -ss <t> -i <clip> -frames:v 1 still.png`.
+2. Dry run: `./.venv/bin/python scripts/gen_video.py --reel <reel> --shot <name> --why "<why footage can't>" --prompt "<prompt>" [--first-frame still.png]`. It prints the cost and every cap, and spends nothing.
+3. Put the shot and its draft cost in the brief, and get the director's yes. Run the draft with `--yes`.
+4. Show the draft. On a yes, run the final: `--mode final --yes`.
+5. The file lands in `projects/<reel>/renders/gen/<shot>_<mode>_<time>.mp4`, with a `.json` sidecar (prompt, cost, the "AI-generated" label).
 
-**Facts** (Google's docs and pricing pages, checked 2026-10-18):
-- 9:16 is supported;
-- 4, 6 or 8 s, with 1080p only at 8 s;
-- Fast at 1080p is $0.12/s, so **≈ $0.96 per 8 s shot**; Lite is $0.08/s; Standard is $0.40/s;
-- there's no free tier, so the key needs billing on;
-- every clip has a **SynthID** AI watermark;
-- Google deletes generated videos after **2 days**, so the script downloads immediately;
-- latency is 11 s to 6 min.
+**Fallback:** `--provider google` uses the Gemini API directly (`GEMINI_API_KEY`). Google always bills audio (Lite 1080p $0.08/s), so a final is about $0.64. Use it only if OpenRouter is down.
 
-**Not yet verified:** a real call. It needs the director's `GEMINI_API_KEY` in `.env`. Google's page also carries a note that video generation is "only available with the generateContent API", which contradicts its own REST examples (`predictLongRunning`, which the script uses). If the first real call is rejected, file a CR with the exact error.
+**Facts:**
+- 9:16 is supported, at 4, 6 or 8 s.
+- Every clip has Google's **SynthID** AI watermark.
+- OpenRouter's video generation isn't eligible for zero data retention: providers keep outputs briefly.
+- Google direct deletes videos after 2 days.
+- Typical generation time is 30 s to a few minutes.
+
+**Not yet verified:** a real paid call (it needs `OPENROUTER_API_KEY` in `.env`). Also unverified: whether OpenRouter accepts a `data:` URL as `frame_images`; the docs show http URLs. If the first real call is rejected, file a CR with the exact error.
 
 **Then:** primary-correct and match the generated shot like any other clip, and run it through the review gate like everything else.
