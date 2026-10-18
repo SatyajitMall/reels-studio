@@ -118,7 +118,8 @@ Default is a **hard cut**. Transitions are seasoning: at most 3–4 non-cut tran
 - **Word cards (default for 1–2-word kinetic type):** `scripts/render_type_cards.py` renders 1080×1920 transparent PNGs. It handles the font, glow and shadow, and fails if the text leaves the safe zone. Place them on V5 with a 3-frame scale pop (Motion keyframes). Use HyperFrames for anything animated beyond a pop.
   - Anton and Bebas aren't installed by default. The macOS fallbacks are **DIN Condensed Bold** and **Impact**.
 - **End cards:** composite the card over the actual outro frame (export a still) and check that it clears faces and the main subject. In the pilot, the first position sat on Durga's face.
-- Text behind subject: only when the subject is cleanly separable. Propose it, and warn that it's a HyperFrames / manual roto job.
+- **Text behind subject:** `scripts/text_behind.py`, which is local and free. Use it on a steady hold of an idol or person against a contrasting background. It fails on busy, ornate full-frame close-ups, so test a still first (`motion-and-ai.md` §2).
+- **Animated titles and graphics:** HyperFrames `/motion-graphics` → ProRes 4444 alpha on V5 (`motion-and-ai.md` §1).
 
 ## F. Sound design (A2 / A3)
 

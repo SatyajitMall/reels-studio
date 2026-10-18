@@ -29,6 +29,13 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - `aerender` starts a second AE per shot (about 4 min each). If render time hurts, try `-reuse` or rendering from AE's own queue.
 - ProRes 422 HQ needs a custom output-module template made once in AE's UI; today we use "High Quality" (ProRes 422).
 
+## Motion graphics / AI (from v0.5.1)
+- Verify the Premiere import of a HyperFrames ProRes 4444 alpha MOV on V5 (first real use).
+- Verify the first real Veo call with the director's key. If `predictLongRunning` is rejected, switch to `generateContent` per Google's note.
+- Text behind the subject on moving shots needs motion tracking: either track the word to the subject, or limit it to holds (as now).
+- Gemini Omni video-to-video restyle (the creator's "text behind the head"): not on Google's pricing page as of 2026-10-18. `text_behind.py` covers the need locally for free.
+- A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
+
 ## Known gaps
 - Music-montage runs on CLAUDE.md §4c rules, which haven't been tested in Premiere yet. The first pilot validates them.
 - The guard hook was installed 2026-10-16. Its deny path hasn't been confirmed from a real reel session yet. The first pilot should hit it once, on purpose.

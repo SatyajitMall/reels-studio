@@ -107,6 +107,7 @@ Offer choices that fit *this* footage, for example:
 1. Fill in `projects/<name>/brief.md` completely: idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
    For **music-montage**, the Treatment must also include:
    - **Energy arc:** which song sections go up or down and where the shot length changes. Default: slow open → build → full → breath → payoff → outro. **Never one shot per bar for the whole reel.** That read as mechanical in the pilot. The music may be edited (e.g. intro joined to the main section on a downbeat).
+   - **Generated shots (if any):** every AI-generated shot gets its own row, labelled **AI-generated**, with the prompt, why your footage can't provide it, and the cost from the `gen_video.py` dry run. The director approves each at Checkpoint 1 (`motion-and-ai.md` §3).
    - **Motion style:** which shots stay as handheld movement, which are held, and where digital push/pull goes (only on `motion.json` holds). Plus where slow-mo goes (calm shots only).
 2. In `project.md`, under `## Round 1 — Proposal`:
    - 3 hook options with a recommendation. Talking-head hooks quote the line and its source timecode. Music-montage hooks give the shot, its source timecode and the accent beat it lands on;
@@ -141,7 +142,7 @@ Execute the Treatment from the brief, beat by beat:
    - scan the export for Warp's "Analyzing" banner, a text band mid-frame.
 2. B-roll on V2 at the trigger words, with time effects (slow-mo, ramps, freeze, reverse), §C.
 3. Transitions at the planned cuts, §D. Hard cut is the default; keep it to 3–4 non-cut transitions per 30 s.
-4. Graphics: HyperFrames cards rendered to `renders/overlays/`, placed on V2.
+4. Graphics: HyperFrames motion graphics rendered as ProRes 4444 alpha and placed on V5, positioned per shot. Text-behind-subject goes on holds only, via `scripts/text_behind.py` (`motion-and-ai.md` §1–2).
 5. Captions on V5, in the style from the brief and inside the safe zone.
 6. After each group: `get_timeline_summary`, `list_clip_effects` on 2–3 clips to confirm nothing stacked twice, then `save_project`.
 

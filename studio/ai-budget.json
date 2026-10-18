@@ -1,0 +1,6 @@
+{
+ "monthly_limit_usd": 10,
+ "provider": "Google Gemini API (Veo 3.1)",
+ "set_by": "director, 2026-10-18",
+ "policy": "Generated footage only for shots the director's own footage can't provide; labelled AI-generated in the brief; approved per reel at Checkpoint 1."
+}

@@ -22,7 +22,7 @@ MARKER = ROOT / ".claude/state/hq_session"
 PROTECTED_FILES = {"CLAUDE.md", "README.md", "setup.sh", ".mcp.json"}
 PROTECTED_DIRS = (".claude/", "scripts/", "studio/", "projects/_template/")
 # Carve-outs inside protected dirs that reel sessions may write.
-ALLOWED_DIRS = ("studio/change-requests/", "studio/retros/")
+ALLOWED_DIRS = ("studio/change-requests/", "studio/retros/", "studio/ledger/")
 
 
 def hq_session() -> str:

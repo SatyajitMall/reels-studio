@@ -28,6 +28,8 @@ Always open sessions at the `reels-studio/` root, never inside `projects/<reel>/
 | `studio/upstream/` | HQ | Drafted bug reports for third-party tools. Filing them is the director's call |
 | `studio/change-requests/` | Any session | Reel sessions file requests here |
 | `studio/retros/` | Any session | Reel sessions copy their finished retro here |
+| `studio/ledger/` | Any session (scripts) | Append-only spend logs, e.g. `ai-spend.jsonl` from `gen_video.py`. Never edit past entries |
+| `studio/ai-budget.json` | HQ | Monthly AI-generation limit, set by the director |
 | `projects/_template/` | HQ | New reels are copied from it |
 | `projects/<reel>/` | That reel's session | Brief, log, analysis, renders, retro |
 | `assets/` | Shared | Any session may **add** files. Only HQ renames or deletes |

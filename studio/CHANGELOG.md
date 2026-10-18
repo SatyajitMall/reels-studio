@@ -1,5 +1,31 @@
 # Studio Changelog
 
+## 0.5.1 — 2026-10-18
+**Motion graphics, text behind the subject, AI video**, from the YouTube workflow review. The director approved tests A and B and setup C.
+- **A, motion graphics** (HyperFrames `/motion-graphics`):
+  - The test title "DURGA PUJA 2026" went through director → builder → check → render: ProRes 4444 with alpha, 1080×1920, 25 fps, 3.0 s, rendered in 7 s.
+  - It composited cleanly over real Puja shots.
+  - Learned: placement must be per shot ("2026" sat on the gold Durga's crown).
+  - The Premiere import isn't verified yet: Premiere was in use by a reel session.
+- **B, text behind the subject: new `scripts/text_behind.py`.**
+  - Local `remove-background` matte (CPU, 4 fps), then footage + glowing word + cut-out, with a compare strip and a frame scan.
+  - Verified: clean and stable on the blue Durga, both as a still and as 2 s of handheld video with 0 scan flags.
+  - Weak on wide shots; it fails on busy ornate close-ups (the gold Durga matte turns to mush).
+  - The word is fixed to the screen, so use it on holds only.
+- **C, AI video: new `scripts/gen_video.py`** (Google Veo 3.1 via the Gemini API, the director's choice).
+  - Dry run by default.
+  - Monthly budget in `studio/ai-budget.json` (**$10**); spend is logged to `studio/ledger/ai-spend.jsonl`, and over-budget calls are refused.
+  - `--why` is required, per the policy "only when footage can't".
+  - Output goes to `renders/gen/` with an "AI-generated" sidecar.
+  - Prices were checked on Google's pricing page: Fast 1080p is $0.12/s, so ≈ $0.96 per 8 s shot.
+  - Verified: the dry run, the budget refusal and the missing-key stop. **A real call isn't verified yet**: it needs the director's `GEMINI_API_KEY` (a placeholder was added to `.env` and `.env.example`).
+- **New `.claude/skills/cinematic-reel/motion-and-ai.md`** with all three recipes and their limits. Also updated:
+  - skill Phase 2 (generated shots listed with cost) and Phase 5 (V5 graphics, text-behind on holds);
+  - playbook §E;
+  - `CLAUDE.md` tooling and ownership;
+  - the director profile's AI policy;
+  - the guard hook's carve-out for `studio/ledger/`, and an `ARCHITECTURE.md` row for it.
+
 ## 0.5.0 — 2026-10-17
 **Review gate + watch**, from the "Claude edits every video" workflow (Nishant Chahar), adapted to this studio.
 - **New `scripts/watch.py`:** samples any video at N fps into labelled contact sheets, one per shot (`--shots`) or per section, with the audio waveform under each sheet, plus `index.md` / `index.json`. Takes about 9 s for a 50 s reel.
