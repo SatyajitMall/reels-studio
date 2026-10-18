@@ -81,6 +81,12 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 - Google direct deletes videos after 2 days.
 - Typical generation time is 30 s to a few minutes.
 
-**Not yet verified:** a real paid call (it needs `OPENROUTER_API_KEY` in `.env`). Also unverified: whether OpenRouter accepts a `data:` URL as `frame_images`; the docs show http URLs. If the first real call is rejected, file a CR with the exact error.
+**Verified (2026-10-18, first real call, $0.12):**
+- OpenRouter charged exactly the estimate.
+- The output was 9:16 (720×1280), exactly 4.0 s, with **no audio track** (audio off is honoured).
+- A `data:` URL first frame works: output frame 0 matched our C027 still (mean difference 0.6 on 0–255).
+- The motion was a smooth push; `frame_scan.py` found 0 flags.
+- **Veo outputs 24 fps.** Conform it to the reel's rate on import (`set_override_frame_rate`, as for 24 fps camera clips), or the sequence will repeat frames.
+- Veo may "clean up" small details from the first frame: in the test it dropped a phone in the corner. Check the draft against the source still.
 
 **Then:** primary-correct and match the generated shot like any other clip, and run it through the review gate like everything else.

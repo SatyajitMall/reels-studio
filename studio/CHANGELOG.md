@@ -1,5 +1,14 @@
 # Studio Changelog
 
+## 0.5.3 — 2026-10-18
+- **First real AI video call verified**, approved by the director. Test shot: a push into the temple courtyard, starting from a C027 still.
+  - OpenRouter → Veo 3.1 Lite draft (720p, 4 s, no audio).
+  - Charged **$0.12 = estimate**; the ledger is correct.
+  - Output 720×1280, 4.0 s, no audio track.
+  - The `data:` URL first frame works: frame 0 matched our still at 0.6/255.
+  - 0 frame-scan flags.
+- **Learned: Veo outputs 24 fps.** Conform it to the reel's rate on import. `motion-and-ai.md` §3 has the verified facts.
+
 ## 0.5.2 — 2026-10-18
 **AI video moved to OpenRouter, with a cost structure** (director's decision).
 - **`scripts/gen_video.py` rewritten:**

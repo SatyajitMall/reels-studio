@@ -31,7 +31,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 
 ## Motion graphics / AI (from v0.5.1)
 - Verify the Premiere import of a HyperFrames ProRes 4444 alpha MOV on V5 (first real use).
-- Verify the first real OpenRouter video call with the director's key, including the `data:` URL `frame_images`. Also verify the Google fallback if it's ever needed (its `predictLongRunning` vs `generateContent` note).
+- ~~Verify the first real OpenRouter call~~: done 2026-10-18 ($0.12, `data:` URL first frame OK, 24 fps output). Still unverified: the Google fallback (its `predictLongRunning` vs `generateContent` note), if it's ever needed.
 - Text behind the subject on moving shots needs motion tracking: either track the word to the subject, or limit it to holds (as now).
 - Gemini Omni video-to-video restyle (the creator's "text behind the head"): not on Google's pricing page as of 2026-10-18. `text_behind.py` covers the need locally for free.
 - A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
