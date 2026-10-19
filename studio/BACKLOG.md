@@ -36,6 +36,17 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - Gemini Omni video-to-video restyle (the creator's "text behind the head"): not on Google's pricing page as of 2026-10-18. `text_behind.py` covers the need locally for free.
 - A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
 
+## From v0.6.0 (playbooks + the WeAreNoCode kit)
+- **Group B: talking-head tools (target v0.7.0):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, a local transcription option (Parakeet / Whisper, see G2), and camera-move helpers for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
+- **`creator-explainer` needs its pilot.** Every rule is adapted from 16:9 YouTube; log every misfit as a CR.
+- **Premiere lock:** three reel sessions contend for one Premiere. A lock file (session, reel, since) checked before mutating tools, released at wrap-up.
+- **A final re-review step** after the review gate's last loop, so the fixes from loop 2 are seen by the reviewer too.
+- `CR-20261017-my-reel-directional-blur-scan`: one-directional smear and blur straddling a cut in `frame_scan.py`.
+- `colour_report.py`: exclude designed fades from the crushed-shadows count.
+- `CR-20261017-my-reel-qa-visual-review` leftovers.
+- After Effects ops still missing: `light_rays`, and handles on trimmed shots.
+- Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
+
 ## Known gaps
 - Music-montage runs on CLAUDE.md §4c rules, which haven't been tested in Premiere yet. The first pilot validates them.
 - The guard hook was installed 2026-10-16. Its deny path hasn't been confirmed from a real reel session yet. The first pilot should hit it once, on purpose.

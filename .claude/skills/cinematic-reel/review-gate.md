@@ -13,7 +13,7 @@ Why: in the my-reel pilot, every defect the director or a later frame-by-frame c
    ```
 2b. **Scan every frame:** `./.venv/bin/python scripts/frame_scan.py renders/exports/<reel>_v<N>.mp4 -o projects/<reel>/analysis/review_v<N>/scan.json --shots projects/<reel>/analysis/shots_v<N>.json`. It takes seconds, and catches defects shorter than the 2 fps sheets can show.
 3. **Call the reviewer:** the Agent tool with `subagent_type: "reel-reviewer"` and `model: "fable"` (it must differ from the editor's model; if the editor is Fable, use `opus`). The prompt gives:
-   - the export path, `scan.json`, `watch/index.md`, `brief.md` and `studio/director-profile.md`;
+   - the export path, `scan.json`, `watch/index.md`, `brief.md`, the brief's playbook (`playbooks/<name>.md`) and `studio/director-profile.md`;
    - a scratch dir for frames: `analysis/review_v<N>/frames/`;
    - this round's director notes, i.e. what was supposed to change.
 

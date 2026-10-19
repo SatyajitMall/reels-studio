@@ -7,6 +7,8 @@ description: Turn the director's clips into a fully treated cinematic 9:16 Insta
 
 The director answers questions, shares clips and references, and approves. **You write everything**: brief, cut list, treatment. This is never cut-and-stitch: every reel gets colour correction, a creative look, motion, transitions, type and sound design, planned in the brief and taken from `effects-playbook.md` (same folder; read it before Phase 2).
 
+**Every reel follows one editing playbook** (`playbooks/`, same folder): the style rules for its kind of video, meaning pace, camera, type, transitions, sound (including whooshes), colour and the QA thresholds. Pick it in Phase 0, record it in the brief, and read it before Phase 2. `effects-playbook.md` is the menu of moves; the playbook says which ones this reel uses.
+
 Stop at the three **⏸ checkpoints**. Follow every rule in `CLAUDE.md`.
 
 Argument: reel name (folder under `projects/`). If it doesn't exist, run `scripts/new_reel.sh <name>`.
@@ -49,6 +51,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 
 **Round 1: the idea (ask before looking at footage)**
 1. What's this reel about, in a sentence or two? What happens in the clips? Is anyone speaking (on camera or VO)? → sets **reel type**: `talking-head` · `music-montage` · `hybrid`. Record it in `project.md`.
+   Then propose the **playbook** from `playbooks/README.md` (`music-montage` → `cinematic-montage`; `talking-head` → `creator-explainer`; `hybrid` → both, by stretch). If nothing fits, use the closest one and file a CR for a new playbook.
 2. What should viewers feel or do at the end? (laugh · learn · be inspired · follow · save · click link)
 3. Who's it for?
 4. Length? (15–20 s · 30–45 s · 60 s · whatever the story needs)
@@ -85,6 +88,12 @@ Offer choices that fit *this* footage, for example:
    - spot upside-down or sideways clips; orientation isn't auto-detected, so fix those with a 180° / 90° rotation and log it.
 
    Then open the `contact.png` of each candidate and read `summary.md`. On dark shoots (night, stage, candle-lit), exposure is judged relative to the shoot's median, so "darker than the shoot" is the flag that matters. If a reference's contact sheet shows more distinct shots than the cut count, rerun it with `--scene-threshold 0.1`. Trust the count once two thresholds agree. Note per clip: exposure, colour cast, flat/log, fps (slow-mo headroom), orientation, what's actually in the shot, hero moments.
+
+   **Measure the references** the same way we'll measure our cut:
+   ```
+   .venv/bin/python scripts/teardown.py --ref projects/<name>/references/<ref>.mp4 -o projects/<name>/analysis/teardown
+   ```
+   It gives cuts per minute, shot lengths, flashes, motion, picture (luma, contrast, saturation, warmth) and loudness. Put the numbers in the brief as targets.
 4. Timing source, by reel type (CLAUDE.md §4):
    - `talking-head` / `hybrid`: transcribe dialogue with `scripts/transcribe_reel.sh <name>`, which produces `transcripts/takes_packed.md`. If there's no ElevenLabs key, use `detect_silence` and tell the director word-level cutting is off.
    - `music-montage` / `hybrid`: run the beat grid on the music track:
@@ -104,7 +113,7 @@ Offer choices that fit *this* footage, for example:
 → Now ask **Round 2** of the interview.
 
 ## Phase 2: Write the brief + cut plan
-1. Fill in `projects/<name>/brief.md` completely: idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
+1. Fill in `projects/<name>/brief.md` completely: **playbook** (and any rule this reel overrides, with the reason), idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
    For **music-montage**, the Treatment must also include:
    - **Energy arc:** which song sections go up or down and where the shot length changes. Default: slow open → build → full → breath → payoff → outro. **Never one shot per bar for the whole reel.** That read as mechanical in the pilot. The music may be edited (e.g. intro joined to the main section on a downbeat).
    - **Generated shots (if any):** every AI-generated shot gets its own row, labelled **AI-generated**, with the prompt, why your footage can't provide it, and the cost from the `gen_video.py` dry run. The director approves each at Checkpoint 1 (`motion-and-ai.md` §3).
@@ -156,7 +165,7 @@ For shots that need **denoise, a real speed-ramp curve, Timewarp slow-mo or glow
 Plan which shots go through After Effects in the brief's Treatment, and say so in the round summary. Stabilisation stays in Premiere (Phase 5): AE's Warp Stabilizer can't be run by script.
 
 ## Phase 6: Sound design & mix
-- SFX on A2 for every visual event the playbook §F lists (−14…−18 dB).
+- SFX on A2 where **this reel's playbook** allows them (its Sound section), from the menu in `effects-playbook.md` §F. Run `scripts/sfx_prep.py` first and place each by its transient. Levels: the playbook's (cinematic-montage swishes about −13 dB; otherwise −14…−18 dB).
 - Music on A3:
   - section changes on the beat;
   - planned silence drops;
@@ -171,6 +180,13 @@ Plan which shots go through After Effects in the brief's Treatment, and say so i
 2. Export H.264 1080×1920, high bitrate → `renders/exports/<name>_v<round>.mp4`, using a built-in `.epr` (paths in the reality doc).
    **Check the audio straight away** (`ffmpeg -af volumedetect`, max_volume > −20 dB). If it's silent, write `analysis/mix.json` and rebuild the audio with `scripts/mix_from_edl.py`. Note it in the round summary.
 3. Run `analyze_footage.py` on the export, look at its contact sheet, and check the first 3 s plus 2–3 risky cuts with `scripts/cut_view.sh`.
+4. **Verify the file** (codec, size, fps, bitrate, BT.709 tags, black or frozen frames, audio length, loudness):
+   ```
+   .venv/bin/python scripts/verify_render.py renders/exports/<name>_v<round>.mp4 --fps <seq fps> --expect <runtime>
+   .venv/bin/python scripts/verify_render.py renders/exports/<name>_v<round>_IG.mp4 --profile ig-quiet   # no-music upload version
+   ```
+   Fix every FAIL before the review gate: `--fix-tags` for missing colour tags, `--fix-loudness` for a mix outside −14 ± 2 LUFS. Re-run on the fixed copy.
+5. **Compare with the reference:** `scripts/teardown.py --ref <ref> --ours <export> -o analysis/teardown`. Read `COMPARE.md`, and either fix each gap beyond tolerance or say in the round notes why it's deliberate.
 
 ## Phase 7b: Review gate (every version, before the director sees it)
 Follow `review-gate.md` (same folder):
@@ -190,7 +206,8 @@ Using `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist` and `ig-
 - 3 first-line hooks (< 125 characters);
 - the caption (hook in the first 125 characters, humanised);
 - 3–5 sized hashtags;
-- the cover frame timecode.
+- the cover frame timecode;
+- if the reel has an AI-generated shot: a note to turn on Instagram's **AI info** label when posting (`motion-and-ai.md` §3).
 
 ### ⏸ Checkpoint 3: approve the package.
 

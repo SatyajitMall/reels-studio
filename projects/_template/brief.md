@@ -6,6 +6,7 @@
 
 ## 1. The idea
 - **Reel type:** talking-head · music-montage · hybrid (sets the editing rules, CLAUDE.md §4)
+- **Playbook:** cinematic-montage · creator-explainer · … (`.claude/skills/cinematic-reel/playbooks/`). **Overrides:** any playbook rule this reel changes, with the reason, or "none"
 - **One-line concept:**
 - **Story arc:** (setup → turn → payoff)
 - **Goal:** (what the viewer should feel or do)

@@ -1,5 +1,23 @@
 # Studio Changelog
 
+## 0.6.0 — 2026-10-19
+**Editing playbooks, plus our own file, sound and AI-clip tools** (director's decision: "multiple editing playbooks for different kinds of videos"). Ideas came from the WeAreNoCode YouTube Editor kit; all code is the studio's own.
+- **Editing playbooks** (`.claude/skills/cinematic-reel/playbooks/`): one file per kind of video, holding its style rules (pace, camera, type, transitions, sound, colour, QA thresholds), each with its reason and source.
+  - `cinematic-montage`: proven, distilled from my-reel and puja-night-2. Swishes go only on real fast motion, never under text, at about −13 dB (the director's puja-night-2 note).
+  - `creator-explainer`: untested, adapted from the kit's 16:9 rules to 9:16. Silence by default, every sound needs a visible cause, never a whoosh under text; top-anchored punch-ins 118–125 %; a card never covers the face.
+  - The brief names its playbook and any overrides. Phase 0 proposes it. The reviewer reads it and judges against its QA thresholds.
+  - The README covers how a liked result becomes a new playbook.
+- **`scripts/verify_render.py`**: the final file gate (Phase 7). Checks codec, 1080×1920, fps, bitrate, 4:2:0, BT.709 tags, duration, audio/video length, black frames outside the end fade, frozen stretches, true peak ≤ −1 dBTP, and −14 ± 2 LUFS (`mix`) or peak only (`ig-quiet`).
+  - `--fix-tags` remuxes losslessly with tags.
+  - `--fix-loudness` writes a −14 LUFS copy with the picture copied.
+  - Tested on my-reel v10 (PASS, −11.5 LUFS warned; fixed copy −14.0 / −4.4 dBTP) and puja-night-2 v5b_IG (PASS).
+- **`scripts/conform_clip.py`**: makes AI, stock or still clips reel-ready. Frame-for-frame retime to the reel's fps, `--start` to skip the settle-in, 1080×1920 crop, audio stripped, ProRes 422 HQ with BT.709 tags, `--match <still>` colour transfer (`.cube`), and still → push-in. Tested on the Veo test draft.
+- **`scripts/teardown.py`**: measures the reference and our cut the same way (pacing incl. flashes, motion, picture, loudness) and writes `COMPARE.md` flagging gaps beyond tolerance. Used in Phase 1 for targets and in Phase 7 to compare.
+- **`scripts/sfx_prep.py`**: trims leading silence and peak-normalises SFX to −3 dBFS, reporting the transient time. SFX are placed by their transient.
+- **Sound and loudness rules:** `effects-playbook.md` §F now points to the playbook for which sounds to use and adds −14 LUFS / −1 dBTP for every mixed export.
+- **AI-shot rules** (`motion-and-ai.md` §3): never proof, never two in a row, 2–5 s, check the draft against its still, conform with `conform_clip.py`, and turn on Instagram's AI label at posting (Phase 8). Added to the reviewer's checklist.
+- The kit is kept as a gitignored reference in `assets/reference-kits/` (its scripts are not run).
+
 ## 0.5.3 — 2026-10-18
 - **First real AI video call verified**, approved by the director. Test shot: a push into the temple courtyard, starting from a C027 still.
   - OpenRouter → Veo 3.1 Lite draft (720p, 4 s, no audio).

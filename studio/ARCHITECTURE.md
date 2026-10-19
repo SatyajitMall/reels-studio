@@ -72,3 +72,5 @@ Set in `brief.md` and `project.md`. They drive which editorial rules apply (`CLA
 | `talking-head` | Someone speaks to camera or in voiceover | Word boundaries | Yes |
 | `music-montage` | No speech. The music carries it | Beat grid of the music track | No |
 | `hybrid` | Montage with spoken lines or VO moments | Words in spoken parts, beats in the rest | Spoken clips only |
+
+**Editing playbooks** sit on top of the reel type: one file per kind of video, holding its style rules (pace, camera, type, transitions, sound, colour, QA thresholds). They're in `.claude/skills/cinematic-reel/playbooks/` (README there). The brief names one and may override single rules. HQ owns them; a liked result that fits none becomes a new playbook.

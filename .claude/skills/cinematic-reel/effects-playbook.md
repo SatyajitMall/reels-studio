@@ -123,19 +123,33 @@ Default is a **hard cut**. Transitions are seasoning: at most 3–4 non-cut tran
 
 ## F. Sound design (A2 / A3)
 
+**Which sounds, how often and how loud is the playbook's call** (`playbooks/<style>.md` → Sound). The two current playbooks disagree on purpose:
+- `cinematic-montage` puts swishes on real fast motion, at about −13 dB;
+- `creator-explainer` keeps silence as the default, gives every sound a visible cause, and never puts a whoosh under text.
+
+The menu below is what's available, not a list to use everywhere.
+
 | Moment | SFX |
 |---|---|
-| Hook / title | riser into sub-hit (`gemini_riser_sub_hit.wav`: the hit lands 1.0 s in) |
-| B-roll entrance | soft whoosh (`gemini_whoosh_soft.wav`) |
+| Hook / title | riser into sub-hit (`gemini_riser_sub_hit.wav`: the hit lands 1.0 s in, 0.70 s after `sfx_prep.py`) |
+| Whip / fast pan / flash transition | soft whoosh (`gemini_whoosh_soft.wav`); never under text |
 | Punch-in / snap zoom | short swish or tick (`gemini_snap_swish.wav`) |
-| Text pop | click / pop (`gemini_text_pop_click.wav`) |
+| Text pop | click / pop (`gemini_text_pop_click.wav`), only where the playbook allows a sound on type |
 | Flash cut | camera shutter (`gemini_camera_shutter.wav`) |
 | Reveal / big turn | bass drop (`gemini_bass_drop_boom.wav`) |
 | Emotional turn | music drops out for 0.5–1 s (silence is an effect) |
 
-The starter SFX in `assets/sfx/` are synthesised placeholders, normalised to −1.5 dBFS peak, so set their clip gain down to −14…−18 dB. Prefer the director's real SFX when there are any.
+**Prepare SFX before placing them:**
+```
+.venv/bin/python scripts/sfx_prep.py assets/sfx/*.wav -o projects/<name>/sfx
+```
+It trims leading silence and peak-normalises to −3 dBFS. Originals are untouched. Library files differ about 10× in level and often start late, so this way one clip gain means the same thing for every file.
+- **Place each SFX by its transient**, not its file start: the report gives the transient time (≈ 0 after prep, except risers). It should land within 2 frames of its visual cause.
+- The starter SFX in `assets/sfx/` are synthesised placeholders. Prefer the director's real SFX when there are any.
 
 Music: cut on the beat for section changes, duck under speech, last note lands on the final frame.
+
+**Loudness (every mixed export):** −14 LUFS integrated ± 2, true peak ≤ −1 dBTP. Instagram turns louder files down and leaves quieter ones quiet, and peaks above −1 clip in its encode. `scripts/verify_render.py` checks this (skill Phase 7); `--fix-loudness` writes a corrected copy with the picture copied. The IG upload version without music is judged on peak only (`--profile ig-quiet`).
 
 **Setting levels:** `set_clip_volume {volumeDb}` writes silence. Set the clip's Level by script instead: `Level = 10^((dB − 15) / 20)` (0.17783 = 0 dB).
 

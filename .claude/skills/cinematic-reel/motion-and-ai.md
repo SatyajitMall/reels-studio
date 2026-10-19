@@ -89,4 +89,23 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 - **Veo outputs 24 fps.** Conform it to the reel's rate on import (`set_override_frame_rate`, as for 24 fps camera clips), or the sequence will repeat frames.
 - Veo may "clean up" small details from the first frame: in the test it dropped a phone in the corner. Check the draft against the source still.
 
-**Then:** primary-correct and match the generated shot like any other clip, and run it through the review gate like everything else.
+**Rules for using an AI shot** (also in each playbook's AI section):
+- **Never proof.** No fake crowds, results, screens, dashboards or people saying things. An AI shot can set a scene or bridge one; it can never show what happened.
+- **Never two in a row**, and at most about one a minute. Cut AI shots between real footage.
+- **The exact scene the moment needs**, 2–5 s on screen. Use the best stretch, not the whole clip.
+- **Check the draft against its source still** before asking for the final (Veo drops small details: see above). Look at every frame of the draft's contact sheet, not just the first.
+- **Label it.** It's "AI-generated" in the brief and in `project.md`. At posting, turn on Instagram's **AI info** label (Phase 8): Veo clips carry Google's SynthID watermark, so Instagram may detect them anyway.
+
+**Conform before it goes in Premiere** (`scripts/conform_clip.py`; local, free):
+```
+./.venv/bin/python scripts/conform_clip.py projects/<reel>/renders/gen/<shot>_final_<time>.mp4 \
+    -o projects/<reel>/renders/gen/<shot>_conformed.mov --fps 25 --start 0.5 --match <source still>
+```
+- Retimes frame for frame to the reel's rate (Veo's 24 → 25 plays 4 % fast, so every frame plays once) instead of the sequence repeating frames.
+- `--start 0.5` skips the model's settle-in at the start of the clip.
+- Scales and crops to 1080×1920, strips audio, writes ProRes 422 HQ with BT.709 tags.
+- `--match <still>` pulls the clip's colour toward the director's footage (a mean/std transfer at `--strength 0.5`, written as a `.cube`), so the grade starts close.
+- The same tool conforms stock clips, and turns a still into a slow push-in (`--push 1.06`).
+- Check `<out>_sheet.png` (first, middle and last frames beside the match still).
+
+**Then:** primary-correct and match the conformed shot like any other clip, and run it through the review gate like everything else.

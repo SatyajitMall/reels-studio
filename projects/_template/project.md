@@ -5,6 +5,7 @@
 | Reel name | |
 | Status | brief → proposal → approved → rough cut → polish → exported → packaged → done |
 | Reel type | talking-head · music-montage · hybrid |
+| Playbook | cinematic-montage · creator-explainer · … |
 | Arch version | |
 | Pilot | yes |
 | Current round | 0 |
