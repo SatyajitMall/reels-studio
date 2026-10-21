@@ -60,7 +60,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 
 **Round 2: taste (ask after analysing footage and references, so the options are concrete)**
 Offer choices that fit *this* footage, for example:
-- Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** render each option on 3–4 of the director's own stills as one labelled sheet, using the `ffmpeg-color-grading-chromakey` recipes or the `assets/luts/` cubes via `lut3d`. These are previews only; the real look is built in Premiere in Phase 4
+- Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** run `scripts/look_preview.py` on 3–4 of the director's own stills (night, a face, a wide). It renders Premiere's own film-stock looks (effects-playbook §A3 film table) as one labelled sheet, with measurements. Offer 3–4 looks that fit the footage, not all 12. These are previews only; the real look is built in Premiere in Phase 4, from the same LUT
 - Pace: calm (3–5 s shots) · medium (2–3 s) · fast (1–2 s), pre-selecting what the reference measured
 - Effects intensity: subtle · signature moments only · heavy / stylised
 - Captions / words: none · Clean · Bold Kinetic · Editorial. For music-montage, default to **title + end card only**. Use beat words only when the director supplies words that mean something; never invent filler words.

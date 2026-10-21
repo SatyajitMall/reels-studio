@@ -46,7 +46,10 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - `CR-20261017-my-reel-qa-visual-review` leftovers.
 - After Effects ops still missing: `light_rays`, and handles on trimmed shots.
 - ffmpeg build without libzimg (`zscale`) and freetype (`drawtext`). An ffmpeg with both would enable HDR → SDR tone-mapping and labelled sheets in one pass. That's an install the director decides on (it changes a system tool).
-- Optional `scripts/look_preview.py`: if Round 2 look sheets get used on every reel, turn the tested recipe (ffmpeg tiles + Pillow labels) into a script.
+- Film-stock looks (v0.6.2): only `Fuji F125 Kodak 2393 (by Adobe)` is verified in Premiere.
+  - The first reel that uses another look confirms the name with `getAllLumetriPresetsList()` and compares the Premiere still with the `look_preview.py` tile. That also tests whether Lumetri's Intensity mixes linearly.
+  - It reports by CR, and HQ marks the row verified.
+- After Effects `glow` op: add Glow Colors (A & B, red/orange), so CineStill halation can be done in AE instead of the ffmpeg bake.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 
 ## Known gaps

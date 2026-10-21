@@ -29,6 +29,8 @@ if not tools:
 # Our own scripts, files and resources share the snake_case shape; they aren't MCP tools.
 ours = {p.stem for p in Path("scripts").iterdir()} | {
     "audio_summary", "takes_packed", "timeline_view", "pack_transcripts", "get_instructions"}
+# Look ids from the film-stock table (effects-playbook §A3) are defined in look_preview.py
+ours |= set(re.findall(r'^\s+"([a-z0-9_]+)": \(', Path("scripts/look_preview.py").read_text(), re.M))
 missing = {}
 for f in sys.argv[2:]:
     for name in set(re.findall(r"`([a-z]+(?:_[a-z0-9]+)+)`", Path(f).read_text())):

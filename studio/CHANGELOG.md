@@ -1,5 +1,23 @@
 # Studio Changelog
 
+## 0.6.2 — 2026-10-21
+**Film-stock look table with tested previews and Premiere settings** (director's request, after the external "color-grading-film-emulation" skill turned out to be prompt words only).
+- **Premiere's own film emulations are now mapped** (effects-playbook §A3, film table): 12 looks with their exact `applyLumetriPreset` name, intensity, measured character, the Lumetri adjustments for the V3 layer, and what each suits.
+  - The looks: Kodak Vision 500T and 250D, Fuji F125, Eterna and Reala, each printed to Kodak 2383 / 2393 / 2395 or Fuji 3510; two Monochrome looks; CineStill 800T with halation; bleach bypass.
+  - Found on disk: Premiere ships 115 LUTs, including Adobe's film emulations as plain `.cube` files.
+- **`scripts/look_preview.py`**: renders those looks on the director's stills (or `clip@time`) as a labelled sheet plus measurements (the same stats as `colour_report.py`).
+  - `exact` looks read **the same `.cube` Premiere uses**, blended at the intensity.
+  - `≈` looks are approximations, since SpeedLooks `.itx` and the Monochrome `.look` files aren't readable outside Premiere, and halation isn't a Premiere effect.
+  - Wired into Round 2 ("show, don't name").
+- **Tested on 4 real stills:** Durga and priest at night, the night temple, a daylight baul, neon arches. Findings now in the table:
+  - 500T → 2383 moves hue +1.5° toward gold, so it's the best night fit;
+  - F125 → 2393 (the proven Warm Film) and F125 → 2395 push toward red (−1.0° / −3.1°);
+  - every 2395 print lifts the blacks to 0 % crush;
+  - Eterna → 3510 is the most saturated, not pastel.
+- **Halation bake** for the CineStill look: the AE `glow` op has no colour setting, so the red bloom is an ffmpeg render, tuned on crops to stay at ≤ 2 % clipping after the look. Tested on 4K footage, with BT.709 tags.
+- `check_tool_names.sh` now ignores look ids defined in `look_preview.py`. They share the snake_case shape of tool names.
+- **Verified in Premiere:** only `Fuji F125 Kodak 2393 (by Adobe)` (my-reel, puja-night-2; its recipe is in the table). The other rows are named from Premiere's own LUT folder. Their first reel use verifies them by render (backlog).
+
 ## 0.6.1 — 2026-10-21
 **Imported skill: `ffmpeg-color-grading-chromakey`** (director's request), from josiahsiegel/claude-plugin-marketplace (MIT; licence kept in the skill folder; commit `9ae4e4a`).
 - **Scoped to work around the Premiere grade**, never instead of it:

@@ -50,8 +50,51 @@ Look presets to propose:
 
 | Look | Built-in preset | Status |
 |---|---|---|
-| Warm Film | `Fuji F125 Kodak 2393 (by Adobe)` | verified in `my-reel` |
-| Teal & Orange, Moody Desat, Clean Bright, Mono Drama | not mapped yet | Pick the closest from `getAllLumetriPresetsList()`, verify by render, and file a CR with the name so HQ can add it here |
+| Warm Film | `Fuji F125 Kodak 2393 (by Adobe)` | verified in `my-reel` and `puja-night-2` |
+| Mono Drama | `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` (film table below) | named, not yet applied by script |
+| Moody Desat | `SL BLEACH NDR` at 40–60 % (film table: `bleach`) | named, not yet applied by script |
+| Teal & Orange, Clean Bright | not mapped yet | Pick the closest from `getAllLumetriPresetsList()`, verify by render, and file a CR with the name so HQ can add it here |
+
+#### Film-stock looks (Premiere's own film emulations)
+Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Vision 500T/250D, Fuji Eterna / F125 / Reala) printed to a print stock (Kodak 2383 / 2393 / 2395, Fuji 3510). They're in Lumetri → Creative → Look, and scriptable with `applyLumetriPreset("<name>")`.
+- **Preview them on the director's stills before choosing** (Round 2):
+  ```
+  .venv/bin/python scripts/look_preview.py raw/b-roll/<clip>.mov@<t> … -o projects/<reel>/analysis/looks [--looks id,id] [--intensity 0.4]
+  ```
+- The `exact` rows read **the same `.cube` Premiere uses**, from its Creative LUT folder, and blend it at the row's intensity. `≈` rows are approximations: SpeedLooks and the Monochrome looks aren't readable outside Premiere, and halation isn't a Premiere effect.
+
+**Measured character** comes from `look_preview.py` at the listed intensity on 4 real stills (2026-10-21): the Durga idol and priest (C152, night), the night temple (my-reel C027), the daylight baul (stock 4221987) and the neon arches (C186). The numbers are the mean change from the source, on a 0–1 scale; hue is in degrees, where negative means toward red.
+
+| id | Premiere look (`applyLumetriPreset`) | Intensity | Measured character | Lumetri on the V3 layer (by occurrence) | Best for |
+|---|---|---|---|---|---|
+| `k500t_2383` | `Kodak 5218 Kodak 2383 (by Adobe)` | 50 % | Gentle: contrast +0.035, sat +0.013, warmth +0.018. **Hue +1.5° toward gold**, deep blacks kept, highlights roll off (clip 1.0 → 0.5 %) | Contrast +10, Shadows −5, vignette −0.8. No tint fix needed | **Night festivals and pandals: default night look for `cinematic-montage`** |
+| `k500t_2395` | `Kodak 5218 Kodak 2395 (by Adobe)` | 50 % | **Lifts blacks** (crush 5.5 → 0 %), brighter +0.028, contrast −0.019, sat −0.038: a soft, faded print | Leave the fade for a memory feel; for depth, Blacks −10 and Contrast +10 | Calm, nostalgic and memory sections |
+| `k250d_3510` | `Kodak 5205 Fuji 3510 (by Adobe)` | 50 % | Clean and warm: contrast +0.024, sat +0.027, warmth +0.034, hue +1.6° | Contrast +5 | Daylight people and street |
+| `f125_2393` | `Fuji F125 Kodak 2393 (by Adobe)` | **40–50 %** | Darker −0.019, contrast +0.039, sat +0.051, warmth +0.048, **hue −1.0° toward red** (−2.4° on the arches), crush 7.4 % | **Verified recipe** (my-reel, puja-night-2): Contrast +15, Shadows −10, Basic Saturation 85–95, Temperature +4 and Tint −10 against the red push, vignette −0.8…−1.0. Check with `colour_report.py --gold` | Warm Film: rich warm night and day |
+| `f125_2395` | `Fuji F125 Kodak 2395 (by Adobe)` | 50 % | Lifted blacks, sat −0.030, **hue −3.1°, the strongest red push** | Tint −10…−15 and check gold hue; Blacks −5 | Soft portraits in daylight. Avoid on gold idols |
+| `eterna_3510` | `Fuji ETERNA 250D Fuji 3510 (by Adobe)` | 40–50 % | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
+| `eterna_2395` | `Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 50 % | **The brightest** (+0.039), lifted blacks, sat −0.024: airy and soft | Exposure −0.1 if skies clip | Gentle daytime, morning, nostalgia |
+| `reala_2393` | `Fuji REALA 500D Kodak 2393 (by Adobe)` | 40–50 % | Like `eterna_3510`: sat +0.060, warmth +0.057, crush 7.2 % | Shadows +5 if dark detail drops | Punchy colour with neutral hue |
+| `mono_500t` ≈ | `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain on V4 15–20 % | Mono Drama: a black-and-white section or reel |
+| `mono_eterna` ≈ | `Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 100 % | Softer, brighter B&W | Contrast +15 | Gentle B&W memories |
+| `cinestill` ≈ | `Kodak 5218 Kodak 2383 (by Adobe)` + **halation bake** | 50 % | 500T plus a soft red bloom around point lights. Visible on bulbs against dark; **subtle on scenes that are already warm**. Clip stays ≤ 2 % after the look | As `k500t_2383`. Halation is baked per shot **before** Premiere (below) | Neon and bulb-lit night, concerts |
+| `bleach` ≈ | `SL BLEACH NDR` | 40–60 % | Contrast +0.094, sat −0.113, cooler −0.066, crush 8.6 % | Shadows +5 to keep detail; no skin warmth to rely on | Gritty, intense moments. Not for idols or faces that need warmth |
+
+**Premiere build** (V3 adjustment layer; reality doc for the occurrence method):
+1. Select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it.
+2. Set Creative Intensity, the **2nd** "Intensity", to the table value.
+3. Set the table's adjustments by occurrence, then write the values back to a file (reality doc, Rule 2). Basic Saturation is 0–200, with 100 neutral.
+4. **Verify by render (CLAUDE.md §2a):** export a still and compare it with the `look_preview.py` tile of the same frame at the same intensity, then run `colour_report.py --gold`.
+   - `exact` looks should land within about 0.02 luma before the adjustments. That assumes Lumetri's Intensity mixes linearly, which is the first thing to confirm.
+   - The first reel to use a look reports the comparison in a CR, and HQ marks it verified here.
+
+**Halation bake (the `cinestill` look):** the After Effects `glow` op has no colour setting, so it glows warm, not red. Bake the bloom with ffmpeg on the night shots that have bright point lights, then place the render and grade it like any clip:
+```
+ffmpeg -i <clip> -an -filter_complex "format=gbrp,split[c][h];[h]colorlevels=rimin=0.70:gimin=0.70:bimin=0.70,gblur=sigma=<width/36>,colorchannelmixer=rr=1.0:rg=0.2:gr=0.12:gg=0.12:br=0:bb=0.02[g];[c][g]blend=all_mode=screen:all_opacity=0.8,format=yuv422p10le,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv" -c:v prores_ks -profile:v 3 -color_primaries bt709 -color_trc bt709 -colorspace bt709 -movflags +write_colr <shot>_halation.mov
+```
+- Sigma scales with the frame: 30 at 1080 wide, 60 at 2160.
+- Tested on 2 s of 4K C186: 3.6 s to render, all BT.709 tags.
+- The render clips slightly more than the source (2.6 → 3.1 %) until the look's print roll-off pulls it back. Check `clip%` after the look, and raise the threshold to 0.75 if it's over 2 %.
 
 **Starter LUTs** in `assets/luts/` (for manual loading in Lumetri → Creative → Look). They're generated by `scripts/gemini_generate_starter_pack.py`. A director's own LUTs in that folder take priority.
 

@@ -10,7 +10,7 @@ description: |
 ## Studio rules (read first)
 - **The reel's grade lives in Premiere.** Primary correction goes on the clips (Lumetri) and the look goes on the V3 adjustment layer. Never grade the reel, or its export, here: grading twice and re-encoding loses quality and breaks shot matching.
 - **Where ffmpeg colour is used:**
-  1. **Look previews (skill Phase 0, Round 2).** Render each look option on 3–4 stills from the director's footage, as one labelled contact sheet, so the director picks from their own shots instead of from names.
+  1. **Look previews (skill Phase 0, Round 2).** Use `scripts/look_preview.py`, which renders Premiere's own film-stock LUTs (effects-playbook §A3) on the director's stills as a labelled sheet. Use the recipes here only for looks that table doesn't cover.
   2. **Pre-rendered effect shots** the brief plans, such as colour isolation (keep only the red), sepia or a film look on one shot. Treat them like After Effects renders: the original stays, the render replaces the shot at the same timeline position, and the brief says so.
   3. **Keying** a green or blue-screen stock element into a ProRes 4444 alpha overlay for V4/V5.
   4. **Stock and AI clips:** use `scripts/conform_clip.py`, which already applies the colour match with `lut3d`.

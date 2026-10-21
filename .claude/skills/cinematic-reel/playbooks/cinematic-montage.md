@@ -34,6 +34,10 @@
 
 ## Colour and texture
 - **Grade toward the warm, deep look of night festivals:** gold midtones (hue 30–45° on warm shots, `colour_report.py --gold`), blacks kept deep, blue accent shots kept clean (G−M ≈ 0).
+- **Look choice:** preview the film-stock looks (`look_preview.py`, effects-playbook §A3).
+  - On night footage, `Kodak 5218 Kodak 2383` measured the best fit for gold: hue +1.5° toward gold, blacks kept deep.
+  - Warm Film (`Fuji F125 Kodak 2393`) is proven on both reels but pushes toward red.
+  - Looks printed to 2395 lift the blacks: use them only when the brief wants a faded memory.
 - **Warm looks push red:** fix it with the look layer's temperature plus a little green tint, never by cooling the clips.
 - **Grain 10–15 %, faded with the picture.** *Source:* 40 % was "too much grain" in my-reel round 2.
 - **Denoise dark shots** in After Effects (`denoise`) when the frame scan or your eye shows noise. *Source:* my-reel v7, −12…−29 % dark-area noise.
