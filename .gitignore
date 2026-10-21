@@ -20,6 +20,8 @@ assets/**/*
 .claude/skills/*
 !.claude/skills/cinematic-reel/
 !.claude/skills/studio-hq/
+# Imported and modified with studio fixes (MIT, licence in the folder): tracked as a studio fork, not reinstalled.
+!.claude/skills/ffmpeg-color-grading-chromakey/
 
 # Keep the template's empty folders
 !projects/_template/**

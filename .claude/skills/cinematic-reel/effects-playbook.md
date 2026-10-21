@@ -70,6 +70,16 @@ Grain, dust, light leaks and film burns from `assets/overlays/` go on V4 in a bl
 - grain → Overlay or Soft Light, `set_clip_opacity` **10–15 % by default**; go higher only if the director asks. The pilot's 40 % was "too much grain" on dark 8-bit footage that's already noisy. Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
 - light leaks → Screen, 40–80 %, on transitions or emotional beats
 - film burn / flash → Screen or Add, 3–8 frames, on hard cuts
+- green- or blue-screen stock elements (smoke, sparks, petals) → key them first into a ProRes 4444 alpha overlay with the `ffmpeg-color-grading-chromakey` skill (sample the screen colour, `despill`), then place them on V4/V5 in Normal mode
+
+### A5. FFmpeg colour (outside Premiere)
+The `ffmpeg-color-grading-chromakey` skill (imported, tested, with studio fixes) is for work **around** the Premiere grade, never instead of it:
+- **look previews** on the director's stills for Round 2;
+- **pre-rendered effect shots** the brief plans (keep-one-colour `colorhold`, sepia, a film look on one shot), swapped in like an After Effects render;
+- **keying** green-screen elements;
+- BT.709 tag fixes.
+
+Don't grade the reel or its export there.
 
 ---
 

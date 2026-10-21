@@ -12,7 +12,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 | G3 | There's no loudness or beat-grid measurement. A librosa analyser is offered | Review the script, then run it on the first music-montage pilot | **partly adopted** v0.2.0: the beat grid was reviewed and tested on a 120 BPM click track (read 117.5 BPM, beats placed within about 1 frame). Used by §4c. The loudness half hasn't been reviewed |
 | G4 | HyperFrames graphics on V2 sit under the V3 grade and get discoloured | Valid concern. Decide on a track layout change (graphics above the grade) | **rejected** 2026-10-16 by the director. Graphics stay on V2, under the grade |
 | G5 | `set_clip_opacity` / `speed_change` / `reverse_clip` may not exist as tools | Grep the tool registry in the installed `adobe-premiere-pro-mcp` package | **rejected** 2026-10-16. Claim is false. All 52 tool names in the rules exist in server 1.2.9 (283 tools), including the 3 named. Rerun `scripts/check_tool_names.sh` after any MCP upgrade |
-| G6 | Premiere tone-maps iPhone HLG before grading, so a Log LUT blows it out | Check on the first iPhone HDR clip in a pilot | open. `my-reel` footage is Rec.709 SDR, so it isn't tested there |
+| G6 | Premiere tone-maps iPhone HLG before grading, so a Log LUT blows it out | Check on the first iPhone HDR clip in a pilot | open. `my-reel` footage is Rec.709 SDR, so it isn't tested there. Since v0.6.1: the ffmpeg route can't tone-map either (no `zscale` in this build), so Premiere is the only path for now |
 | G7 | `scripts/gemini_setup_premiere_mcp.sh` (added 2026-10-16): setup with an npm fallback for a root-owned `/usr/local`, plus CEP debug mode for CSXS 9–16 (doctor covers 10–12) | Fold its npm-prefix fallback into `setup.sh`. Enable more CSXS versions only if the panel doesn't show in Premiere | open. File left untracked |
 
 ## From the my-reel retro (deferred)
@@ -45,6 +45,8 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - `colour_report.py`: exclude designed fades from the crushed-shadows count.
 - `CR-20261017-my-reel-qa-visual-review` leftovers.
 - After Effects ops still missing: `light_rays`, and handles on trimmed shots.
+- ffmpeg build without libzimg (`zscale`) and freetype (`drawtext`). An ffmpeg with both would enable HDR → SDR tone-mapping and labelled sheets in one pass. That's an install the director decides on (it changes a system tool).
+- Optional `scripts/look_preview.py`: if Round 2 look sheets get used on every reel, turn the tested recipe (ffmpeg tiles + Pillow labels) into a script.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 
 ## Known gaps

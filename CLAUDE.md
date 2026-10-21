@@ -129,6 +129,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Footage & reference analysis: `scripts/analyze_footage.py` writes a contact sheet + exposure / white-balance / saturation / fps readings per clip, and with `--reference` the cut pacing. **Look at the contact sheets** before deciding colour or effects.
 - Reference teardown: `scripts/teardown.py --ref <ref> [--ours <export>]` measures pacing, motion, picture and loudness the same way for both, and writes `COMPARE.md`.
 - Final file check: `scripts/verify_render.py <export>` (codec, 1080×1920, fps, bitrate, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version). Every export passes it before the review gate.
+- FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.
 - SFX prep: `scripts/sfx_prep.py` (trim leading silence, peak −3 dBFS) before placing sounds. Generated or stock clips: `scripts/conform_clip.py` (frame rate, 1080×1920, colour match to the footage).
 - Transcription: `.vendor/video-use/helpers/transcribe.py` (ElevenLabs Scribe — needs `ELEVENLABS_API_KEY` in `.env`). Wrapped by `scripts/transcribe_reel.sh <reel-name>`.
 - Packing: `pack_transcripts.py` → `projects/<name>/transcripts/takes_packed.md`. Read this, not raw frames.

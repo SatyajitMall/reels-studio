@@ -1,5 +1,29 @@
 # Studio Changelog
 
+## 0.6.1 — 2026-10-21
+**Imported skill: `ffmpeg-color-grading-chromakey`** (director's request), from josiahsiegel/claude-plugin-marketplace (MIT; licence kept in the skill folder; commit `9ae4e4a`).
+- **Scoped to work around the Premiere grade**, never instead of it:
+  - look previews on the director's stills (Round 2, "show, don't name");
+  - pre-rendered effect shots the brief plans (keep-one-colour, sepia, film look);
+  - keying green-screen elements to ProRes 4444 alpha;
+  - BT.709 tag fixes.
+
+  Its auto-trigger description was rewritten so reel sessions don't grade the reel in ffmpeg.
+- **Every recipe was tested** on ffmpeg 9.0.2, with a real my-reel still and a test green screen. Fixed and re-verified:
+  - "keep only red" came out fully grey; replaced with `colorhold` / `hsvhold`;
+  - animated `colorbalance` / `colortemperature` errored; animated with `sendcmd`. `eq` time expressions need `eval=frame`;
+  - the dream glow blended in YUV and went magenta; now blends in RGB;
+  - the chromakey start of 0.3 made a warm subject see-through; now sample the screen colour and start at 0.10–0.15;
+  - colour-balance despill tinted the whole subject; now uses the `despill` filter;
+  - a no-op "LUT intensity" recipe was removed;
+  - ProRes overlays were half-tagged; now `setparams` + `write_colr`.
+- **Studio notes:**
+  - teal & orange, the `vintage` preset and the 35mm chain overshoot on warm night footage;
+  - HDR → SDR needs `zscale`, which this ffmpeg lacks;
+  - no `drawtext`, so sheets are labelled with Pillow.
+- Wired into `effects-playbook.md` (§A4 keying, new §A5), the skill's Round 2 look question and `CLAUDE.md` §5.
+- **Tracked in git as a studio fork** (`.gitignore` exception, like `cinematic-reel`). Unlike third-party skills, it isn't reinstalled by `setup.sh`, so our fixes stay.
+
 ## 0.6.0 — 2026-10-19
 **Editing playbooks, plus our own file, sound and AI-clip tools** (director's decision: "multiple editing playbooks for different kinds of videos"). Ideas came from the WeAreNoCode YouTube Editor kit; all code is the studio's own.
 - **Editing playbooks** (`.claude/skills/cinematic-reel/playbooks/`): one file per kind of video, holding its style rules (pace, camera, type, transitions, sound, colour, QA thresholds), each with its reason and source.
