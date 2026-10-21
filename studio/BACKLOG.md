@@ -37,7 +37,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
 
 ## From v0.6.0 (playbooks + the WeAreNoCode kit)
-- **Group B: talking-head tools (target v0.7.0):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, a local transcription option (Parakeet / Whisper, see G2), and camera-move helpers for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
+- **Group B: talking-head tools (next minor version):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, a local transcription option (Parakeet / Whisper, see G2), and camera-move helpers for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
 - **`creator-explainer` needs its pilot.** Every rule is adapted from 16:9 YouTube; log every misfit as a CR.
 - **Premiere lock:** three reel sessions contend for one Premiere. A lock file (session, reel, since) checked before mutating tools, released at wrap-up.
 - **A final re-review step** after the review gate's last loop, so the fixes from loop 2 are seen by the reviewer too.
@@ -49,6 +49,9 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - Film-stock looks (v0.6.2): only `Fuji F125 Kodak 2393 (by Adobe)` is verified in Premiere.
   - The first reel that uses another look confirms the name with `getAllLumetriPresetsList()` and compares the Premiere still with the `look_preview.py` tile. That also tests whether Lumetri's Intensity mixes linearly.
   - It reports by CR, and HQ marks the row verified.
+- **story-montage (v0.7.0) needs its pilot.** Pujo ki Asolei Sobar is the closest reel.
+  - Unverified in Premiere: setting Leave Color (Using Hue) and the Lumetri Highlight / Shadow Tint wheels by script, Posterize Time, and the Lumetri saturation keyframes for the B&W → colour reveal.
+  - Ask the director for the reference **with audio** to replace the provisional sound rules.
 - After Effects `glow` op: add Glow Colors (A & B, red/orange), so CineStill halation can be done in AE instead of the ffmpeg bake.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 

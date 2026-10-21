@@ -55,7 +55,7 @@ Claude will:
 
 The full menu of looks, moves and transitions is in `.claude/skills/cinematic-reel/effects-playbook.md`. You can ask for any of them by name, e.g. "Warm Film look, a speed ramp on the gym shot, flash cuts on the beat".
 
-Each kind of video has an **editing playbook** with its own style rules (pace, camera, type, sound), in `.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage` for music montages, `creator-explainer` for talking to camera. Claude proposes one in the first interview round; you can override any rule for a single reel.
+Each kind of video has an **editing playbook** with its own style rules (pace, camera, type, sound), in `.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage` for music montages, `story-montage` for narrated montages with one recurring character, `creator-explainer` for talking to camera. Claude proposes one in the first interview round; you can override any rule for a single reel.
 
 ## Giving notes after a cut
 

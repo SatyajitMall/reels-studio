@@ -17,7 +17,8 @@ Usage:
   ./.venv/bin/python scripts/teardown.py --ref projects/<reel>/references/ref1.mp4 --ours projects/<reel>/renders/exports/<reel>_v3_mix.mp4 \
       -o projects/<reel>/analysis/teardown_v3
   ./.venv/bin/python scripts/teardown.py --ref a.mp4 --ref b.mp4 --ours v3.mp4 -o ...     (several references)
-Writes <out>/<name>/report.json + sheet.png per video and <out>/COMPARE.md.
+  ./.venv/bin/python scripts/teardown.py --ref ref1.mp4 -o projects/<reel>/analysis/teardown   (Phase 1: references only, targets)
+Writes <out>/<name>/report.json + sheet.png per video, and <out>/COMPARE.md (with --ours) or <out>/TEARDOWN.md (references only).
 """
 from __future__ import annotations
 
@@ -75,7 +76,7 @@ def measure(video: Path, out: Path, threshold: float, every: float) -> dict:
     tiles = max(int(dur // every), 1)
     cols = min(8, tiles)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-vf",
-                    f"fps=1/{every},scale=180:320,tile={cols}x{(tiles + cols - 1) // cols}", "-frames:v", "1", str(out / "sheet.png")])
+                    f"fps=1/{every},scale=-2:320,tile={cols}x{(tiles + cols - 1) // cols}", "-frames:v", "1", str(out / "sheet.png")])  # keeps the aspect: landscape refs too
 
     rep = {
         "video": str(video), "duration_s": round(dur, 2), "fps": round(fps, 3),
@@ -127,16 +128,28 @@ def get(rep: dict, path: tuple) -> float | None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ref", type=Path, action="append", required=True, help="a reference video (repeatable)")
-    ap.add_argument("--ours", type=Path, required=True, help="our export")
+    ap.add_argument("--ours", type=Path, help="our export (leave out in Phase 1 to measure references only)")
     ap.add_argument("-o", "--out", type=Path, required=True)
     ap.add_argument("--threshold", type=float, default=0.15)
     ap.add_argument("--every", type=float, default=1.0, help="contact-sheet tile spacing (s)")
     args = ap.parse_args()
 
     reps = []
-    for v in [*args.ref, args.ours]:
+    for v in [*args.ref, *([args.ours] if args.ours else [])]:
         print(f"▸ measuring {v.name}", flush=True)
         reps.append(measure(v, args.out / v.stem, args.threshold, args.every))
+    if not args.ours:  # Phase 1: the reference numbers become the brief's targets
+        fmt = lambda x, u: "–" if x is None else f"{x}{(' ' + u) if u else ''}"
+        md = [f"# Teardown: {len(reps)} reference(s)", "", f"Scene threshold {args.threshold}. Put these in the brief as targets; "
+              "rerun with --ours on each export to compare.", "",
+              "| Measure | " + " | ".join(f"ref: {Path(r['video']).stem}" for r in reps) + " |", "|" + "---|" * (len(reps) + 1)]
+        md += [f"| {label} | " + " | ".join(fmt(get(r, path), unit) for r in reps) + " |" for label, path, unit, _ in ROWS]
+        md += ["", "## Contact sheets (count by eye: on-screen words, captions, graphics, faces, transitions)", ""]
+        md += [f"- `{Path(r['sheet']).relative_to(args.out)}`" for r in reps]
+        (args.out / "TEARDOWN.md").write_text("\n".join(md) + "\n")
+        print("\n".join(md[4:]))
+        print(f"✓ {args.out / 'TEARDOWN.md'}")
+        return
     refs, ours = reps[:-1], reps[-1]
 
     head = "| Measure | " + " | ".join(f"ref: {Path(r['video']).stem}" for r in refs) + " | **ours** | Read |"

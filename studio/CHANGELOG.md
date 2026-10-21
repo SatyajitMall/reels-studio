@@ -1,5 +1,26 @@
 # Studio Changelog
 
+## 0.7.0 — 2026-10-21
+**Third editing playbook, `story-montage`, with its tools** (director's request, from the "Two Sides of Bangkok" teardown).
+- **`playbooks/story-montage.md`:** a narrated montage carried by one recurring character, measured from the reference (150 cuts viewed; 112 real shots once the step-prints are merged).
+  - **Section arc:** sizzle hook of 4–7-frame flashes → title over a real moment → optional B&W prologue → a long character hold → discovery at ~1.1 s → a step-print chaos beat → a breather at ~2 s → a calm section locked to one shot per bar (2.06 s ≈ 117 BPM) → split-screen theme → ending holds and a thank-you card in the local script. Scaled to a 45–60 s reel.
+  - **Devices:** photo-print inserts, B&W → colour reveal on a match cut, top/bottom split screen with native-language words.
+  - **Colour:** measured and turned into rules: sat 0.34, reds 0.82, gold mids at 37°, mint highlights, warm shadows, whites rolled off.
+  - **Status:** untested. The reference had no audio, so the sound rules are provisional.
+  - Chosen in Phase 0 for `hybrid` reels with a VO and one recurring character.
+- **`scripts/step_print.py`:** the step-printed stutter as a render. Long-shutter smear (`tmix`), 12 images/s, re-timed to the reel's fps so each image holds 2–3 frames, ProRes 422 HQ with BT.709 tags. It measures the holds it produced. Tested on 4K C186 at 25 and 30 fps: holds 2–3 frames, 12.0 images/s, 2.7 s to render 2 s.
+- **`scripts/photo_prints.py`:** photo-print inserts.
+  - Graded stills or `clip@t` on a fine-grained off-white paper with a soft shadow, cropped to 3:4 / 3:2 print shapes.
+  - Per-print durations for beat sync; optional settle, tilt, border and a white shutter flash.
+  - ProRes with BT.709 tags, plus a sheet and timings.
+  - Tested on mixed portrait and landscape footage: 5 prints rendered in 5.5 s.
+- **`muted_red` look** in `look_preview.py`: 500T print at 35 %, then a hue-only "leave red" pass modelled on Premiere's Leave Color (Using Hue), plus mint highlights and warm shadows.
+  - On 4 of our stills: sat 0.54 → 0.36 with reds kept.
+  - `--red-tolerance 25` keeps saffron (0.47).
+  - Added to the film table with its Premiere build, which is unverified by script.
+- **`teardown.py` fix:** `--ours` is now optional, so Phase 1 can measure references alone (writes `TEARDOWN.md`). Before this, the skill's Phase 1 command failed. Contact sheets now keep the video's aspect (landscape references were squashed).
+- Wired into the effects menu (§A3 film table, §C Time, §E Type), the playbook index, Phase 0, `CLAUDE.md` §5 and the README.
+
 ## 0.6.2 — 2026-10-21
 **Film-stock look table with tested previews and Premiere settings** (director's request, after the external "color-grading-film-emulation" skill turned out to be prompt words only).
 - **Premiere's own film emulations are now mapped** (effects-playbook §A3, film table): 12 looks with their exact `applyLumetriPreset` name, intensity, measured character, the Lumetri adjustments for the V3 layer, and what each suits.

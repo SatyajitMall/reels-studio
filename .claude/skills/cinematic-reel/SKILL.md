@@ -51,7 +51,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 
 **Round 1: the idea (ask before looking at footage)**
 1. What's this reel about, in a sentence or two? What happens in the clips? Is anyone speaking (on camera or VO)? → sets **reel type**: `talking-head` · `music-montage` · `hybrid`. Record it in `project.md`.
-   Then propose the **playbook** from `playbooks/README.md` (`music-montage` → `cinematic-montage`; `talking-head` → `creator-explainer`; `hybrid` → both, by stretch). If nothing fits, use the closest one and file a CR for a new playbook.
+   Then propose the **playbook** from `playbooks/README.md` (`music-montage` → `cinematic-montage`; `talking-head` → `creator-explainer`; `hybrid` with a voiceover and one recurring character → `story-montage`; other `hybrid` → both, by stretch). If nothing fits, use the closest one and file a CR for a new playbook.
 2. What should viewers feel or do at the end? (laugh · learn · be inspired · follow · save · click link)
 3. Who's it for?
 4. Length? (15–20 s · 30–45 s · 60 s · whatever the story needs)

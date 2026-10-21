@@ -59,7 +59,32 @@ LOOKS: dict[str, tuple[str, str, str | None, float, str, str]] = {
     # Bleach bypass: a greyscale copy laid over the colour (Premiere: SL BLEACH NDR, not readable by ffmpeg)
     "bleach": ("Bleach bypass ≈ (SL BLEACH NDR)", "approx", None, 1.0,
                "split[c][m];[m]hue=s=0[m2];[c][m2]blend=all_mode=overlay:all_opacity=0.6,hue=s=0.75", "SL BLEACH NDR"),
+    # Muted except red ("Two Sides of Bangkok", story-montage playbook): 500T print at 35 %, then every hue more than
+    # --red-tolerance degrees from true red loses 55 % of its colour (Premiere: Leave Color, Match colors = Using Hue),
+    # mint highlights, warm shadows. Python pass, not ffmpeg: a hue-only match isn't an ffmpeg filter.
+    "muted_red": ("Muted except red ≈ (Leave Color + 500T)", "approx", "Kodak 5218 Kodak 2383 (by Adobe)", 0.35, "py:leave_red",
+                  "Kodak 5218 Kodak 2383 (by Adobe) 35 % + Leave Color (red, Using Hue)"),
 }
+
+
+def _smooth(e0: float, e1: float, x: np.ndarray) -> np.ndarray:
+    t = np.clip((x - e0) / (e1 - e0), 0, 1)
+    return t * t * (3 - 2 * t)
+
+
+def leave_red(a: np.ndarray, tolerance: float = 12.0, amount: float = 0.55, softness: float = 10.0) -> np.ndarray:
+    """Hue-only 'leave colour': hues within `tolerance`° of red keep their colour, the rest lose `amount` of it.
+    Then mint highlights and warm shadows (measured on the reference: highlights G−M +0.07, shadows R−B +0.06)."""
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    mx, mn = a.max(2), a.min(2)
+    s = np.where(mx > 1e-3, (mx - mn) / np.maximum(mx, 1e-3), 0)
+    hue = np.degrees(np.arctan2(np.sqrt(3) * (g - b), 2 * r - g - b)) % 360   # 0° = red
+    keep = (1 - _smooth(tolerance, tolerance + softness, np.minimum(hue, 360 - hue))) * _smooth(0.2, 0.4, s)
+    y = (0.2126 * r + 0.7152 * g + 0.0722 * b)[..., None]
+    out = y + (a - y) * (1 - amount * (1 - keep))[..., None]
+    out += np.array([-0.04, 0.06, 0.01]) * _smooth(0.55, 0.9, y[..., 0])[..., None]        # mint highlights
+    out += np.array([0.03, 0.0, -0.02]) * (1 - _smooth(0.05, 0.3, y[..., 0]))[..., None]   # warm shadows
+    return np.clip(out, 0, 1)
 
 
 def creative_lut_dir() -> Path:
@@ -83,7 +108,7 @@ def chain(look: str, lut_dir: Path, k: float, width: int) -> str:
         f = str(lut_dir / f"{lut}.cube").replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
         parts.append(f"split[o][l];[l]lut3d=file='{f}':interp=tetrahedral[g];"
                      f"[o][g]blend=all_expr='A*{1 - k:.3f}+B*{k:.3f}'")
-    if extra:
+    if extra and not extra.startswith("py:"):
         parts.append(extra.format(sig=max(4, width / 36)))  # 30 px at 1080 wide
     return ",".join(parts)
 
@@ -96,6 +121,8 @@ def main() -> None:
     ap.add_argument("--intensity", type=float, help="override every look's intensity (0–1)")
     ap.add_argument("--width", type=int, default=540, help="processing width in px (height follows the still)")
     ap.add_argument("--tile", type=int, default=270, help="tile width on the sheet (raise it to judge detail such as halation)")
+    ap.add_argument("--red-tolerance", type=float, default=12.0,
+                    help="muted_red: degrees of hue kept around red (12 = true reds only; ~25 also keeps saffron)")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
     if a.list:
@@ -126,6 +153,9 @@ def main() -> None:
                                    capture_output=True, text=True)
                 if p.returncode:
                     sys.exit(f"{look} failed on {name}: {p.stderr.strip()[:300]}")
+                if LOOKS[look][4] == "py:leave_red":
+                    arr = np.asarray(Image.open(out).convert("RGB"), dtype=np.float32) / 255.0
+                    Image.fromarray((leave_red(arr, a.red_tolerance) * 255 + 0.5).astype(np.uint8)).save(out)
                 tiles.append((LOOKS[look][0], f"{k:.0%}" if LOOKS[look][2] else "", out))
             report[name] = {}
             imgs = []

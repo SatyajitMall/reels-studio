@@ -79,6 +79,7 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 | `mono_eterna` ≈ | `Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 100 % | Softer, brighter B&W | Contrast +15 | Gentle B&W memories |
 | `cinestill` ≈ | `Kodak 5218 Kodak 2383 (by Adobe)` + **halation bake** | 50 % | 500T plus a soft red bloom around point lights. Visible on bulbs against dark; **subtle on scenes that are already warm**. Clip stays ≤ 2 % after the look | As `k500t_2383`. Halation is baked per shot **before** Premiere (below) | Neon and bulb-lit night, concerts |
 | `bleach` ≈ | `SL BLEACH NDR` | 40–60 % | Contrast +0.094, sat −0.113, cooler −0.066, crush 8.6 % | Shadows +5 to keep detail; no skin warmth to rely on | Gritty, intense moments. Not for idols or faces that need warmth |
+| `muted_red` ≈ | `Kodak 5218 Kodak 2383 (by Adobe)` + **Leave Color** effect | 35 % | Sat 0.54 → 0.36 with reds kept (tolerance 12°); highlights toward neutral and mint. At `--red-tolerance 25` saffron stays too (sat 0.47) | Leave Color: red sampled from the footage, Using Hue, Amount to Decolor ≈ 55 %. Creative Highlight Tint mint, Shadow Tint warm. **Unverified by script**: render and compare with the preview | **story-montage**: muted calm where reds glow ("Two Sides of Bangkok"). Mutes gold too, so choose the tolerance per reel |
 
 **Premiere build** (V3 adjustment layer; reality doc for the occurrence method):
 1. Select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it.
@@ -148,6 +149,7 @@ Don't grade the reel or its export there.
 | **Freeze + text** | `freeze_frame` on the beat, then a title / HyperFrames card on top | "this is me 2 years ago" moments |
 | **Rewind** | `reverse_clip` 0.3–0.6 s + rewind SFX | callbacks, "wait, go back" |
 | **Stutter** | razor 3–4 identical 2-frame slices back-to-back | beat drops |
+| **Step-print** | `scripts/step_print.py <clip> -o renders/fx/<shot>_step.mov --start S --dur D --fps <seq>`: 12 images/s, each held 2–3 frames, long-shutter smear (`--blur 3`). The render replaces the shot. Premiere's Posterize Time (12) does the hold without the smear | Chaos peaks on fast handheld moves or traffic passing close; barely reads on slow shots. 1–2 s, at most twice a reel (story-montage) |
 
 ## D. Transitions (between shots)
 
@@ -166,6 +168,8 @@ Default is a **hard cut**. Transitions are seasoning: at most 3–4 non-cut tran
 ## E. Type, graphics, captions (V5 + V2)
 
 - **Music-montage words:** title + end card by default. Beat words only when the director supplies words that mean something (the pilot's "DUM · DUM · DURGA" read as meaningless and were cut).
+- **Photo-print inserts** (story-montage): the character takes a picture, then the pictures appear as prints on paper. `scripts/photo_prints.py <graded stills or clip@t…> -o renders/fx/prints.mov --durations <beats> [--settle --flash --border 14 --tilt 1.5]` (3:4 / 3:2 print shapes). Place it on V4 in Normal mode, above the look. Shutter SFX on the first frame.
+- **Split screen and native-language words** (story-montage): in 9:16, split top/bottom (Crop Top 25 % + Bottom 25 %, Position Y ±480). Put the key words in the local script, placed in the picture's space (HyperFrames on V5).
 - Captions: phrase-aware, 2–4 words, safe zone (clear of top 220 px, bottom 320 px, right 120 px). Styles: *Clean* (white, subtle shadow), *Bold Kinetic* (key word highlighted in brand colour, pop-in), *Editorial* (serif, lower-third). Use `/embedded-captions` for animated styles, `create_caption_track` for clean ones.
 - HyperFrames cards (`/motion-graphics`): stat callouts, lists, step numbers, maps, quotes. Render 1080×1920 alpha `.mov` → `renders/overlays/`.
 - **Word cards (default for 1–2-word kinetic type):** `scripts/render_type_cards.py` renders 1080×1920 transparent PNGs. It handles the font, glow and shadow, and fails if the text leaves the safe zone. Place them on V5 with a 3-frame scale pop (Motion keyframes). Use HyperFrames for anything animated beyond a pop.

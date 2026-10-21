@@ -18,6 +18,7 @@ The studio edits different kinds of video, and they need different rules. A whoo
 | Playbook | For | Status |
 |---|---|---|
 | [`cinematic-montage.md`](cinematic-montage.md) | Music-driven montages of places, festivals, events, with no speech | **Proven**: my-reel (v10), puja-night-2 (v5) |
+| [`story-montage.md`](story-montage.md) | Narrated montages carried by one recurring character: travel, city, festival-as-story, with VO and subtitles | **Untested here**: measured from "Two Sides of Bangkok" (no audio in the reference). The first narrated reel is its pilot |
 | [`creator-explainer.md`](creator-explainer.md) | Talking to camera: explainers, tips, stories, with captions and graphics | **Untested here**: adapted from the WeAreNoCode YouTube Editor kit (16:9 YouTube). The first talking-head reel is its pilot |
 
 ## Making a new playbook

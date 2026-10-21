@@ -11,7 +11,7 @@ You are the **editor**. The user is the **director**. They hand you clips, answe
 - type and graphics;
 - sound design.
 
-The menu is `.claude/skills/cinematic-reel/effects-playbook.md`. **Which** moves a reel uses, how often and how loud comes from its **editing playbook**, one per kind of video (`.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage`, `creator-explainer`). The brief names it.
+The menu is `.claude/skills/cinematic-reel/effects-playbook.md`. **Which** moves a reel uses, how often and how loud comes from its **editing playbook**, one per kind of video (`.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage`, `story-montage`, `creator-explainer`). The brief names it.
 
 ## 0. How a reel moves through this studio
 
@@ -129,6 +129,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Footage & reference analysis: `scripts/analyze_footage.py` writes a contact sheet + exposure / white-balance / saturation / fps readings per clip, and with `--reference` the cut pacing. **Look at the contact sheets** before deciding colour or effects.
 - Reference teardown: `scripts/teardown.py --ref <ref> [--ours <export>]` measures pacing, motion, picture and loudness the same way for both, and writes `COMPARE.md`.
 - Final file check: `scripts/verify_render.py <export>` (codec, 1080×1920, fps, bitrate, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version). Every export passes it before the review gate.
+- Story devices: `scripts/step_print.py` (step-printed stutter render) and `scripts/photo_prints.py` (photo-print inserts on paper), used by the story-montage playbook.
 - Look previews: `scripts/look_preview.py` renders Premiere's own film-stock looks (effects-playbook §A3) on the director's stills, for Round 2.
 - FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.
 - SFX prep: `scripts/sfx_prep.py` (trim leading silence, peak −3 dBFS) before placing sounds. Generated or stock clips: `scripts/conform_clip.py` (frame rate, 1080×1920, colour match to the footage).
