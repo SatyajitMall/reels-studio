@@ -57,6 +57,10 @@ The full menu of looks, moves and transitions is in `.claude/skills/cinematic-re
 
 Each kind of video has an **editing playbook** with its own style rules (pace, camera, type, sound), in `.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage` for music montages, `story-montage` for narrated montages with one recurring character, `creator-explainer` for talking to camera. Claude proposes one in the first interview round; you can override any rule for a single reel.
 
+## Before you shoot
+
+The one-page camera guide is `studio/shooting-guide-blackmagic-cam.md`. It covers 25 fps at 1/50 s under Indian lamps, white balance set to the light, and a LUT for the monitor only (or its name in the slate notes). It comes from what the Pujo 2026 footage measured.
+
 ## Giving notes after a cut
 
 Specific notes work best:

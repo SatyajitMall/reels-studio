@@ -126,6 +126,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 
 ## 5. Local tooling
 
+- Ingest check (Phase 1, first): `scripts/ingest_report.py <raw> -o <analysis> --scan` reads what the camera recorded (codec, bit depth, fps and VFR, Blackmagic Cam white balance / shutter / ISO / lens), rates and measures mains flicker, finds dropped-frame jumps, and groups clips by shoot night and white balance. The director's camera settings are in `studio/shooting-guide-blackmagic-cam.md`.
 - Footage & reference analysis: `scripts/analyze_footage.py` writes a contact sheet + exposure / white-balance / saturation / fps readings per clip, and with `--reference` the cut pacing. **Look at the contact sheets** before deciding colour or effects.
 - Reference teardown: `scripts/teardown.py --ref <ref> [--ours <export>]` measures pacing, motion, picture and loudness the same way for both, and writes `COMPARE.md`.
 - Final file check: `scripts/verify_render.py <export>` (codec, 1080×1920, fps, bitrate, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version). Every export passes it before the review gate.

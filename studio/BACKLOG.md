@@ -52,6 +52,11 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - **story-montage (v0.7.0) needs its pilot.** Pujo ki Asolei Sobar is the closest reel.
   - Unverified in Premiere: setting Leave Color (Using Hue) and the Lumetri Highlight / Shadow Tint wheels by script, Posterize Time, and the Lumetri saturation keyframes for the B&W → colour reveal.
   - Ask the director for the reference **with audio** to replace the provisional sound rules.
+- **Footage (from v0.7.1):**
+  - promote Pujo's `deflicker.py` to `scripts/`, with display-domain estimation by default (CR mains-flicker);
+  - `frame_scan.py` export checks: `flicker` (≤ 1.5 % per tile), `jump`, `ghost`, `translation` (CR vfr-jump-qa);
+  - **test an Apple Log / 10-bit HEVC clip** through Premiere before the first log shoot (the conversion LUT can't be applied by script: `apply_lut` is broken);
+  - `teardown.py` misses dissolves (scene threshold), so cuts are undercounted on reels that use them (seen on Uski Aankhein).
 - After Effects `glow` op: add Glow Colors (A & B, red/orange), so CineStill halation can be done in AE instead of the ffmpeg bake.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 

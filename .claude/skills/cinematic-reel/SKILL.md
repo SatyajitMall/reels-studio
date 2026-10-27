@@ -78,6 +78,18 @@ Offer choices that fit *this* footage, for example:
    ```
    scripts/link_footage.sh <name> "<source folder>" [a-roll|b-roll]
    ```
+   **Ingest check first** (what the camera recorded, and what it means for the edit):
+   ```
+   .venv/bin/python scripts/ingest_report.py projects/<name>/raw -o projects/<name>/analysis --scan
+   ```
+   Read `analysis/ingest.md` and act on it:
+   - **sequence fps:** the most common rate; conform the others in step 6;
+   - **`FLICKER n%`:** deflicker those clips before colour, or pick other clips. Until HQ promotes a deflicker tool, use the workaround in CR mains-flicker;
+   - **`jumps` / VFR gaps:** keep placed windows clear of the listed times;
+   - **8-bit:** grade gently;
+   - **colour casts and match groups:** these become Phase 4's starting corrections;
+   - **LUT:** the camera doesn't record a burned-in LUT. If no slate note says so and a clip already looks graded on its stills, ask the director in Round 2.
+
    Then run the analysers (no API key needed):
    ```
    .venv/bin/python scripts/analyze_footage.py projects/<name>/raw/a-roll projects/<name>/raw/b-roll -o projects/<name>/analysis

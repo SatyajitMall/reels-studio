@@ -1,5 +1,31 @@
 # Studio Changelog
 
+## 0.7.1 — 2026-10-27
+**Ingest check and the camera shooting guide** (director's request: "how are you getting these raw videos").
+- **What the footage really is**, from all 329 clips:
+  - Blackmagic Cam 3.5 on an iPhone 17, not a Blackmagic camera body: HEVC Main **8-bit** Rec.709, about 56 Mb/s, no log;
+  - mixed 25 / 30 / 24 / 23.976 fps, 10 variable-rate clips;
+  - **144 clips at high mains-flicker risk** (30 fps at 1/60 s);
+  - 93 of 123 clips at 5600 K show an orange cast under warm lamps;
+  - **a burned-in LUT is not recorded anywhere in the file.**
+- **`scripts/ingest_report.py`** (Phase 1, first step):
+  - reads codec, bit depth, colour tags, rotation, bitrate, nominal vs average fps, and the app's white balance, shutter, ISO, lens and slate note;
+  - takes 3 stills per clip for black and white points, saturation and casts;
+  - rates flicker from shutter × fps × `--mains`.
+  - With `--scan` it decodes every frame to measure flicker (lock-in on the alias cycle, whole frame and 6 bands), dropped-frame gaps and isolated picture jumps.
+  - It groups clips by **shoot night** (from the recording time, after-midnight clips joined to the evening before) and white balance, as Phase 4's match groups.
+  - It writes `analysis/ingest.md` and `ingest.json`.
+  - Verified against what Pujo ki Asolei Sobar found by hand: C004's jump at 12.53 s (15 dropped frames), C028's flicker (3.9 % / 6.1 %), C043 safe. A full card of 329 clips takes 2 min; a reel's 54 clips with `--scan` take 2¼ min.
+- **`studio/shooting-guide-blackmagic-cam.md`:** one page covering:
+  - 25 fps at 1/50 s (50 fps at 1/100 s for slow motion);
+  - white balance set to the light (3200 K in pandals);
+  - 10-bit or Apple Log if the app offers it, with Apple Log untested in the edit;
+  - ISO low, highlights protected;
+  - LUT for the monitor only, or its name in the slate notes;
+  - 5–10 s holds and ambience.
+- The director profile gets a Camera section. README links the guide. `CLAUDE.md` §5 and skill Phase 1 run the ingest check.
+- **CRs:** `mains-flicker` and `vfr-jump-qa` are **partly done**: detection and measurement on the raw clips. Deflicker promotion and the `frame_scan.py` export checks stay in the backlog.
+
 ## 0.7.0 — 2026-10-21
 **Third editing playbook, `story-montage`, with its tools** (director's request, from the "Two Sides of Bangkok" teardown).
 - **`playbooks/story-montage.md`:** a narrated montage carried by one recurring character, measured from the reference (150 cuts viewed; 112 real shots once the step-prints are merged).
