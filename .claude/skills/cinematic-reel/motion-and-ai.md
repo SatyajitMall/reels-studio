@@ -94,7 +94,7 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 - **Never two in a row**, and at most about one a minute. Cut AI shots between real footage.
 - **The exact scene the moment needs**, 2–5 s on screen. Use the best stretch, not the whole clip.
 - **Check the draft against its source still** before asking for the final (Veo drops small details: see above). Look at every frame of the draft's contact sheet, not just the first.
-- **Label it.** It's "AI-generated" in the brief and in `project.md`. At posting, turn on Instagram's **AI info** label (Phase 8): Veo clips carry Google's SynthID watermark, so Instagram may detect them anyway.
+- **Label it.** It's "AI-generated" in the brief and in `project.md`. At posting, **turn on Instagram's AI info label**: Veo clips carry Google's SynthID watermark, so Instagram may detect them anyway. A reel that AI only *edited*, from real footage, gets the caption's AI-credit line and **no** label (`instagram-strategy.md`).
 
 **Conform before it goes in Premiere** (`scripts/conform_clip.py`; local, free):
 ```

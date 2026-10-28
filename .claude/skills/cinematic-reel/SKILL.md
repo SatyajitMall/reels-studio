@@ -214,12 +214,16 @@ Never skip it because your own metrics passed: in the pilot, every shipped defec
 Send the export path, runtime and a 3-line "what I did" summary. Ask the director to **watch it full-screen on a phone with sound**, then ask one question before accepting approval: "What would make it more cinematic?" (In the pilot, v1 was approved and then reopened five times.) On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes.
 
 ## Phase 8: Instagram package (after final approval)
-Using `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist` and `ig-humanizer`, write to `project.md`:
+Read `instagram-strategy.md` (same folder) first: where it disagrees with the `ig-*` pack, it wins. Using `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist` and `ig-humanizer`, write to `project.md` (and the caption to `deliver/caption.txt`):
 - 3 first-line hooks (< 125 characters);
-- the caption (hook in the first 125 characters, humanised);
-- 3–5 sized hashtags;
-- the cover frame timecode;
-- if the reel has an AI-generated shot: a note to turn on Instagram's **AI info** label when posting (`motion-and-ai.md` §3).
+- the caption: hook in the first 125 characters, the subject named in plain search words, one concrete "send this to…" call to action, credits (voiceover, music, people who asked), humanised;
+- **at most 5 hashtags, all on the reel's real subject**: no tool or brand tags;
+- **the AI credit line**, since AI edited every studio reel: one detailed line on what AI did, with the footage and direction the director's. Use the verified handles in `instagram-strategy.md` (@claudeai, @adobevideo; never @premierepro);
+- **the AI info label:** **on** only if the reel contains an AI-generated shot (`motion-and-ai.md` §3); **off** for AI-edited real footage;
+- alt text, location, and the cover frame timecode;
+- no collab invite and no Story share (director profile).
+
+**Posting** happens only when the director asks for that post. Follow `ig-posting-reality.md` (iPhone Mirroring), and stop before Share: the director taps it.
 
 ### ⏸ Checkpoint 3: approve the package.
 

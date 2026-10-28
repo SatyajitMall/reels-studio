@@ -1,5 +1,25 @@
 # Studio Changelog
 
+## 0.7.2 — 2026-10-28
+**Instagram strategy and posting rules** (CR-20261027-pujo-ki-asolei-sobar-ig-strategy-posting, applied with the director's go-ahead).
+- **`cinematic-reel/instagram-strategy.md`** (studio-owned; it overrides the third-party `ig-*` pack where they disagree):
+  - at most 5 hashtags, all on topic, no tool or brand tags;
+  - keywords in the caption text, plus alt text and location;
+  - the ranking signals (watch time, likes per reach, sends per reach) and one "send this to…" call to action;
+  - the 2026 originality rule;
+  - the **AI-credit line** with verified handles (@claudeai, @adobevideo; @premierepro is not Adobe);
+  - **AI info label:** on only when the reel contains an AI-generated shot; off for AI-edited real footage.
+
+  The research figures come from the reel session's sources and are marked for a yearly re-check.
+- **`cinematic-reel/ig-posting-reality.md`:** what works when posting through iPhone Mirroring:
+  - key-press typing (no `?`, `_`, emoji or paste);
+  - slow-drag scrolling and lagging sliders;
+  - phone locked, full-screen approval;
+  - firm rules: only on the director's ask; the director taps Share; reuse consent and Photos access are the director's; touch nothing else in the account.
+- **Skill Phase 8** is rewritten to match. `motion-and-ai.md` §3 states both label cases.
+- **Director profile:** a new Instagram section (AI credit line, no collab invites, no Story share, topical hashtags, posting via the app).
+- **Backlog:** a "made with AI" behind-the-scenes playbook; a Graph API posting path once the director's account is set up.
+
 ## 0.7.1 — 2026-10-27
 **Ingest check and the camera shooting guide** (director's request: "how are you getting these raw videos").
 - **What the footage really is**, from all 329 clips:

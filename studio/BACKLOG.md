@@ -57,6 +57,10 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
   - `frame_scan.py` export checks: `flicker` (≤ 1.5 % per tile), `jump`, `ghost`, `translation` (CR vfr-jump-qa);
   - **test an Apple Log / 10-bit HEVC clip** through Premiere before the first log shoot (the conversion LUT can't be applied by script: `apply_lut` is broken);
   - `teardown.py` misses dissolves (scene threshold), so cuts are undercounted on reels that use them (seen on Uski Aankhein).
+- **Instagram (from v0.7.2):**
+  - a "made with AI" behind-the-scenes reel playbook, for the tool and brand story (kept off topical posts);
+  - a Graph API posting path (the pack's Publora flow or the `instagram:configure` plugin) for reels with their own licensed audio, once the director sets up the account;
+  - re-check the strategy figures in `instagram-strategy.md` yearly.
 - After Effects `glow` op: add Glow Colors (A & B, red/orange), so CineStill halation can be done in AE instead of the ffmpeg bake.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 
