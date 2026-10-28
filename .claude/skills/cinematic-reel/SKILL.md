@@ -60,7 +60,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 
 **Round 2: taste (ask after analysing footage and references, so the options are concrete)**
 Offer choices that fit *this* footage, for example:
-- Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** run `scripts/look_preview.py` on 3–4 of the director's own stills (night, a face, a wide). It renders Premiere's own film-stock looks (effects-playbook §A3 film table) as one labelled sheet, with measurements. Offer 3–4 looks that fit the footage, not all 12. These are previews only; the real look is built in Premiere in Phase 4, from the same LUT
+- Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** run `scripts/look_preview.py` on 3–4 of the director's own stills (night, a face, a wide). It renders Premiere's own film-stock looks (effects-playbook §A3 film table) as one labelled sheet, with measurements. Offer 3–4 looks that fit the footage, not all 12. These are previews only; the real look is built in Premiere in Phase 4, from the same LUT. Most film looks (all the Kodak ones, `muted_red`) are **dropdown only**: tell the director they're one manual pick in Phase 4, and that `muted_red`'s Hue vs Sat curve is a second UI step.
 - Pace: calm (3–5 s shots) · medium (2–3 s) · fast (1–2 s), pre-selecting what the reference measured
 - Effects intensity: subtle · signature moments only · heavy / stylised
 - Captions / words: none · Clean · Bold Kinetic · Editorial. For music-montage, default to **title + end card only**. Use beat words only when the director supplies words that mean something; never invent filler words.
@@ -148,7 +148,7 @@ Give the director a short summary in chat: the concept, hook, look, 4–6 signat
 ## Phase 4: Colour (playbook §A, strictly in order)
 1. **A1 primary correction**: one `color_correct` per clip with contrast, temperature and tint only, then set exposure, highlights, shadows and saturation by script (playbook §A1, reality doc). Copy to same-setup clips with `copy_effects_between_clips`. Check the first clip by exported still before copying.
 2. **A2 shot match**: compare adjacent shots and fine-tune with `set_effect_property`.
-3. **A3 creative look**: ask the director for the one manual step (create an Adjustment Layer), place it on V3, apply the look's built-in Lumetri preset and set its intensity (playbook §A3).
+3. **A3 creative look**: ask the director for the manual step (create an Adjustment Layer; for a **dropdown** look, also pick it in Lumetri → Creative → Look on V3), place it on V3, apply a **preset** look with `applyLumetriPreset`, then set intensity and the table's adjustments by script (playbook §A3). `muted_red` adds the Hue vs Sat curve, a UI step.
 4. **A4 texture**: grain / leaks on V4, with the blend mode set by script (enum in the reality doc) + `set_clip_opacity`. Fade V4 with the picture at every fade to black.
 5. Export 3–4 still frames (or a short preview) and check skin tones and contrast with your own eyes. `save_project`.
 6. **Colour QA on every frame** before review: `scripts/colour_report.py <export> -o analysis/colour_v<N>.json --shots <shots.json> [--gold]`.

@@ -1,5 +1,25 @@
 # Studio Changelog
 
+## 0.7.3 — 2026-10-29
+**Film looks: preset or dropdown, and `muted_red` without Leave Color** (CR-20261028-we-never-treated-her-like-a-goddess-pilot-notes, items 8, 12, 14, 16; director's request).
+- **Each look now names its route in Premiere.** Premiere 26.5's own preset file (`Lumetri Presets.prfpset`), confirmed live on the goddess reel:
+  - **preset**, applied by script with `applyLumetriPreset`: only the five Fuji-negative film looks (F125 → 2393 / 2395, Eterna 250D → 3510 / 2395, Reala 500D → 2393), with their preset spelling ("Fuji Eterna 250D …", not the LUT file's "ETERNA");
+  - **dropdown**, picked in Lumetri → Creative → Look by the director (or by computer use with their OK): the Kodak 5218 / 5205 looks, the Monochrome film looks and `SL BLEACH NDR`. The v0.6.2 table called all of them scriptable, which was wrong.
+  - **Never write the Lumetri `Look` slot by script.** It's a dropdown index: later writes change the number, not the look.
+- **`muted_red` rebuilt for Premiere 2026, which has no Leave Color effect:**
+  - the V3 Lumetri's **Hue vs Sat** curve keeps ±T° of red, ramps over about 20°, and sets all other hues to 46 %. It's a UI step: the curve and the tint wheels can't be set by script;
+  - **verified by render** on the goddess reel against the preview;
+  - **tolerance 45 for gold idols:** at 12–25, gold turns silver-grey.
+- **Intensity:** the CLAUDE.md V3 row now defers to each look's §A3 value (usually 40–80 %; `muted_red` 35 %, mono 100 %) instead of a flat 40–80 %.
+- **Files:**
+  - `effects-playbook.md` §A3: look bullet, presets table, film table, build steps, and a new Hue vs Sat recipe;
+  - `story-montage.md` Colour;
+  - `premiere-mcp-reality.md` (`apply_lut` row, the adjustment-layer step);
+  - SKILL Round 2 and Phase 4;
+  - `CLAUDE.md` §2.5 and the §3 V3 row;
+  - `scripts/look_preview.py`: each look marked `preset:` or `dropdown:`, muted_red's label and the `--red-tolerance` help.
+- **Still open in that CR:** Pillow can't shape Bangla, the transcription fallback, link_footage's reference-folder skip, clip keys, the cross-project active sequence, the export bridge, safe zones on the storyboard, and colour_report's hue sample.
+
 ## 0.7.2 — 2026-10-28
 **Instagram strategy and posting rules** (CR-20261027-pujo-ki-asolei-sobar-ig-strategy-posting, applied with the director's go-ahead).
 - **`cinematic-reel/instagram-strategy.md`** (studio-owned; it overrides the third-party `ig-*` pack where they disagree):

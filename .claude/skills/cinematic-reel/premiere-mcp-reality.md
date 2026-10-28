@@ -33,7 +33,7 @@ f.open("w"); f.write(JSON.stringify(result)); f.close();
 | `color_correct` | ⚠️ writes only Contrast, Temperature, Tint. Brightness/Highlights/Shadows are ignored. `saturation` lands as 0 **and** zeroes Creative Saturation, so the clip turns **black & white** | Lumetri recipe (below). Never pass `saturation` |
 | `set_effect_property` | ⚠️ sets only the **first** property with that name. Lumetri has 3 × "Saturation", 2 × "Intensity", 2 × "Contrast" | Set by occurrence in ExtendScript |
 | `add_adjustment_layer` | ❌ makes a transparent PNG, not an adjustment layer. No scripting API for adjustment layers exists | Director makes one by hand (below) |
-| `apply_lut` | ❌ reports success, loads nothing (custom `.cube` can't be loaded by script) | `app.project.applyLumetriPreset("<built-in name>")` on the selected clip (325 built-ins: `getAllLumetriPresetsList()`) |
+| `apply_lut` | ❌ reports success, loads nothing (custom `.cube` can't be loaded by script) | A look with a built-in preset: `app.project.applyLumetriPreset("<preset name>")` on the selected clip (325 built-ins: `getAllLumetriPresetsList()`). Any other look: the director picks it in Creative → Look. **Never write the Lumetri `Look` slot**: it's a dropdown index, and later writes change the number, not the look (effects-playbook §A3) |
 | `set_blend_mode` | ❌ `Illegal Parameter type` | Set `Opacity.properties[1]` with the enum below |
 | `add_transition`, `add_transition_to_clip` | ❌ lands one cut off, returns `accepted_unverified` | QE snippet (below) |
 | Opacity keyframes on a clip interpreted to another fps | ❌ didn't render (Motion keyframes did) | Dip to Black transition for fades |
@@ -113,4 +113,8 @@ ffmpeg -i renders/exports/<file>.mp4 -af volumedetect -vn -f null - 2>&1 | grep 
 1. In Premiere's Project panel: File → New → Adjustment Layer → OK (it uses the sequence settings).
 2. Come back and say "done".
 
-Then place it on V3 across the reel with `add_to_timeline`, and apply the look with `applyLumetriPreset` on it.
+Then place it on V3 across the reel with `add_to_timeline`, and load the look by its route in the film table (effects-playbook §A3):
+- a **preset** look by `applyLumetriPreset`;
+- a **dropdown** look: the director picks it, in the same message as the adjustment layer when possible ("then on V3: Lumetri → Creative → Look → <name>").
+
+Premiere 2026 has **no Leave Color** effect, and the Lumetri Hue vs Sat curve and tint wheels can't be set by script. Both are UI steps.

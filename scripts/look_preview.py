@@ -36,34 +36,36 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from colour_report import KEYS, stats  # noqa: E402  (same measurements as the colour QA)
 
 # id: (label, kind, preview .cube in Premiere's Creative folder or None, default intensity,
-#      extra ffmpeg chain after the LUT, Premiere look name for applyLumetriPreset / Creative → Look)
+#      extra ffmpeg chain after the LUT, how to build it in Premiere). "preset:" = a built-in Lumetri preset
+#      (applyLumetriPreset, by script); "dropdown:" = only in Lumetri Creative → Look, picked by hand
+#      (no preset exists: Premiere 26.5 Lumetri Presets.prfpset lists only the Fuji film looks).
 LOOKS: dict[str, tuple[str, str, str | None, float, str, str]] = {
-    "k500t_2383": ("Kodak 500T → 2383", "exact", "Kodak 5218 Kodak 2383 (by Adobe)", 0.5, "", "Kodak 5218 Kodak 2383 (by Adobe)"),
-    "k500t_2395": ("Kodak 500T → 2395", "exact", "Kodak 5218 Kodak 2395 (by Adobe)", 0.5, "", "Kodak 5218 Kodak 2395 (by Adobe)"),
-    "k250d_3510": ("Kodak 250D → Fuji 3510", "exact", "Kodak 5205 Fuji 3510 (by Adobe)", 0.5, "", "Kodak 5205 Fuji 3510 (by Adobe)"),
-    "f125_2393": ("Fuji F125 → 2393 (Warm Film)", "exact", "Fuji F125 Kodak 2393 (by Adobe)", 0.5, "", "Fuji F125 Kodak 2393 (by Adobe)"),
-    "f125_2395": ("Fuji F125 → 2395", "exact", "Fuji F125 Kodak 2395 (by Adobe)", 0.5, "", "Fuji F125 Kodak 2395 (by Adobe)"),
-    "eterna_3510": ("Fuji Eterna 250D → 3510", "exact", "Fuji ETERNA 250D Fuji 3510 (by Adobe)", 0.5, "", "Fuji ETERNA 250D Fuji 3510 (by Adobe)"),
-    "eterna_2395": ("Fuji Eterna 250D → 2395", "exact", "Fuji ETERNA 250D Kodak 2395 (by Adobe)", 0.5, "", "Fuji ETERNA 250D Kodak 2395 (by Adobe)"),
-    "reala_2393": ("Fuji Reala 500D → 2393", "exact", "Fuji REALA 500D Kodak 2393 (by Adobe)", 0.5, "", "Fuji REALA 500D Kodak 2393 (by Adobe)"),
+    "k500t_2383": ("Kodak 500T → 2383", "exact", "Kodak 5218 Kodak 2383 (by Adobe)", 0.5, "", "dropdown: Kodak 5218 Kodak 2383 (by Adobe)"),
+    "k500t_2395": ("Kodak 500T → 2395", "exact", "Kodak 5218 Kodak 2395 (by Adobe)", 0.5, "", "dropdown: Kodak 5218 Kodak 2395 (by Adobe)"),
+    "k250d_3510": ("Kodak 250D → Fuji 3510", "exact", "Kodak 5205 Fuji 3510 (by Adobe)", 0.5, "", "dropdown: Kodak 5205 Fuji 3510 (by Adobe)"),
+    "f125_2393": ("Fuji F125 → 2393 (Warm Film)", "exact", "Fuji F125 Kodak 2393 (by Adobe)", 0.5, "", "preset: Fuji F125 Kodak 2393 (by Adobe)"),
+    "f125_2395": ("Fuji F125 → 2395", "exact", "Fuji F125 Kodak 2395 (by Adobe)", 0.5, "", "preset: Fuji F125 Kodak 2395 (by Adobe)"),
+    "eterna_3510": ("Fuji Eterna 250D → 3510", "exact", "Fuji ETERNA 250D Fuji 3510 (by Adobe)", 0.5, "", "preset: Fuji Eterna 250D Fuji 3510 (by Adobe)"),
+    "eterna_2395": ("Fuji Eterna 250D → 2395", "exact", "Fuji ETERNA 250D Kodak 2395 (by Adobe)", 0.5, "", "preset: Fuji Eterna 250d Kodak 2395 (by Adobe)"),
+    "reala_2393": ("Fuji Reala 500D → 2393", "exact", "Fuji REALA 500D Kodak 2393 (by Adobe)", 0.5, "", "preset: Fuji Reala 500D Kodak 2393 (by Adobe)"),
     # The Monochrome looks are SpeedGrade .look files ffmpeg can't read: preview = the colour film LUT, then grey
     "mono_500t": ("Mono Kodak 500T → 2395 ≈", "approx", "Kodak 5218 Kodak 2395 (by Adobe)", 1.0, "hue=s=0",
-                  "Monochrome Kodak 5218 Kodak 2395 (by Adobe)"),
+                  "dropdown: Monochrome Kodak 5218 Kodak 2395 (by Adobe)"),
     "mono_eterna": ("Mono Eterna 250D → 2395 ≈", "approx", "Fuji ETERNA 250D Kodak 2395 (by Adobe)", 1.0, "hue=s=0",
-                    "Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)"),
+                    "dropdown: Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)"),
     # CineStill 800T: 500T base + red-orange halation around the brightest lights (Premiere has none: AE glow op)
     "cinestill": ("CineStill 800T ≈ (500T + halation)", "approx", "Kodak 5218 Kodak 2383 (by Adobe)", 0.5,
                   "split[c][h];[h]colorlevels=rimin=0.70:gimin=0.70:bimin=0.70,gblur=sigma={sig},"
                   "colorchannelmixer=rr=1.0:rg=0.2:gr=0.12:gg=0.12:br=0:bb=0.02[g];"
-                  "[c][g]blend=all_mode=screen:all_opacity=0.8", "Kodak 5218 Kodak 2383 (by Adobe) + halation bake"),
+                  "[c][g]blend=all_mode=screen:all_opacity=0.8", "dropdown: Kodak 5218 Kodak 2383 (by Adobe) + halation bake"),
     # Bleach bypass: a greyscale copy laid over the colour (Premiere: SL BLEACH NDR, not readable by ffmpeg)
     "bleach": ("Bleach bypass ≈ (SL BLEACH NDR)", "approx", None, 1.0,
-               "split[c][m];[m]hue=s=0[m2];[c][m2]blend=all_mode=overlay:all_opacity=0.6,hue=s=0.75", "SL BLEACH NDR"),
+               "split[c][m];[m]hue=s=0[m2];[c][m2]blend=all_mode=overlay:all_opacity=0.6,hue=s=0.75", "dropdown: SL BLEACH NDR"),
     # Muted except red ("Two Sides of Bangkok", story-montage playbook): 500T print at 35 %, then every hue more than
-    # --red-tolerance degrees from true red loses 55 % of its colour (Premiere: Leave Color, Match colors = Using Hue),
-    # mint highlights, warm shadows. Python pass, not ffmpeg: a hue-only match isn't an ffmpeg filter.
-    "muted_red": ("Muted except red ≈ (Leave Color + 500T)", "approx", "Kodak 5218 Kodak 2383 (by Adobe)", 0.35, "py:leave_red",
-                  "Kodak 5218 Kodak 2383 (by Adobe) 35 % + Leave Color (red, Using Hue)"),
+    # --red-tolerance degrees from true red loses 55 % of its colour, mint highlights, warm shadows. Premiere 2026 has
+    # no Leave Color: the V3 Lumetri's Hue vs Sat curve does it (effects-playbook §A3). Python pass, not ffmpeg.
+    "muted_red": ("Muted except red ≈ (500T + Hue vs Sat)", "approx", "Kodak 5218 Kodak 2383 (by Adobe)", 0.35, "py:leave_red",
+                  "dropdown: Kodak 5218 Kodak 2383 (by Adobe) 35 % + Hue vs Sat curve (keep ±tolerance° of red, rest 46 %)"),
 }
 
 
@@ -122,7 +124,7 @@ def main() -> None:
     ap.add_argument("--width", type=int, default=540, help="processing width in px (height follows the still)")
     ap.add_argument("--tile", type=int, default=270, help="tile width on the sheet (raise it to judge detail such as halation)")
     ap.add_argument("--red-tolerance", type=float, default=12.0,
-                    help="muted_red: degrees of hue kept around red (12 = true reds only; ~25 also keeps saffron)")
+                    help="muted_red: degrees of hue kept around red (12 = true reds only; ~25 also keeps saffron; ~45 keeps gold idols)")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
     if a.list:

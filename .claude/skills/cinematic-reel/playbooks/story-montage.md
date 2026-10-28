@@ -69,10 +69,13 @@ Measured on the reference's colour footage (17–183 s), on a 0–1 scale:
 
 - **The look is `muted_red`** in `scripts/look_preview.py`: Kodak 500T → 2383 at 35 % for the roll-off, then every hue more than 12° from red loses 55 % of its colour, with mint highlights and warm shadows.
   - Tested on four of our stills: saturation 0.54 → 0.36, reds kept.
-  - **On festival footage it also mutes gold and saffron.** `--red-tolerance 25` keeps saffron (saturation 0.47). Pick the tolerance per reel, with the director, from the preview sheet.
-- **Premiere build** (V3 adjustment layer): the `Kodak 5218 Kodak 2383 (by Adobe)` look at 35 %, plus the **Leave Color** effect: Color To Leave = a red sampled from the footage, Match Colors = Using Hue, Amount to Decolor ≈ 55 %, then tolerance and edge softness tuned until the render matches the preview tile. Mint highlights / warm shadows come from Lumetri Creative → Highlight Tint / Shadow Tint.
-  - None of this is verified in Premiere yet: Leave Color and the tint wheels have never been set by script here.
-  - The first reel verifies it by render and reports by CR. If a property won't take by script, it's one manual step for the director.
+  - **On festival footage it also mutes gold and saffron:** at 12–25 a gold Durga turns silver-grey. `--red-tolerance 25` keeps saffron (saturation 0.47); **45 keeps red and gold** and still mutes blue and green (saturation 0.54 → 0.50). On footage with gold idols, start at 45. Pick the tolerance per reel, with the director, from the preview sheet.
+- **Premiere build** (V3 adjustment layer; effects-playbook §A3, verified on the goddess reel):
+  - **Look:** `Kodak 5218 Kodak 2383 (by Adobe)`, picked from Lumetri → Creative → Look. It isn't a preset, so the director picks it, or computer use does with the director's OK.
+  - **By script:** Creative Intensity 35 % and vignette −0.8.
+  - **Hue vs Sat curve** on the same Lumetri, instead of Leave Color (Premiere 2026 has none): keep ±T° of red, ramp over about 20°, all other hues 46 %. It's a UI step: the curve can't be set by script.
+  - **Mint highlights / warm shadows** (Creative tint wheels) are optional, also UI only. The goddess reel matched the preview without them.
+  - **Verify by render** against the preview tile at the same tolerance.
 - **B&W only for "before"** (the prologue).
 - Grain: light (10 %), as cinematic-montage.
 

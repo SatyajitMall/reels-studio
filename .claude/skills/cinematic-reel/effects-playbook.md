@@ -30,7 +30,13 @@ Re-run `scripts/analyze_footage.py` on a frame export, or compare contact sheets
 
 ### A3. Creative look: V3 adjustment layer only
 One adjustment layer across the reel. `add_adjustment_layer` doesn't make a real one, so the director makes it with one manual click (reality doc). Place it on V3 with `add_to_timeline`, then on that layer:
-- **look:** `app.project.applyLumetriPreset("<built-in name>")` on the selected layer clip, then set Creative Intensity to 40–80 % (it's the 2nd "Intensity", so set it by occurrence). Custom `.cube` LUTs from `assets/luts/` can't be loaded by script: offer them as a manual option for the director, or use the built-in preset;
+- **look:** use the route the film table gives for the look.
+  - **preset**: run `app.project.applyLumetriPreset("<preset name>")` on the selected layer clip.
+  - **dropdown**: the director picks the look in Lumetri → Creative → Look. That's one click, or computer use with the director's OK. Most of Adobe's film looks are only in the dropdown.
+  - **Never set the `Look` slot by script.** It's a dropdown index, not in file order. The first write loads some look, and later writes change the number but not the look (goddess CR).
+  - Custom `.cube` LUTs from `assets/luts/` load the same manual way (Look → Browse).
+
+  Then set Creative Intensity to the table's value, by script. It's the 2nd "Intensity", so set it by occurrence. Most looks sit at 40–80 %; a few are lower or higher (e.g. `muted_red` 35 %, mono 100 %);
 - look contrast / temperature: on the same Lumetri, by script
 - vignette via the Lumetri vignette properties (`set_effect_property`), amount −0.5…−1.5
 
@@ -51,12 +57,15 @@ Look presets to propose:
 | Look | Built-in preset | Status |
 |---|---|---|
 | Warm Film | `Fuji F125 Kodak 2393 (by Adobe)` | verified in `my-reel` and `puja-night-2` |
-| Mono Drama | `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` (film table below) | named, not yet applied by script |
-| Moody Desat | `SL BLEACH NDR` at 40–60 % (film table: `bleach`) | named, not yet applied by script |
+| Mono Drama | none: `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` is dropdown only (film table: `mono_500t`) | not a preset. The presets list has only generic `Monochrome …` presets (untested) |
+| Moody Desat | none: `SL BLEACH NDR` is dropdown only, at 40–60 % (film table: `bleach`) | not a preset. SpeedLooks presets are named per camera, e.g. `SL Noir Tri-X (Universal)`, and there's no Bleach family |
 | Teal & Orange, Clean Bright | not mapped yet | Pick the closest from `getAllLumetriPresetsList()`, verify by render, and file a CR with the name so HQ can add it here |
 
 #### Film-stock looks (Premiere's own film emulations)
-Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Vision 500T/250D, Fuji Eterna / F125 / Reala) printed to a print stock (Kodak 2383 / 2393 / 2395, Fuji 3510). They're in Lumetri → Creative → Look, and scriptable with `applyLumetriPreset("<name>")`.
+Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Vision 500T/250D, Fuji Eterna / F125 / Reala) printed to a print stock (Kodak 2383 / 2393 / 2395, Fuji 3510). All of them are in Lumetri → Creative → Look.
+- **Only the five Fuji-negative looks are also built-in presets**, so only they can be applied by script (`applyLumetriPreset`, route **preset**).
+- The Kodak 5218 / 5205 looks, the Monochrome film looks and the SpeedLooks are **dropdown only** (route **dropdown**).
+- Source: Premiere 26.5's `Resources/LocalizedPresets/en_US/Effect Presets/Lumetri Presets.prfpset`, confirmed live on the goddess reel. Preset names are spelled differently from the LUT files ("Fuji Eterna 250D", not "Fuji ETERNA 250D"); use the table's spelling.
 - **Preview them on the director's stills before choosing** (Round 2):
   ```
   .venv/bin/python scripts/look_preview.py raw/b-roll/<clip>.mov@<t> … -o projects/<reel>/analysis/looks [--looks id,id] [--intensity 0.4]
@@ -65,29 +74,39 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 
 **Measured character** comes from `look_preview.py` at the listed intensity on 4 real stills (2026-10-21): the Durga idol and priest (C152, night), the night temple (my-reel C027), the daylight baul (stock 4221987) and the neon arches (C186). The numbers are the mean change from the source, on a 0–1 scale; hue is in degrees, where negative means toward red.
 
-| id | Premiere look (`applyLumetriPreset`) | Intensity | Measured character | Lumetri on the V3 layer (by occurrence) | Best for |
+| id | Premiere look (route) | Intensity | Measured character | Lumetri on the V3 layer (by occurrence) | Best for |
 |---|---|---|---|---|---|
-| `k500t_2383` | `Kodak 5218 Kodak 2383 (by Adobe)` | 50 % | Gentle: contrast +0.035, sat +0.013, warmth +0.018. **Hue +1.5° toward gold**, deep blacks kept, highlights roll off (clip 1.0 → 0.5 %) | Contrast +10, Shadows −5, vignette −0.8. No tint fix needed | **Night festivals and pandals: default night look for `cinematic-montage`** |
-| `k500t_2395` | `Kodak 5218 Kodak 2395 (by Adobe)` | 50 % | **Lifts blacks** (crush 5.5 → 0 %), brighter +0.028, contrast −0.019, sat −0.038: a soft, faded print | Leave the fade for a memory feel; for depth, Blacks −10 and Contrast +10 | Calm, nostalgic and memory sections |
-| `k250d_3510` | `Kodak 5205 Fuji 3510 (by Adobe)` | 50 % | Clean and warm: contrast +0.024, sat +0.027, warmth +0.034, hue +1.6° | Contrast +5 | Daylight people and street |
-| `f125_2393` | `Fuji F125 Kodak 2393 (by Adobe)` | **40–50 %** | Darker −0.019, contrast +0.039, sat +0.051, warmth +0.048, **hue −1.0° toward red** (−2.4° on the arches), crush 7.4 % | **Verified recipe** (my-reel, puja-night-2): Contrast +15, Shadows −10, Basic Saturation 85–95, Temperature +4 and Tint −10 against the red push, vignette −0.8…−1.0. Check with `colour_report.py --gold` | Warm Film: rich warm night and day |
-| `f125_2395` | `Fuji F125 Kodak 2395 (by Adobe)` | 50 % | Lifted blacks, sat −0.030, **hue −3.1°, the strongest red push** | Tint −10…−15 and check gold hue; Blacks −5 | Soft portraits in daylight. Avoid on gold idols |
-| `eterna_3510` | `Fuji ETERNA 250D Fuji 3510 (by Adobe)` | 40–50 % | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
-| `eterna_2395` | `Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 50 % | **The brightest** (+0.039), lifted blacks, sat −0.024: airy and soft | Exposure −0.1 if skies clip | Gentle daytime, morning, nostalgia |
-| `reala_2393` | `Fuji REALA 500D Kodak 2393 (by Adobe)` | 40–50 % | Like `eterna_3510`: sat +0.060, warmth +0.057, crush 7.2 % | Shadows +5 if dark detail drops | Punchy colour with neutral hue |
-| `mono_500t` ≈ | `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain on V4 15–20 % | Mono Drama: a black-and-white section or reel |
-| `mono_eterna` ≈ | `Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 100 % | Softer, brighter B&W | Contrast +15 | Gentle B&W memories |
-| `cinestill` ≈ | `Kodak 5218 Kodak 2383 (by Adobe)` + **halation bake** | 50 % | 500T plus a soft red bloom around point lights. Visible on bulbs against dark; **subtle on scenes that are already warm**. Clip stays ≤ 2 % after the look | As `k500t_2383`. Halation is baked per shot **before** Premiere (below) | Neon and bulb-lit night, concerts |
-| `bleach` ≈ | `SL BLEACH NDR` | 40–60 % | Contrast +0.094, sat −0.113, cooler −0.066, crush 8.6 % | Shadows +5 to keep detail; no skin warmth to rely on | Gritty, intense moments. Not for idols or faces that need warmth |
-| `muted_red` ≈ | `Kodak 5218 Kodak 2383 (by Adobe)` + **Leave Color** effect | 35 % | Sat 0.54 → 0.36 with reds kept (tolerance 12°); highlights toward neutral and mint. At `--red-tolerance 25` saffron stays too (sat 0.47) | Leave Color: red sampled from the footage, Using Hue, Amount to Decolor ≈ 55 %. Creative Highlight Tint mint, Shadow Tint warm. **Unverified by script**: render and compare with the preview | **story-montage**: muted calm where reds glow ("Two Sides of Bangkok"). Mutes gold too, so choose the tolerance per reel |
+| `k500t_2383` | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` | 50 % | Gentle: contrast +0.035, sat +0.013, warmth +0.018. **Hue +1.5° toward gold**, deep blacks kept, highlights roll off (clip 1.0 → 0.5 %) | Contrast +10, Shadows −5, vignette −0.8. No tint fix needed | **Night festivals and pandals: default night look for `cinematic-montage`** |
+| `k500t_2395` | dropdown: `Kodak 5218 Kodak 2395 (by Adobe)` | 50 % | **Lifts blacks** (crush 5.5 → 0 %), brighter +0.028, contrast −0.019, sat −0.038: a soft, faded print | Leave the fade for a memory feel; for depth, Blacks −10 and Contrast +10 | Calm, nostalgic and memory sections |
+| `k250d_3510` | dropdown: `Kodak 5205 Fuji 3510 (by Adobe)` | 50 % | Clean and warm: contrast +0.024, sat +0.027, warmth +0.034, hue +1.6° | Contrast +5 | Daylight people and street |
+| `f125_2393` | preset: `Fuji F125 Kodak 2393 (by Adobe)` (verified) | **40–50 %** | Darker −0.019, contrast +0.039, sat +0.051, warmth +0.048, **hue −1.0° toward red** (−2.4° on the arches), crush 7.4 % | **Verified recipe** (my-reel, puja-night-2): Contrast +15, Shadows −10, Basic Saturation 85–95, Temperature +4 and Tint −10 against the red push, vignette −0.8…−1.0. Check with `colour_report.py --gold` | Warm Film: rich warm night and day |
+| `f125_2395` | preset: `Fuji F125 Kodak 2395 (by Adobe)` | 50 % | Lifted blacks, sat −0.030, **hue −3.1°, the strongest red push** | Tint −10…−15 and check gold hue; Blacks −5 | Soft portraits in daylight. Avoid on gold idols |
+| `eterna_3510` | preset: `Fuji Eterna 250D Fuji 3510 (by Adobe)` | 40–50 % | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
+| `eterna_2395` | preset: `Fuji Eterna 250d Kodak 2395 (by Adobe)` | 50 % | **The brightest** (+0.039), lifted blacks, sat −0.024: airy and soft | Exposure −0.1 if skies clip | Gentle daytime, morning, nostalgia |
+| `reala_2393` | preset: `Fuji Reala 500D Kodak 2393 (by Adobe)` | 40–50 % | Like `eterna_3510`: sat +0.060, warmth +0.057, crush 7.2 % | Shadows +5 if dark detail drops | Punchy colour with neutral hue |
+| `mono_500t` ≈ | dropdown: `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain on V4 15–20 % | Mono Drama: a black-and-white section or reel |
+| `mono_eterna` ≈ | dropdown: `Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 100 % | Softer, brighter B&W | Contrast +15 | Gentle B&W memories |
+| `cinestill` ≈ | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` + **halation bake** | 50 % | 500T plus a soft red bloom around point lights. Visible on bulbs against dark; **subtle on scenes that are already warm**. Clip stays ≤ 2 % after the look | As `k500t_2383`. Halation is baked per shot **before** Premiere (below) | Neon and bulb-lit night, concerts |
+| `bleach` ≈ | dropdown: `SL BLEACH NDR` | 40–60 % | Contrast +0.094, sat −0.113, cooler −0.066, crush 8.6 % | Shadows +5 to keep detail; no skin warmth to rely on | Gritty, intense moments. Not for idols or faces that need warmth |
+| `muted_red` ≈ | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` + Lumetri **Hue vs Sat** curve | 35 % | Sat 0.54 → 0.36 with reds kept (tolerance 12°); highlights toward neutral and mint. At `--red-tolerance 25` saffron stays too (sat 0.47). **At 12–25 a gold idol turns silver-grey; 45 keeps red and gold** and still mutes blue and green (sat 0.54 → 0.50) | **Hue vs Sat** on the same Lumetri (below), vignette −0.8. Premiere 2026 has **no Leave Color**. Mint / warm tints optional (UI only). **Verified by render** on the goddess reel at tolerance 45: a cool shot's sat 0.31 → 0.16 (preview) vs 0.26 → 0.16 (Premiere) | **story-montage**: muted calm where reds glow ("Two Sides of Bangkok"). **Festival footage with gold idols: start at tolerance 45** |
 
 **Premiere build** (V3 adjustment layer; reality doc for the occurrence method):
-1. Select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it.
+1. Load the look by its route:
+   - **preset**: select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it;
+   - **dropdown**: the director picks it in Lumetri → Creative → Look on the V3 layer, or computer use does, with the director's OK. Don't trust the `Look` index readback as proof (2383 read as 11 on one reel); the render check in step 4 is the proof.
 2. Set Creative Intensity, the **2nd** "Intensity", to the table value.
 3. Set the table's adjustments by occurrence, then write the values back to a file (reality doc, Rule 2). Basic Saturation is 0–200, with 100 neutral.
 4. **Verify by render (CLAUDE.md §2a):** export a still and compare it with the `look_preview.py` tile of the same frame at the same intensity, then run `colour_report.py --gold`.
    - `exact` looks should land within about 0.02 luma before the adjustments. That assumes Lumetri's Intensity mixes linearly, which is the first thing to confirm.
    - The first reel to use a look reports the comparison in a CR, and HQ marks it verified here.
+
+**Hue vs Sat (the `muted_red` look).** Premiere 2026 has no Leave Color effect anywhere: it's not in the Effects panel, not under Legacy, and QE can't find it. Build "muted except red" on the V3 layer's own Lumetri instead, with Curves → **Hue vs Sat**:
+- **Keep** saturation unchanged within ±T° of red, where T is the `--red-tolerance` the director approved (45 on the goddess reel).
+- **Ramp down** over about 20° beyond that. On the goddess reel the ramp ended at −65° and +62°.
+- **All other hues at 46 %.** That matches the preview's 55 % decolour.
+- **It's a UI step.** The curve (Lumetri property 58) and the Creative tint wheels are binary blobs that script can neither read nor set. The director draws it, or computer use does with the director's OK: 2 anchors at ±T°, 2 ramp points and 1 far point (e.g. blue) pulled to 46 %.
+- **Then verify by render** against the preview tile at the same tolerance. The preview ramps over 10°, so Premiere keeps a little more of the neighbouring hues. On the goddess reel the cast change still matched.
+- **Mint highlights and warm shadows** (Creative tint wheels) are optional, also UI only. On the goddess reel they weren't needed: the measured cast already matched the preview.
 
 **Halation bake (the `cinestill` look):** the After Effects `glow` op has no colour setting, so it glows warm, not red. Bake the bloom with ffmpeg on the night shots that have bright point lights, then place the render and grade it like any clip:
 ```

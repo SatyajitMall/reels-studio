@@ -17,6 +17,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 
 ## From the my-reel retro (deferred)
 - Template `.prproj` with a pre-made 1080×1920 adjustment layer and sequence presets. This would remove the one manual step (CR color-tools 3b).
+  - Lead from Uski Aankhein: a sequence cloned from one that already has the V3 adjustment layer carries it along, so no manual step was needed there. Verify, then document it in the reality doc as the default route for later versions.
 - Root cause of the silent Premiere export (upstream draft #15). Needs a minimal repro project.
 - Map built-in Lumetri presets for Teal & Orange, Moody Desat, Clean Bright and Mono Drama (playbook §A3) as reels verify them.
 - MCP smoke test: extend `check_tool_names.sh` to import and delete a dummy file in a scratch project, so tool regressions are caught after upgrades.

@@ -67,7 +67,7 @@ MCP server: `premiere-pro` (npm `adobe-premiere-pro-mcp`, from hetpatel-11/Adobe
 5. **Effects can't be removed via script.** Premiere's ExtendScript DOM has no "remove one effect" call, so plan before you apply:
    - **`color_correct` adds a new Lumetri every time it's called.** Call it exactly **once per clip**, and only with `contrast`, `temperature` and `tint`. It ignores the other values, and `saturation` turns the clip black and white. Set exposure, highlights, shadows and saturation on that same Lumetri by script (reality doc: Lumetri recipe). Check with `list_clip_effects` before touching a clip.
    - Per-clip *primary* correction (exposure, white balance, contrast) goes on the clip. Never put creative LUTs or stylised looks on V1/V2 clips.
-   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3**. `add_adjustment_layer` doesn't make a real one, so the director creates it with one manual click (reality doc). Custom `.cube` LUTs can't be loaded by script: apply the look's built-in Lumetri preset (playbook §A3), or ask the director to load the `.cube` by hand.
+   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3**. `add_adjustment_layer` doesn't make a real one, so the director creates it with one manual click (reality doc). Custom `.cube` LUTs can't be loaded by script. A look that has a built-in Lumetri preset is applied by script; any other look, including most of Adobe's film looks, the director picks from the Look dropdown, and so is any `.cube` the director loads by hand (playbook §A3 gives each look's route).
    - Exception: a camera log→Rec709 conversion LUT may be a clip's single Lumetri, applied with `apply_lut`.
 6. **A sequence created by `duplicate_sequence` must be opened in the timeline** before QE-based tools (e.g. `delete_track`) can reach it.
 7. **`detect_silence` runs ffmpeg on the source file**, not on the timeline. Convert its source-time ranges to sequence time before cutting.
@@ -85,7 +85,7 @@ Sequence: **1080×1920**. **Frame rate = the most common frame rate in the foota
 |---|---|---|
 | **V5** | Captions & kinetic type | Above the grade, so text stays clean. 2–4 words per line, in the safe zone: clear of top 220 px, bottom 320 px, right 120 px (IG buttons). |
 | **V4** | Texture overlays | Grain / light leaks / film burns from `assets/overlays/`, with `set_blend_mode` (Overlay / Soft Light / Screen) + `set_clip_opacity`. |
-| **V3** | Creative look adjustment layer | Spans the reel. LUT from `assets/luts/` at 40–80 %, look contrast, vignette. Grades V1 + V2 only. |
+| **V3** | Creative look adjustment layer | Spans the reel. Film look or LUT at the intensity its effects-playbook §A3 row gives (usually 40–80 %; `muted_red` 35 %, mono 100 %), look contrast, vignette. Grades V1 + V2 only. |
 | **V2** | B-roll & HyperFrames graphics | Each clip primary-corrected. Cutaways on visual nouns / emotional shifts. Time effects (slow-mo, ramps, freeze). |
 | **V1** | A-roll (talking head / hero action) | Primary-corrected. Reframed to 9:16. Punch-ins, slow pushes, snap zooms (playbook §B). |
 | **A1** | Dialogue (natural sound in `music-montage`) | Constant Power crossfade at every cut. Peaks −6 to −3 dB. Music-montage: muted or ≤ −20 dB (§4c). |
