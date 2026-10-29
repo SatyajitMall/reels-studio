@@ -22,6 +22,7 @@ assets/**/*
 !.claude/skills/studio-hq/
 # Imported and modified with studio fixes (MIT, licence in the folder): tracked as a studio fork, not reinstalled.
 !.claude/skills/ffmpeg-color-grading-chromakey/
+!.claude/skills/film-emulation-prompts/
 
 # Keep the template's empty folders
 !projects/_template/**

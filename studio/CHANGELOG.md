@@ -1,5 +1,20 @@
 # Studio Changelog
 
+## 0.7.4 — 2026-10-30
+**AI-shot prompts that leave the grade to Premiere** (director's request: "a studio-scoped version of the film-emulation skill, for AI-shot prompts only, fixed to our measured film table").
+- **New skill `film-emulation-prompts`**, a studio fork of mcpmarket's `color_grading_film_emulation` (MIT, `LICENSE` in the folder; tracked through a `.gitignore` exception). It writes the light and colour block of a `gen_video.py` prompt:
+  - **the scene described ungraded**, as the director's phone records it: lens, vertical 4K, light source and direction, natural white balance, clean image;
+  - **no film-stock names, grades, grain, halation or letterbox in the prompt**, because the V3 look and V4 grain grade AI shots like every clip, and a baked look would get the look twice;
+  - a standard `--negative` list;
+  - a light table for the studio's usual scenes (pandal, LED street, sodium, diyas, daylight, river at dusk);
+  - for each film-table look id, what the look adds (our measurements), what the prompt should give it, and what to leave out. For example, `muted_red` needs the story's reds and gold clearly in frame; `cinestill` needs bare bulbs against dark, but never "glow";
+  - **a draft check by numbers** (`colour_report.py` against the anchor shot: luma ±0.04, warm/cool ±0.03, no lifted blacks, teal shadows, grain or bars) before asking for the final.
+
+  The original's film-stock lore is dropped where our measurements contradict it ("500T cool shadows", "Eterna pastel").
+  **Untested:** the first reel to use it reports in a CR.
+- **`motion-and-ai.md` §3 "How":** steps 2 and 4 use the skill and the draft check. CLAUDE.md §5 points at it.
+- **Reviewed, not imported: `ffmpeg-lut-grade` 1.0.0** (mcpmarket tarball). Its read: it overlaps `ffmpeg-color-grading-chromakey`, ships no licence, and its renders break studio rules (x264 CRF 18 with `-c:a copy`, no BT.709 tags; it relies on `zscale`, which this ffmpeg lacks). One idea went to the backlog: a Hald identity through Premiere for exact previews of dropdown-only looks.
+
 ## 0.7.3 — 2026-10-29
 **Film looks: preset or dropdown, and `muted_red` without Leave Color** (CR-20261028-we-never-treated-her-like-a-goddess-pilot-notes, items 8, 12, 14, 16; director's request).
 - **Each look now names its route in Premiere.** Premiere 26.5's own preset file (`Lumetri Presets.prfpset`), confirmed live on the goddess reel:

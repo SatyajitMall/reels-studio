@@ -67,9 +67,10 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 
 **How:**
 1. Pick a still from the director's footage that the shot should continue from (optional, but it cuts retries). Export it with `ffmpeg -ss <t> -i <clip> -frames:v 1 still.png`.
-2. Dry run: `./.venv/bin/python scripts/gen_video.py --reel <reel> --shot <name> --why "<why footage can't>" --prompt "<prompt>" [--first-frame still.png]`. It prints the cost and every cap, and spends nothing.
+2. Write the prompt's light and colour with the `film-emulation-prompts` skill. It describes the scene ungraded, as the director's camera records it, and leaves out film stocks, grades, grain and halation, since the reel's V3 look and V4 grain grade the AI shot like every clip. It also gives the `--negative` list and the draft check.
+   Dry run: `./.venv/bin/python scripts/gen_video.py --reel <reel> --shot <name> --why "<why footage can't>" --prompt "<prompt>" --negative "<avoid>" [--first-frame still.png]`. It prints the cost and every cap, and spends nothing.
 3. Put the shot and its draft cost in the brief, and get the director's yes. Run the draft with `--yes`.
-4. Show the draft. On a yes, run the final: `--mode final --yes`.
+4. Check the draft's numbers against its anchor (`film-emulation-prompts`, "Check the draft"), then show it. On a yes, run the final: `--mode final --yes`.
 5. The file lands in `projects/<reel>/renders/gen/<shot>_<mode>_<time>.mp4`, with a `.json` sidecar (prompt, cost, the "AI-generated" label).
 
 **Fallback:** `--provider google` uses the Gemini API directly (`GEMINI_API_KEY`). Google always bills audio (Lite 1080p $0.08/s), so a final is about $0.64. Use it only if OpenRouter is down.

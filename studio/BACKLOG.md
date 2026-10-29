@@ -62,6 +62,9 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
   - a "made with AI" behind-the-scenes reel playbook, for the tool and brand story (kept off topical posts);
   - a Graph API posting path (the pack's Publora flow or the `instagram:configure` plugin) for reels with their own licensed audio, once the director sets up the account;
   - re-check the strategy figures in `instagram-strategy.md` yearly.
+- **Looks and AI shots (from v0.7.4):**
+  - **Exact previews of dropdown-only looks.** Run a Hald CLUT identity (`ffmpeg -f lavfi -i haldclutsrc=level=8 -frames:v 1 hald8.png`) through Premiere's V3 look once per look, export the frame, and use it with `haldclut` in `look_preview.py`. That would make the `≈` looks exact: SpeedLooks (encrypted `.itx`), the Monochrome film looks, and `muted_red` with its Hue vs Sat curve. It needs Premiere free of reel sessions. The idea comes from the ffmpeg-lut-grade skill review; this ffmpeg has `haldclutsrc` and `haldclut`;
+  - **verify `film-emulation-prompts`** on the first reel with an AI shot (draft numbers against its anchor, in a CR). A cheaper option, only with the director's OK for ≈ $0.24: two drafts of one prompt, with and without film-stock words, compared by `colour_report.py`.
 - After Effects `glow` op: add Glow Colors (A & B, red/orange), so CineStill halation can be done in AE instead of the ffmpeg bake.
 - Instagram plugin: needs the director's Graph API token via `instagram:configure`. Read-only use (insights, comments) recommended; posting only with approval per post.
 
