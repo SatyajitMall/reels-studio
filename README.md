@@ -2,7 +2,7 @@
 
 You direct, Claude edits, in Adobe Premiere Pro. You drop in your clips, answer a few questions and share references. Claude **writes the brief**, then turns the clips into a fully treated cinematic 9:16 Instagram Reel, never just cuts stitched together. Every reel gets:
 - colour correction per clip and matching between shots;
-- a creative look plus film texture;
+- a camera-true grade, plus a creative look or film texture when you pick one;
 - punch-ins and camera moves;
 - speed ramps and transitions;
 - graphics and captions;
@@ -48,7 +48,7 @@ Claude will:
 2. **Analyse every clip and reference**: exposure, colour cast, slow-mo headroom, and the reference's cut pacing.
 3. **Write `brief.md`** with the full treatment, plus 3 hooks and a cut list. ⏸ *You approve.*
 4. Cut it in a **duplicate sequence**, so your original is never touched.
-5. Colour: correct each clip → match the shots → creative look → grain and light leaks.
+5. Colour: correct each clip toward its camera file → match the shots → a look or texture only if you picked one.
 6. Add the planned moves, transitions, B-roll, graphics and captions, then the sound design and a music mix that dips under speech.
 7. Export `renders/exports/<name>_v1.mp4`. ⏸ *You give notes, and Claude makes `_v2` with only those changes.*
 8. Write the Instagram caption, hook lines and hashtags. ⏸ *You approve.*
@@ -86,7 +86,8 @@ Specific notes work best:
 CLAUDE.md                     rules Claude follows (tracks, guardrails, editing style)
 .claude/skills/cinematic-reel the 7-phase workflow behind /cinematic-reel
 .mcp.json                     Premiere MCP config for Claude Code in Terminal
-scripts/                      new_reel, analyze_footage, transcribe_reel, cut_view
+scripts/                      the studio's tools (CLAUDE.md §5 lists them): ingest and footage analysis, camera check,
+                              delivery encode, file check, pregate, review sheets, After Effects round-trip, and more
 projects/<reel>/              brief.md (Claude writes) · project.md · raw/ · references/ · analysis/ · transcripts/ · renders/
 ```
 

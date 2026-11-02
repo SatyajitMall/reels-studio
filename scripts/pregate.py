@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+"""Pregate: the scripted checks that run before the LLM review gate (review-gate.md step 2). Minutes, no tokens.
+
+In the first five reels the gate ran 59 times and failed 47, at about 200k tokens a run. Most FAILs were things a
+script can see. This runs them first, and the reviewer is only called on a clean pregate:
+
+  1. verify_render.py   the file: codec, profile, bitrate, size, fps, tags, black/frozen frames, loudness   FAIL → stop
+                        (black inside a --designed span is allowed)
+  2. frame_scan.py      every frame: blur dips, frozen runs, luma jumps, black/white frames.
+                        A flag inside a --designed span (a fade, an end card) is expected; any other flag  FAIL → stop
+                        (look at it, then fix it, or add the span to --designed and say why in project.md)
+  3. camera_fidelity.py each shot against its camera file: brightness, colour, crush, burn, framing         FAIL → stop
+                        (skipped with --no-fidelity, or when the map has no camera clips)
+  4. render_diff.py     with --prev: what changed since the last reviewed version, so the review can be focused
+  5. watch.py           2 fps contact sheets for the reviewer (only when 1–3 pass)
+A check that crashes or leaves no output counts as a FAIL. Old outputs in -o are cleared first.
+
+Writes into -o: shots.json (from the map, for the gate), <export>_VERIFY.md, scan.json, fidelity/, diff.json, watch/
+and PREGATE.md, which says PASS/FAIL and the review scope. Exit 1 on FAIL.
+
+Usage (from the studio root):
+  ./.venv/bin/python scripts/pregate.py projects/<reel>/renders/exports/<reel>_v4.mp4 \
+      --map projects/<reel>/analysis/map_v4.json -o projects/<reel>/analysis/pregate_v4 \
+      --fps 25 --expect 29.84 --designed 27.3-29.84 \
+      [--prev projects/<reel>/renders/exports/<reel>_v3.mp4 --prev-map projects/<reel>/analysis/map_v3.json] \
+      [--allow 01_C010] [--exclude-band 0.72,0.82] [--look] [--profile ig-quiet] [--min-mbps 12]
+--designed takes spans in seconds of reel time, T0-T1 (e.g. a fade-in 0-0.5 and an end card 27.3-29.84).
+The map is camera_fidelity.py's shot map (name, start, end, clip, src_in, rate); shots without a clip are fine.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+PY = sys.executable
+
+
+def run(args: list[str]) -> tuple[int, str]:
+    p = subprocess.run([PY, *args], capture_output=True, text=True)
+    return p.returncode, (p.stdout + p.stderr).strip()
+
+
+def last_line(txt: str) -> str:
+    lines = [ln for ln in txt.splitlines() if ln.strip()]
+    return lines[-1][-300:] if lines else "no output"
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("export", type=Path)
+    ap.add_argument("--map", type=Path, required=True)
+    ap.add_argument("-o", "--out", type=Path, required=True)
+    ap.add_argument("--prev", type=Path, help="the last export the reviewer saw")
+    ap.add_argument("--prev-map", type=Path, help="that version's map, to tell a moved cut from a changed shot")
+    ap.add_argument("--fps", type=float)
+    ap.add_argument("--expect", type=float, help="expected duration, s")
+    ap.add_argument("--profile", choices=["mix", "ig-quiet"], default="mix")
+    ap.add_argument("--min-mbps", type=float, default=12.0)
+    ap.add_argument("--designed", nargs="*", default=[], metavar="T0-T1", help="spans (s) where black and scan flags are intended")
+    ap.add_argument("--allow", nargs="*", default=[], help="shots whose fidelity FAILs are deliberate (in the brief)")
+    ap.add_argument("--exclude-band", action="append", default=[], metavar="Y0,Y1")
+    ap.add_argument("--look", action="store_true", help="a creative look is on (camera_fidelity --look)")
+    ap.add_argument("--no-fidelity", action="store_true")
+    a = ap.parse_args()
+
+    if not a.export.exists():
+        sys.exit(f"No export {a.export}")
+    out = a.out
+    out.mkdir(parents=True, exist_ok=True)
+    for old in ("scan.json", "diff.json", "PREGATE.md", "shots.json"):
+        (out / old).unlink(missing_ok=True)
+    for old in ("fidelity", "watch"):
+        shutil.rmtree(out / old, ignore_errors=True)
+    smap = json.loads(a.map.read_text())
+    shots = [[s["name"], s["start"], s["end"]] if isinstance(s, dict) else list(s) for s in smap]
+    (out / "shots.json").write_text(json.dumps(shots, indent=1))
+    designed = [tuple(float(x) for x in span.split("-")) for span in a.designed]
+    rows: list[tuple[str, str, str]] = []
+    hard_fail = False
+
+    # 1. the file
+    args = [str(HERE / "verify_render.py"), str(a.export), "--profile", a.profile, "--min-mbps", str(a.min_mbps), "--out", str(out)]
+    if designed:
+        args += ["--allow-black", *a.designed]
+    if a.fps:
+        args += ["--fps", str(a.fps)]
+    if a.expect:
+        args += ["--expect", str(a.expect)]
+    rc, txt = run(args)
+    fails = [ln.strip() for ln in txt.splitlines() if ln.startswith("FAIL")]
+    rows.append(("FAIL" if rc else "PASS", "verify_render", "; ".join(fails) or (last_line(txt) if rc else "all file checks pass")))
+    hard_fail |= rc != 0
+
+    # 2. every frame
+    rc, txt = run([str(HERE / "frame_scan.py"), str(a.export), "-o", str(out / "scan.json"), "--shots", str(out / "shots.json")])
+    if rc or not (out / "scan.json").exists():
+        rows.append(("FAIL", "frame_scan", f"didn't run: {last_line(txt)}"))
+        hard_fail = True
+    else:
+        flags = json.loads((out / "scan.json").read_text())["flags"]
+        loose = [f for f in flags if not any(t0 - 0.05 <= f["t0"] and f["t1"] <= t1 + 0.05 for t0, t1 in designed)]
+        rows.append(("FAIL" if loose else "PASS", "frame_scan",
+                     "; ".join(f"{f['type']} {f['shot']} {f['t0']}–{f['t1']} s ({f['value']})" for f in loose)
+                     or f"{len(flags)} flag(s), all inside designed spans"))
+        hard_fail |= bool(loose)
+
+    # 3. against the camera
+    has_clips = any(isinstance(s, dict) and s.get("clip") for s in smap)
+    if a.no_fidelity or not has_clips:
+        rows.append(("SKIP", "camera_fidelity", "--no-fidelity" if a.no_fidelity else "no camera clips in the map"))
+    else:
+        args = [str(HERE / "camera_fidelity.py"), str(a.export), "--map", str(a.map), "-o", str(out / "fidelity")]
+        if a.allow:
+            args += ["--allow", *a.allow]
+        if a.look:
+            args.append("--look")
+        for band in a.exclude_band:
+            args += ["--exclude-band", band]
+        rc, txt = run(args)
+        fj = out / "fidelity" / "fidelity.json"
+        if not fj.exists():
+            rows.append(("FAIL", "camera_fidelity", f"didn't run: {last_line(txt)}"))
+            hard_fail = True
+        else:
+            rep = json.loads(fj.read_text())
+            bad = [n for n, v in rep["shots"].items() if v.get("verdict") == "FAIL"]
+            allowed = [n for n, v in rep["shots"].items() if v.get("verdict") == "ALLOWED"]
+            detail = ("FAIL on " + ", ".join(bad)) if bad else "every shot within the camera bands"
+            if allowed:
+                detail += f" (allowed: {', '.join(allowed)})"
+            rows.append(("FAIL" if bad or rc else "PASS", "camera_fidelity", detail + "; see fidelity/FIDELITY.md for WARNs"))
+            hard_fail |= bool(bad) or rc != 0
+
+    # 4. what changed
+    scope = "full review (first review of this cut)"
+    changed: list[str] = []
+    if a.prev:
+        if not a.prev_map:
+            rows.append(("INFO", "render_diff", "no --prev-map, so a moved cut can't be ruled out: full review"))
+        args = [str(HERE / "render_diff.py"), str(a.prev), str(a.export), "-o", str(out / "diff.json"), "--shots", str(a.map)]
+        if a.prev_map:
+            args += ["--prev-shots", str(a.prev_map)]
+        rc, txt = run(args)
+        if rc or not (out / "diff.json").exists():
+            rows.append(("FAIL", "render_diff", f"didn't run: {last_line(txt)}"))
+            hard_fail = True
+        else:
+            d = json.loads((out / "diff.json").read_text())
+            scope, changed = d["scope"], d["changed_shots"]
+            spans = ", ".join(f"{s['t0']}–{s['t1']} s" for s in d["changed_spans"])
+            what = spans or ("different length" if d["frames"][0] != d["frames"][1] else "no picture change")
+            rows.append(("INFO", "render_diff", f"{d['structure']} structure, audio {'identical' if d['audio_identical'] else 'changed'}; {what}"))
+
+    # 5. sheets for the reviewer
+    if not hard_fail:
+        rc, txt = run([str(HERE / "watch.py"), str(a.export), "-o", str(out / "watch"), "--fps", "2", "--shots", str(out / "shots.json")])
+        rows.append(("PASS" if rc == 0 else "FAIL", "watch", "contact sheets in watch/" if rc == 0 else last_line(txt)))
+        hard_fail |= rc != 0
+
+    verdict = "FAIL" if hard_fail else "PASS"
+    md = [f"# Pregate: {a.export.name}", "", f"**{verdict}**" + ("" if hard_fail else f" · review scope: **{scope}**"
+          + (f" ({', '.join(changed)})" if changed and scope.startswith("focused") else "")), "",
+          "| Check | Result | Detail |", "|---|---|---|"]
+    md += [f"| {c} | {r} | {d} |" for r, c, d in rows]
+    md += ["", "Fix every FAIL before calling the reviewer. On PASS, give the reviewer this folder: `shots.json`, `scan.json`, "
+           "`watch/index.md`, `fidelity/FIDELITY.md` + `fidelity/fidelity_sheet.jpg`, and `diff.json` for a focused review."]
+    (out / "PREGATE.md").write_text("\n".join(md) + "\n")
+    for r, c, d in rows:
+        print(f"{r:5s} {c:16s} {d}")
+    print(f"\n{verdict} · {out / 'PREGATE.md'}" + ("" if hard_fail else f" · {scope}"))
+    sys.exit(1 if hard_fail else 0)
+
+
+if __name__ == "__main__":
+    main()

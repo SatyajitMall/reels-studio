@@ -2,6 +2,12 @@
 
 Architecture work not yet done. HQ triages it at the start of each `/studio-hq` session. Change requests from reels are linked here when deferred.
 
+## Next: v0.8 plan, Batches B and C (`studio/plans/v0.8-plan.md`)
+Approved in outline by the director on 2026-11-01; Batch A shipped as v0.8.0. Each batch starts with the director's go-ahead in an HQ session.
+- **B, fewer rounds:** `scripts/preview_edl.py` (promote Pujo's `preview_assemble.py`: lock pace, picks and framing offline, then one Premiere build); a line-by-line shot table for VO reels; promote `storyboard.py` + `pick_sheet.py` with the IG safe-zone overlay; a Phase 0 "is the soundtrack existing audio?" question; a `## Now` block in `project.md`; director-profile update; **local faster-whisper as the default transcriber** (closes G2).
+- **C, tools that save hours:** a shared ExtendScript library (`scripts/es/studio.jsx`, including the read-back that writes `map_v<N>.json` for `camera_fidelity.py`); a one-reel-at-a-time Premiere lock; a full-resolution pre-screen of candidate windows (zoom steps, jerks, flicker, orientation, faces/phones in the IG bands; also the pregate items CR puja-night-2-review-gate still lists); `<shoot>:<clip>` identity across the analysers, the `link_footage.sh` reference skip and the `shake_report` fps parse; HTML word cards for Bangla/Devanagari.
+- **Open decision:** delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`, which can publish to Instagram directly (the director taps Share), plus `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md`.
+
 ## Untriaged: external review (`GEMINI_ARCHITECTURE_REVIEW.md`, added 2026-10-15 by another tool)
 Each item needs to be verified before it's adopted. The scripts it ships (`scripts/gemini_*.py`) haven't been reviewed yet.
 
@@ -31,7 +37,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - ProRes 422 HQ needs a custom output-module template made once in AE's UI; today we use "High Quality" (ProRes 422).
 
 ## Motion graphics / AI (from v0.5.1)
-- Verify the Premiere import of a HyperFrames ProRes 4444 alpha MOV on V5 (first real use).
+- ~~Verify the Premiere import of a HyperFrames ProRes 4444 alpha MOV on V5~~: verified on puja-night-2 (CR-20261018-puja-night-2-motion-ai, item 1).
 - ~~Verify the first real OpenRouter call~~: done 2026-10-18 ($0.12, `data:` URL first frame OK, 24 fps output). Still unverified: the Google fallback (its `predictLongRunning` vs `generateContent` note), if it's ever needed.
 - Text behind the subject on moving shots needs motion tracking: either track the word to the subject, or limit it to holds (as now).
 - Gemini Omni video-to-video restyle (the creator's "text behind the head"): not on Google's pricing page as of 2026-10-18. `text_behind.py` covers the need locally for free.
@@ -41,11 +47,12 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - **Group B: talking-head tools (next minor version):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, a local transcription option (Parakeet / Whisper, see G2), and camera-move helpers for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
 - **`creator-explainer` needs its pilot.** Every rule is adapted from 16:9 YouTube; log every misfit as a CR.
 - **Premiere lock:** three reel sessions contend for one Premiere. A lock file (session, reel, since) checked before mutating tools, released at wrap-up.
-- **A final re-review step** after the review gate's last loop, so the fixes from loop 2 are seen by the reviewer too.
+- ~~A final re-review step after the review gate's last loop~~: done in v0.8.0 (one focused check of the last fixes).
 - `CR-20261017-my-reel-directional-blur-scan`: one-directional smear and blur straddling a cut in `frame_scan.py`.
 - `colour_report.py`: exclude designed fades from the crushed-shadows count.
 - `CR-20261017-my-reel-qa-visual-review` leftovers.
-- After Effects ops still missing: `light_rays`, and handles on trimmed shots.
+- After Effects ops still missing: handles on trimmed shots, and a `vector_detail` setting on `timewarp` (goddess CR item 39). (`light_rays` dropped: the director called the rays and leaks "cringe and less production grade" on my-reel v8.)
+- From CR pujo lens-bokeh (deferred in v0.8.0): the per-shot stabilisation bake and its QA (first / mid / last frames, stability on a background ROI).
 - ffmpeg build without libzimg (`zscale`) and freetype (`drawtext`). An ffmpeg with both would enable HDR → SDR tone-mapping and labelled sheets in one pass. That's an install the director decides on (it changes a system tool).
 - Film-stock looks (v0.6.2): only `Fuji F125 Kodak 2393 (by Adobe)` is verified in Premiere.
   - The first reel that uses another look confirms the name with `getAllLumetriPresetsList()` and compares the Premiere still with the `look_preview.py` tile. That also tests whether Lumetri's Intensity mixes linearly.

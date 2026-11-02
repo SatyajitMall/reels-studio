@@ -2,8 +2,12 @@
 """After Effects round-trip for finishing shots that Premiere can't do well.
 
 For each shot in a jobs file it:
-  1. builds a fresh AE project via scripts/ae_bridge.py (import source, 1080x1920 comp at the reel's
-     fps, source in-point at comp 0, optional rotation/fill),
+  0. if the source carries a rotation flag (the director's phone clips are stored landscape with a −90° flag), first
+     writes an upright ProRes HQ trim of in_s−0.5 … out_s+0.5 s to projects/<reel>/renders/ae_src/ and uses that:
+     After Effects ignores the flag, so the shot would come in sideways (goddess round 10),
+  1. builds a fresh AE project via scripts/ae_bridge.py (import source, comp at the job's size — 1080x1920, or the
+     camera's 2160x3840 so Premiere's framing and pushes carry over — at the reel's fps, source in-point at comp 0,
+     optional rotation/fill),
   2. applies the ops in order,
   3. saves projects/<reel>/renders/ae/<name>.aep and renders <name>.mov headlessly with aerender
      (default output module "High Quality" = ProRes 422; pass --om for another template),
@@ -243,6 +247,30 @@ def frame_match(source: Path, src_t: float, out_mov: Path, rotate: float = 0) ->
             "diffs": {str(k): round(v, 2) for k, v in diffs.items()}}
 
 
+def rotation(path: Path) -> int:
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                          "stream_side_data=rotation:stream_tags=rotate", "-of", "json", str(path)], capture_output=True, text=True).stdout
+    s = (json.loads(out or "{}").get("streams") or [{}])[0]
+    for sd in s.get("side_data_list", []) or []:
+        if "rotation" in sd:
+            return int(float(sd["rotation"]))
+    return int(float((s.get("tags") or {}).get("rotate", 0)))
+
+
+def upright_trim(source: Path, in_s: float, out_s: float, dest: Path, handle: float = 0.5) -> float:
+    """ProRes HQ trim of source, upright (ffmpeg applies the rotation flag), with handles. Returns the trim's start in source s.
+    dest's name should carry in/out, so a changed window never reuses an old trim; it's written to a temp name, then renamed."""
+    t0 = max(0.0, in_s - handle)
+    if not dest.exists():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_name(dest.stem + ".part.mov")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t0:.4f}", "-i", str(source), "-t", f"{out_s - t0 + handle:.4f}", "-an",
+                        "-c:v", "prores_ks", "-profile:v", "3", "-pix_fmt", "yuv422p10le",
+                        "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", str(tmp)], check=True)
+        tmp.rename(dest)
+    return t0
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("jobs", type=Path)
@@ -262,6 +290,14 @@ def main() -> None:
             continue
         spec = {**shot, "fps": jobs.get("fps", 25), "width": jobs.get("width", 1080), "height": jobs.get("height", 1920),
                 "source": str((ROOT / shot["source"]).resolve())}
+        rot = rotation(Path(spec["source"]))
+        if rot:
+            trim = ROOT / "projects" / reel / "renders" / "ae_src" / f"{shot['name']}_{shot['in_s']:.3f}-{shot['out_s']:.3f}_upright.mov"
+            t0 = upright_trim(Path(spec["source"]), shot["in_s"], shot["out_s"], trim)
+            print(f"  source has a {rot}° rotation flag: using the upright trim {trim.relative_to(ROOT)}", flush=True)
+            if shot.get("rotate"):
+                print(f"  ! the job also sets rotate {shot['rotate']}: the trim is already upright, so that rotates it again", flush=True)
+            spec.update(source=str(trim), in_s=round(shot["in_s"] - t0, 4), out_s=round(shot["out_s"] - t0, 4))
         spec["aep"] = str(out_dir / f"{shot['name']}.aep")
         mov = out_dir / f"{shot['name']}.mov"
         print(f"▸ {shot['name']}: building in After Effects", flush=True)

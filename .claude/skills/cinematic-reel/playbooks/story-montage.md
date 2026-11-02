@@ -56,9 +56,11 @@ The reference's shot length changes by section, never by habit. Measured medians
 - **Mixed version:** −14 LUFS ± 2, true peak ≤ −1 dBTP (`verify_render.py`).
 
 ## Colour and texture: muted, except red
+**v0.8: camera-true is the default here too** (effects-playbook §A0). The goddess pilot built `muted_red` (below) and matched the preview, then the director dropped it for the camera's own colour ("over processed", then "colours all over the place"); v10b was approved camera-true. Offer `muted_red` as an option on the Round 2 sheet, not as the plan.
+
 Measured on the reference's colour footage (17–183 s), on a 0–1 scale:
 
-| | Reference | Rule |
+| | Reference | `muted_red` rule (when chosen) |
 |---|---|---|
 | Overall saturation | **0.34** | Low. Everything is calm |
 | Reds | saturation **0.82**, 5 % of the frame | **Reds stay at full strength:** candles, lanterns, robes, sindoor |
@@ -67,7 +69,7 @@ Measured on the reference's colour footage (17–183 s), on a 0–1 scale:
 | Highlights | G−M **+0.07**, hue 100° | Mint, pale |
 | Blacks / whites | p02 0.024 (1.4 % crushed) / p98 0.90 (0.03 % clipped) | Deep but open blacks; whites roll off and never clip |
 
-- **The look is `muted_red`** in `scripts/look_preview.py`: Kodak 500T → 2383 at 35 % for the roll-off, then every hue more than 12° from red loses 55 % of its colour, with mint highlights and warm shadows.
+- **The look option is `muted_red`** in `scripts/look_preview.py`: Kodak 500T → 2383 at 35 % for the roll-off, then every hue more than 12° from red loses 55 % of its colour, with mint highlights and warm shadows.
   - Tested on four of our stills: saturation 0.54 → 0.36, reds kept.
   - **On festival footage it also mutes gold and saffron:** at 12–25 a gold Durga turns silver-grey. `--red-tolerance 25` keeps saffron (saturation 0.47); **45 keeps red and gold** and still mutes blue and green (saturation 0.54 → 0.50). On footage with gold idols, start at 45. Pick the tolerance per reel, with the director, from the preview sheet.
 - **Premiere build** (V3 adjustment layer; effects-playbook §A3, verified on the goddess reel):
@@ -77,14 +79,14 @@ Measured on the reference's colour footage (17–183 s), on a 0–1 scale:
   - **Mint highlights / warm shadows** (Creative tint wheels) are optional, also UI only. The goddess reel matched the preview without them.
   - **Verify by render** against the preview tile at the same tolerance.
 - **B&W only for "before"** (the prologue).
-- Grain: light (10 %), as cinematic-montage.
+- Grain: as cinematic-montage (none on night phone footage, ≤ 5 % otherwise).
 
 ## AI shots
 - Not used in the reference. The story depends on real people and places, so the cinematic-montage rule applies: never generate the people, the idol or the crowd (`motion-and-ai.md` §3).
 
 ## QA thresholds for this style (review gate)
 - **Section pacing:** each section's median shot within ±25 % of the brief's target (from the table above, scaled). The sizzle's flashes are 4–7 frames each. The calm section's cuts are within ±2 frames of the bar.
-- **Colour:** overall saturation ≤ 0.40 while reds stay ≥ 0.7 (`colour_report.py`); clipped ≤ 0.5 %; prologue fully monochrome.
+- **Colour:** every shot within its camera bands (`camera_fidelity.py`). Only if the director chose `muted_red`: overall saturation ≤ 0.40 while reds stay ≥ 0.7 (`colour_report.py`), with `camera_fidelity.py --look`. Clipped ≤ 0.5 %; prologue fully monochrome.
 - **Character:** on screen at least every 15 s of reel time.
 - **Transitions:** nothing but hard cuts, the one match cut, and the final fade.
 - **Type:** subtitles and native-language words inside the safe zone, never over a face.

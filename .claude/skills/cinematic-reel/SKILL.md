@@ -5,7 +5,7 @@ description: Turn the director's clips into a fully treated cinematic 9:16 Insta
 
 # /cinematic-reel
 
-The director answers questions, shares clips and references, and approves. **You write everything**: brief, cut list, treatment. This is never cut-and-stitch: every reel gets colour correction, a creative look, motion, transitions, type and sound design, planned in the brief and taken from `effects-playbook.md` (same folder; read it before Phase 2).
+The director answers questions, shares clips and references, and approves. **You write everything**: brief, cut list, treatment. This is never cut-and-stitch: every reel gets camera-true colour correction (a creative look only when the director picks one), motion, transitions, type and sound design, planned in the brief and taken from `effects-playbook.md` (same folder; read it before Phase 2).
 
 **Every reel follows one editing playbook** (`playbooks/`, same folder): the style rules for its kind of video, meaning pace, camera, type, transitions, sound (including whooshes), colour and the QA thresholds. Pick it in Phase 0, record it in the brief, and read it before Phase 2. `effects-playbook.md` is the menu of moves; the playbook says which ones this reel uses.
 
@@ -60,7 +60,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 
 **Round 2: taste (ask after analysing footage and references, so the options are concrete)**
 Offer choices that fit *this* footage, for example:
-- Look: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** run `scripts/look_preview.py` on 3–4 of the director's own stills (night, a face, a wide). It renders Premiere's own film-stock looks (effects-playbook §A3 film table) as one labelled sheet, with measurements. Offer 3–4 looks that fit the footage, not all 12. These are previews only; the real look is built in Premiere in Phase 4, from the same LUT. Most film looks (all the Kodak ones, `muted_red`) are **dropdown only**: tell the director they're one manual pick in Phase 4, and that `muted_red`'s Hue vs Sat curve is a second UI step.
+- Look: **Camera-true (default, effects-playbook §A0)** · or a creative look on top: Warm Film · Teal & Orange · Moody Desat · Clean Bright · Mono Drama · Match reference. **Show, don't name:** put the camera-true frame first on a camera | camera-true | look sheet at phone size, from 3–4 of the director's own stills (night, a face, a wide), using `scripts/look_preview.py` for the looks (effects-playbook §A3 film table, with measurements). Offer at most 2–3 looks that fit the footage, at 30 %. If the director leans to a look, also send a 6 s phone sample of the 3 hardest shots: goddess approved a look on stills and rejected it on the full reel. Most film looks (all the Kodak ones, `muted_red`) are **dropdown only**: tell the director they're one manual pick in Phase 4, and that `muted_red`'s Hue vs Sat curve is a second UI step.
 - Pace: calm (3–5 s shots) · medium (2–3 s) · fast (1–2 s), pre-selecting what the reference measured
 - Effects intensity: subtle · signature moments only · heavy / stylised
 - Captions / words: none · Clean · Bold Kinetic · Editorial. For music-montage, default to **title + end card only**. Use beat words only when the director supplies words that mean something; never invent filler words.
@@ -107,6 +107,7 @@ Offer choices that fit *this* footage, for example:
    ```
    It gives cuts per minute, shot lengths, flashes, motion, picture (luma, contrast, saturation, warmth) and loudness. Put the numbers in the brief as targets.
 4. Timing source, by reel type (CLAUDE.md §4):
+   - **If the soundtrack is existing Instagram audio** (a library song, or another reel's original audio): open its Instagram page now and note whether it's a library song or "Original audio" and who made it, then cut to a stereo guide copy of it (CLAUDE.md §4c). Don't wait until posting.
    - `talking-head` / `hybrid`: transcribe dialogue with `scripts/transcribe_reel.sh <name>`, which produces `transcripts/takes_packed.md`. If there's no ElevenLabs key, use `detect_silence` and tell the director word-level cutting is off.
    - `music-montage` / `hybrid`: run the beat grid on the music track:
      ```
@@ -125,7 +126,7 @@ Offer choices that fit *this* footage, for example:
 → Now ask **Round 2** of the interview.
 
 ## Phase 2: Write the brief + cut plan
-1. Fill in `projects/<name>/brief.md` completely: **playbook** (and any rule this reel overrides, with the reason), idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
+1. Fill in `projects/<name>/brief.md` completely: **playbook** (and any rule this reel overrides, with the reason), idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4 with A3/A4 marked "none" unless the director picked a look or texture, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
    For **music-montage**, the Treatment must also include:
    - **Energy arc:** which song sections go up or down and where the shot length changes. Default: slow open → build → full → breath → payoff → outro. **Never one shot per bar for the whole reel.** That read as mechanical in the pilot. The music may be edited (e.g. intro joined to the main section on a downbeat).
    - **Generated shots (if any):** every AI-generated shot gets its own row, labelled **AI-generated**, with the prompt, why your footage can't provide it, and the cost from the `gen_video.py` dry run. The director approves each at Checkpoint 1 (`motion-and-ai.md` §3).
@@ -141,19 +142,24 @@ Give the director a short summary in chat: the concept, hook, look, 4–6 signat
 ## Phase 3: Rough cut (V1 / A1)
 1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline. `create_sequence` needs an `.sqpreset`, so use `create_sequence_from_clips` on a clip that has the target size and fps.
 2. Assemble the approved EDL with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
-3. Reframe to 9:16 (`auto_reframe_sequence` or `set_clip_scale` / `set_clip_position`).
+3. Reframe to 9:16 (`auto_reframe_sequence` or `set_clip_scale` / `set_clip_position`), **showing at least 80 % of the camera width** (Scale ≤ 62.5 on vertical 4K clips, effects-playbook §B). Name any tighter shot and its reason in the brief.
+   Then write `analysis/map_v<N>.json`, the shot map `camera_fidelity.py` and `pregate.py` read: per shot its reel start/end, camera clip, camera in-point and rate. Build it from a Premiere read-back; the formula is in `camera_fidelity.py`'s header.
 4. Check with `get_timeline_gaps` (zero unintended gaps) and `get_timeline_summary` (matches the EDL).
 5. A1: Constant Power crossfade at every cut (`batch_add_transitions`, ~1 frame). `save_project`.
 
-## Phase 4: Colour (playbook §A, strictly in order)
-1. **A1 primary correction**: one `color_correct` per clip with contrast, temperature and tint only, then set exposure, highlights, shadows and saturation by script (playbook §A1, reality doc). Copy to same-setup clips with `copy_effects_between_clips`. Check the first clip by exported still before copying.
-2. **A2 shot match**: compare adjacent shots and fine-tune with `set_effect_property`.
-3. **A3 creative look**: ask the director for the manual step (create an Adjustment Layer; for a **dropdown** look, also pick it in Lumetri → Creative → Look on V3), place it on V3, apply a **preset** look with `applyLumetriPreset`, then set intensity and the table's adjustments by script (playbook §A3). `muted_red` adds the Hue vs Sat curve, a UI step.
-4. **A4 texture**: grain / leaks on V4, with the blend mode set by script (enum in the reality doc) + `set_clip_opacity`. Fade V4 with the picture at every fade to black.
+## Phase 4: Colour (playbook §A, strictly in order; camera-true by default, §A0)
+1. **A1 primary correction**: one `color_correct` per clip with contrast, temperature and tint only, then set exposure, highlights, shadows and saturation by script (playbook §A1, reality doc). Copy to same-setup clips with `copy_effects_between_clips`. Check the first clip by exported still before copying. Correct toward the camera file, not toward a number: fix casts, blown or crushed areas and dark night exposure, and stop.
+2. **A2 shot match**: compare adjacent shots and fine-tune with `set_effect_property`, staying inside each shot's camera bands.
+3. **A3 creative look: only if the director picked one in Round 2.** Ask for the manual step (create an Adjustment Layer; for a **dropdown** look, also pick it in Lumetri → Creative → Look on V3), place it on V3, apply a **preset** look with `applyLumetriPreset`, then set intensity (start at 30 %) and the table's adjustments by script (playbook §A3). `muted_red` adds the Hue vs Sat curve, a UI step. With no look, leave V3 empty, or disable an inherited layer **and** its Hue vs Sat curve.
+4. **A4 texture (optional)**: none on night phone footage; elsewhere, only if the brief has it, grain ≤ 5 % on V4, with the blend mode set by script (enum in the reality doc) + `set_clip_opacity`. Fade V4 with the picture at every fade to black. No extra sharpening.
 5. Export 3–4 still frames (or a short preview) and check skin tones and contrast with your own eyes. `save_project`.
-6. **Colour QA on every frame** before review: `scripts/colour_report.py <export> -o analysis/colour_v<N>.json --shots <shots.json> [--gold]`.
-   - Targets: shots within ±0.03 of the montage luma, crushed < 25 % (except true-black skies), clipped < 2 %, gold midtone hue 30–45°, blue shots G−M ≈ 0.
-   - Fix the unintended flags. Note the deliberate ones in `project.md`.
+6. **Colour QA against the camera** before review, on the ProRes master or the export:
+   ```
+   .venv/bin/python scripts/camera_fidelity.py <export> --map projects/<name>/analysis/map_v<N>.json -o projects/<name>/analysis/fidelity_v<N> [--allow <shots>] [--look] [--exclude-band 0.72,0.82]
+   ```
+   - It finds each shot's camera frame and framing and checks brightness, saturation, hue, crush, burn and width (effects-playbook §A0). Read `FIDELITY.md` and the camera | render sheet.
+   - Fix every FAIL. A deliberate one (a cast fix, recovered highlights) goes in the brief and in `--allow`.
+   - `colour_report.py --gold` still checks gold hue and shot-to-shot jumps.
 
 ## Phase 5: Motion, effects, B-roll, graphics, captions
 Execute the Treatment from the brief, beat by beat:
@@ -168,7 +174,7 @@ Execute the Treatment from the brief, beat by beat:
 6. After each group: `get_timeline_summary`, `list_clip_effects` on 2–3 clips to confirm nothing stacked twice, then `save_project`.
 
 ## Phase 5b: After Effects finishing (optional)
-For shots that need **denoise, a real speed-ramp curve, Timewarp slow-mo or glow/halation**, follow `after-effects.md` (same folder):
+For shots that need **denoise, a real speed-ramp curve, Timewarp slow-mo or glow/halation**, follow `after-effects.md` (same folder). **Slow motion on ≤ 30 fps footage goes through After Effects Timewarp by default** (effects-playbook §C): Premiere's Optical Flow ghosted on goddess v10.
 1. Write `analysis/ae_jobs.json` from the EDL.
 2. Run `scripts/ae_roundtrip.py`, in the background, at about 4 min per shot.
 3. Check every `_compare.png` and the before/after reports.
@@ -189,25 +195,31 @@ Plan which shots go through After Effects in the brief's Treatment, and say so i
 
 ## Phase 7: QA & export
 1. `validate_project_for_export`, `check_offline_media`, `get_timeline_gaps`, `set_sequence_in_out_points`.
-2. Export H.264 1080×1920, high bitrate → `renders/exports/<name>_v<round>.mp4`, using a built-in `.epr` (paths in the reality doc).
+2. **Export a ProRes 422 master** → `renders/masters/<name>_v<round>_master.mov`, with the built-in "Match Source - Apple ProRes 422" `.epr` (path in the reality doc). Then encode the deliverables from it; Premiere's H.264 preset gave 9 Mb/s Main profile that looked blocky on the iPhone:
+   ```
+   .venv/bin/python scripts/encode_master.py renders/masters/<name>_v<round>_master.mov -o renders/exports/<name>_v<round>.mp4
+   .venv/bin/python scripts/encode_master.py renders/masters/<name>_v<round>_master.mov -o renders/previews/<name>_v<round>_phone.mp4 --phone
+   ```
+   The `--phone` copy (≤ 29 MB) is the review copy sent to the director as a file. A reel whose audio is added in Instagram also gets an `_IG` master (the guide audio muted on a duplicate sequence) and its own encode.
    **Check the audio straight away** (`ffmpeg -af volumedetect`, max_volume > −20 dB). If it's silent, write `analysis/mix.json` and rebuild the audio with `scripts/mix_from_edl.py`. Note it in the round summary.
 3. Run `analyze_footage.py` on the export, look at its contact sheet, and check the first 3 s plus 2–3 risky cuts with `scripts/cut_view.sh`.
 4. **Verify the file** (codec, size, fps, bitrate, BT.709 tags, black or frozen frames, audio length, loudness):
    ```
    .venv/bin/python scripts/verify_render.py renders/exports/<name>_v<round>.mp4 --fps <seq fps> --expect <runtime>
    .venv/bin/python scripts/verify_render.py renders/exports/<name>_v<round>_IG.mp4 --profile ig-quiet   # no-music upload version
+   .venv/bin/python scripts/verify_render.py renders/previews/<name>_v<round>_phone.mp4 --min-mbps <floor encode_master printed>
    ```
-   Fix every FAIL before the review gate: `--fix-tags` for missing colour tags, `--fix-loudness` for a mix outside −14 ± 2 LUFS. Re-run on the fixed copy.
+   Fix every FAIL before the review gate: `--fix-tags` for missing colour tags, `--fix-loudness` for a mix outside −14 ± 2 LUFS, `encode_master.py` for a Main-profile or low-bitrate file. Re-run on the fixed copy. The pregate (Phase 7b) runs this check again.
 5. **Compare with the reference:** `scripts/teardown.py --ref <ref> --ours <export> -o analysis/teardown`. Read `COMPARE.md`, and either fix each gap beyond tolerance or say in the round notes why it's deliberate.
 
 ## Phase 7b: Review gate (every version, before the director sees it)
 Follow `review-gate.md` (same folder):
-1. Make the shot list.
-2. Run `scripts/watch.py` on the export.
-3. Have the `reel-reviewer` agent on a **different model** judge it blind.
+1. Write the shot map (`analysis/map_v<N>.json`).
+2. Run **`scripts/pregate.py`**: the file check, every-frame scan (`frame_scan.py`), the camera check and the contact sheets, in minutes and with no tokens. Fix every FAIL before going on.
+3. Have the `reel-reviewer` agent on a **different model** judge it blind: a full review for a new cut, a focused one on the changed shots for a fix version (pregate's `render_diff`).
 4. Save the report.
 5. Fix or answer every blocker and major.
-6. Re-run the gate, at most 2 loops.
+6. Re-run the gate, at most 2 loops, plus one focused check of the last fixes.
 Never skip it because your own metrics passed: in the pilot, every shipped defect had passed metric QA.
 
 ### ⏸ Checkpoint 2: review the cut

@@ -15,7 +15,7 @@
 - **Punch-in on emphasis** (the number, the promise, the punchline): 118–125 % over 0.30–0.35 s, ease-out.
 - **Slow creep across a thought:** 110–112 % over 5–10 s, released at the next cut.
 - **Snap back to 100 % at every cut;** never carry a zoom across a cut.
-- **Limits:** 1080p source up to 112 %; 4K source up to 150 %.
+- **Limits:** 1080p source up to 112 %; 4K source up to 150 %. The base framing still shows ≥ 80 % of the camera width (effects-playbook §B); these zooms are named moves on top of it.
 - **Budget:** 3–5 camera moves per 40 s hook. Jump cuts stay plain by default; dress one only when the energy changes (a pivot, a joke landing), at most one per 10 s.
 
 ## Type and graphics
@@ -38,7 +38,7 @@
 - **Mixed version:** −14 LUFS ± 2, true peak ≤ −1 dBTP (`verify_render.py`).
 
 ## Colour and texture
-- Clean, natural skin first (primary correction, playbook §A1). A light look, little or no grain.
+- Camera-true, clean natural skin first (effects-playbook §A0–A1). A look only if the director picks one (§A3); little or no grain.
 
 ## AI shots
 - His rule: **AI shots star the creator or nobody**, show the exact scene the sentence describes, last 2–5 s, and are **never proof** (no fake dashboards, results or crowds). At most about one a minute, never two in a row. Also `motion-and-ai.md` §3.

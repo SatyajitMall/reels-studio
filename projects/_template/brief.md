@@ -30,8 +30,10 @@
 ### Colour
 - **Primary correction (per clip, V1/V2):** what each clip needs (from `analysis/summary.md`)
 - **Shot matching:** which clips must match which
-- **Creative look (V3 adjustment layer):** LUT / palette / contrast / skin-tone intent
-- **Texture (V4):** grain, light leaks, vignette, halation (none / subtle / heavy)
+- **Creative look (V3 adjustment layer):** none (camera-true, the default, effects-playbook §A0), or the look the director picked on the Round 2 sheet: name, intensity (start 30 %), why
+- **Texture (V4):** none by default (and always none on night phone footage); otherwise grain ≤ 5 %, light leaks, vignette, halation
+- **Camera-check exceptions:** shots allowed to depart from their camera file (`camera_fidelity.py --allow`), each with its reason
+- **Framing exceptions:** shots tighter than 80 % of the camera width, each with its reason
 
 ### Effects & transitions
 - List the named moves from `effects-playbook.md` and where they go (timecode or beat).

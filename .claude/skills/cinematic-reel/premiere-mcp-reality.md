@@ -41,6 +41,9 @@ f.open("w"); f.write(JSON.stringify(result)); f.close();
 | `slip_edit` | ⚠️ `offset` ignored | Use `deltaSeconds` |
 | `razor_timeline_at_time` with `audioTrackIndices: []` | ⚠️ empty array = **all** audio tracks | List the tracks you mean |
 | `speed_change` | ⚠️ keeps the timeline duration and changes the source span (2.0 = twice the source) | Speed-ramp recipe in playbook §C |
+| A speed-changed clip's `inPoint` / `outPoint` (QE `setSpeed`) | ⚠️ read and write **source time ÷ speed**. Writing raw source seconds moved both in-points (goddess round 10) | Write source ÷ speed, then check source = DOM value × speed |
+| Scale keyframes on a speed-changed clip | ❌ didn't run the full ramp (goddess v10: C051 still at 0.56 Scale partway through) | Slow-mo through After Effects (playbook §C), swapped in at 100 % speed, with the push keyed on that clip |
+| Optical Flow (QE `setTimeInterpolationType(2)`) | ⚠️ falls back to frame blends on fast or crossing motion: a doubled arm and a sharp/soft pulse on a 25 fps night crowd (goddess v10) | After Effects Timewarp (`after-effects.md`) |
 | `get_encoder_presets` | ⚠️ finds no factory presets | Built-in `.epr` paths (below) |
 | `create_sequence` | ⚠️ needs an `.sqpreset` | `create_sequence_from_clips` on a clip with the target size and fps |
 | `exportAsMediaDirect` / `export_sequence` | ⚠️ correct picture, **silent audio** in the pilot (cause unknown) | Always check audio after export. Fallback: `scripts/mix_from_edl.py` |
@@ -99,6 +102,8 @@ Check the result with `seq.videoTracks[t].transitions[j].start/end`. Remove a wr
 - `Level = 10^((dB − 15) / 20)`, so −16 dB → 0.0282.
 
 **Export presets** (built in, since `get_encoder_presets` finds none):
+- **The master (default since v0.8):** `/Applications/Adobe Premiere Pro 2026/Adobe Premiere Pro 2026.app/Contents/Settings/IngestPresets/Transcode/Match Source - Apple ProRes 422.epr` with `exportAsMediaDirect` (10-bit 4:2:2; used on uski and goddess). Then `scripts/encode_master.py` makes the H.264 deliverables and the phone copy.
+- The H.264 presets below gave 9.2–9.5 Mb/s Main profile, which looked blocky on the iPhone. Use them only for a quick internal check:
 - `/Applications/Adobe Premiere Pro 2026/Adobe Premiere Pro 2026.app/Contents/Settings/IngestPresets/Transcode/Match Source - H.264 High Bitrate.epr`
 - `/Applications/Adobe Media Encoder 2026/Adobe Media Encoder 2026.app/Contents/MediaIO/systempresets/4E49434B_48323634/00 - Match Source - High bitrate.epr`
 

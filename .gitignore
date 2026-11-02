@@ -34,3 +34,6 @@ assets/**/*
 **/Adobe Premiere Pro Auto-Save/
 **/Adobe Premiere Pro Audio Previews/
 **/Adobe Premiere Pro Video Previews/
+
+# Python bytecode
+__pycache__/

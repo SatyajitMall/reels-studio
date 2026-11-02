@@ -33,19 +33,19 @@
 - **Mixed version:** −14 LUFS ± 2, true peak ≤ −1 dBTP (`verify_render.py`; `--fix-loudness`). The IG version without music is judged on peak only.
 
 ## Colour and texture
-- **Grade toward the warm, deep look of night festivals:** gold midtones (hue 30–45° on warm shots, `colour_report.py --gold`), blacks kept deep, blue accent shots kept clean (G−M ≈ 0).
-- **Look choice:** preview the film-stock looks (`look_preview.py`, effects-playbook §A3).
+- **Camera-true first** (effects-playbook §A0). Night festival footage already carries warm gold: keep it where the camera has it (hue 30–45° on warm shots, `colour_report.py --gold`), keep blue accent shots clean (G−M ≈ 0), and don't deepen blacks beyond the camera's.
+- **Look choice: optional** (effects-playbook §A3). Only when the director picks a look over camera-true on the Round 2 sheet, preview the film-stock looks (`look_preview.py`):
   - On night footage, `Kodak 5218 Kodak 2383` measured the best fit for gold: hue +1.5° toward gold, blacks kept deep.
   - Warm Film (`Fuji F125 Kodak 2393`) is proven on both reels but pushes toward red.
   - Looks printed to 2395 lift the blacks: use them only when the brief wants a faded memory.
 - **Warm looks push red:** fix it with the look layer's temperature plus a little green tint, never by cooling the clips.
-- **Grain 10–15 %, faded with the picture.** *Source:* 40 % was "too much grain" in my-reel round 2.
+- **Grain: none on night phone footage, ≤ 5 % otherwise, faded with the picture.** *Source:* 40 % was "too much grain" in my-reel round 2; goddess's 10 % added to what the director called over-processed.
 - **Denoise dark shots** in After Effects (`denoise`) when the frame scan or your eye shows noise. *Source:* my-reel v7, −12…−29 % dark-area noise.
 
 ## AI shots
 - Rarely needed: both reels had **no gap** the footage couldn't fill. If one is needed, follow the policy in `motion-and-ai.md` §3, and never generate the idol or the crowd.
 
 ## QA thresholds for this style (review gate)
-- Shot luma within ±0.03 of the montage median, unless a shot is a deliberate dark establisher or a blue accent.
+- Every shot within its camera bands (`camera_fidelity.py`, effects-playbook §A0). Adjacent shots within ±0.04 luma unless their camera files differ more, a shot is a deliberate dark establisher, or it's a blue accent.
 - No phones, raised hands with screens, or bald heads drifting into hero frames. Reframe or mask them. *Source:* the most common review finding on puja-night-2.
 - Every cut within ±2 frames of its beat, except deliberate off-grid holds noted in the brief.

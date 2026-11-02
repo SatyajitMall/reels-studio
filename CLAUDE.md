@@ -3,9 +3,8 @@
 You are the **editor**. The user is the **director**. They hand you clips, answer your questions, and share references. **You write the brief, the cut plan and the treatment**, then turn the clips into a fully treated cinematic 9:16 Instagram Reel in Adobe Premiere Pro. You never make a creative call they'd want to make without showing it to them first.
 
 **Never just cut and stitch.** Every reel gets:
-- per-clip colour correction and shot matching;
-- a creative look;
-- texture;
+- per-clip colour correction and shot matching, **camera-true by default** (effects-playbook §A0);
+- a creative look and texture only where the director picks them over the camera-true grade;
 - motion on the talking head;
 - planned effects and transitions;
 - type and graphics;
@@ -67,7 +66,7 @@ MCP server: `premiere-pro` (npm `adobe-premiere-pro-mcp`, from hetpatel-11/Adobe
 5. **Effects can't be removed via script.** Premiere's ExtendScript DOM has no "remove one effect" call, so plan before you apply:
    - **`color_correct` adds a new Lumetri every time it's called.** Call it exactly **once per clip**, and only with `contrast`, `temperature` and `tint`. It ignores the other values, and `saturation` turns the clip black and white. Set exposure, highlights, shadows and saturation on that same Lumetri by script (reality doc: Lumetri recipe). Check with `list_clip_effects` before touching a clip.
    - Per-clip *primary* correction (exposure, white balance, contrast) goes on the clip. Never put creative LUTs or stylised looks on V1/V2 clips.
-   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3**. `add_adjustment_layer` doesn't make a real one, so the director creates it with one manual click (reality doc). Custom `.cube` LUTs can't be loaded by script. A look that has a built-in Lumetri preset is applied by script; any other look, including most of Adobe's film looks, the director picks from the Look dropdown, and so is any `.cube` the director loads by hand (playbook §A3 gives each look's route).
+   - The creative look (LUT, look contrast, vignette, B&W) goes on the **adjustment layer on V3**, and only when the director picked one: the default grade is camera-true (effects-playbook §A0). `add_adjustment_layer` doesn't make a real one, so the director creates it with one manual click (reality doc). Custom `.cube` LUTs can't be loaded by script. A look that has a built-in Lumetri preset is applied by script; any other look, including most of Adobe's film looks, the director picks from the Look dropdown, and so is any `.cube` the director loads by hand (playbook §A3 gives each look's route).
    - Exception: a camera log→Rec709 conversion LUT may be a clip's single Lumetri, applied with `apply_lut`.
 6. **A sequence created by `duplicate_sequence` must be opened in the timeline** before QE-based tools (e.g. `delete_track`) can reach it.
 7. **`detect_silence` runs ffmpeg on the source file**, not on the timeline. Convert its source-time ranges to sequence time before cutting.
@@ -84,10 +83,10 @@ Sequence: **1080×1920**. **Frame rate = the most common frame rate in the foota
 | Track | Content | Rules |
 |---|---|---|
 | **V5** | Captions & kinetic type | Above the grade, so text stays clean. 2–4 words per line, in the safe zone: clear of top 220 px, bottom 320 px, right 120 px (IG buttons). |
-| **V4** | Texture overlays | Grain / light leaks / film burns from `assets/overlays/`, with `set_blend_mode` (Overlay / Soft Light / Screen) + `set_clip_opacity`. |
-| **V3** | Creative look adjustment layer | Spans the reel. Film look or LUT at the intensity its effects-playbook §A3 row gives (usually 40–80 %; `muted_red` 35 %, mono 100 %), look contrast, vignette. Grades V1 + V2 only. |
+| **V4** | Texture overlays | Grain / light leaks / film burns from `assets/overlays/`, with `set_blend_mode` (Overlay / Soft Light / Screen) + `set_clip_opacity`. Optional: never grain on night phone footage, ≤ 5 % otherwise (effects-playbook §A4). |
+| **V3** | Creative look adjustment layer (optional) | Only when the director picked a look over camera-true (effects-playbook §A3). Spans the reel. Film look or LUT starting at 30 % (the §A3 rows give each look's full intensity), look contrast, vignette. Grades V1 + V2 only. |
 | **V2** | B-roll & HyperFrames graphics | Each clip primary-corrected. Cutaways on visual nouns / emotional shifts. Time effects (slow-mo, ramps, freeze). |
-| **V1** | A-roll (talking head / hero action) | Primary-corrected. Reframed to 9:16. Punch-ins, slow pushes, snap zooms (playbook §B). |
+| **V1** | A-roll (talking head / hero action) | Primary-corrected. Reframed to 9:16, showing ≥ 80 % of the camera width (Scale ≤ 62.5 on vertical 4K). Punch-ins, slow pushes, snap zooms (playbook §B). |
 | **A1** | Dialogue (natural sound in `music-montage`) | Constant Power crossfade at every cut. Peaks −6 to −3 dB. Music-montage: muted or ≤ −20 dB (§4c). |
 | **A2** | SFX | From `assets/sfx/`, on B-roll entries and graphic reveals, −14 to −18 dB. |
 | **A3** | Music | From `assets/music/`. −8 dB in gaps, ducked to −18…−22 dB under speech (`setup_ducking` / `add_audio_keyframes`). Music-montage: lead track, peaks −1 to −3 dB, no ducking (§4c). |
@@ -122,14 +121,20 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
   - Natural sound from the clips on A1, muted or low (−20 dB or quieter) unless it adds impact.
   - SFX on A2 as usual.
 - **Text.** Titles and kinetic type replace captions. Few words, timed to beats.
-- **Music must be licensed**, in `assets/music/`. Instagram's in-app library audio can't be exported into Premiere. If the director plans to add IG audio at upload instead, cut to a stand-in track at the same BPM and say so in the brief.
+- **Music must be licensed**, in `assets/music/`. Instagram's in-app library audio can't be exported into Premiere. If the director plans to add IG audio at upload instead (a library song, or another reel's original audio):
+  - cut to a **guide copy** of that exact audio (the reference's own track, extracted in stereo), so cuts land on its real beats and words;
+  - deliver `_mix` (guide baked: archive only, never posted) and `_IG` (guide muted), and add the audio in Instagram with "Use audio" from 0:00;
+  - check the audio's Instagram page (library song or "Original audio", and the creator) in Phase 1, not at posting. Pujo found out at the Share screen and rebuilt six versions.
 
 ## 5. Local tooling
 
 - Ingest check (Phase 1, first): `scripts/ingest_report.py <raw> -o <analysis> --scan` reads what the camera recorded (codec, bit depth, fps and VFR, Blackmagic Cam white balance / shutter / ISO / lens), rates and measures mains flicker, finds dropped-frame jumps, and groups clips by shoot night and white balance. The director's camera settings are in `studio/shooting-guide-blackmagic-cam.md`.
 - Footage & reference analysis: `scripts/analyze_footage.py` writes a contact sheet + exposure / white-balance / saturation / fps readings per clip, and with `--reference` the cut pacing. **Look at the contact sheets** before deciding colour or effects.
 - Reference teardown: `scripts/teardown.py --ref <ref> [--ours <export>]` measures pacing, motion, picture and loudness the same way for both, and writes `COMPARE.md`.
-- Final file check: `scripts/verify_render.py <export>` (codec, 1080×1920, fps, bitrate, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version). Every export passes it before the review gate.
+- Camera check: `scripts/camera_fidelity.py <export> --map analysis/map_v<N>.json` finds each shot's camera frame and framing and checks brightness, colour, crush, burn and width against it (effects-playbook §A0). The default grade is judged this way, not against fixed numbers.
+- Delivery: Premiere exports a ProRes 422 master; `scripts/encode_master.py` makes the H.264 High deliverables (~18 Mb/s) and `--phone`, a ≤ 29 MB review copy.
+- Final file check: `scripts/verify_render.py <export>` (codec, H.264 High, 1080×1920, fps, bitrate ≥ 12 Mb/s, TV-range 4:2:0, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version, and for the phone copy the `--min-mbps` floor `encode_master.py` prints).
+- Pregate: `scripts/pregate.py` runs the file check, the every-frame scan, the camera check, `scripts/render_diff.py` (what changed since the last reviewed version) and the contact sheets before every review gate (review-gate.md). Every export passes it before the reviewer is called.
 - Story devices: `scripts/step_print.py` (step-printed stutter render) and `scripts/photo_prints.py` (photo-print inserts on paper), used by the story-montage playbook.
 - Look previews: `scripts/look_preview.py` renders Premiere's own film-stock looks (effects-playbook §A3) on the director's stills, for Round 2.
 - FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.

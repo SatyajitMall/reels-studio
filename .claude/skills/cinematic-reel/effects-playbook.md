@@ -10,15 +10,26 @@ Named moves the editor can propose in the brief's **Treatment** section. Every r
 
 ## A. Colour (three stages, always in this order)
 
+### A0. The default: camera-true (v0.8)
+The director judges every reel against what the camera recorded. Five reels say the same thing: "over processed instead of looking HD" (goddess v6c), "why does everything look so over-processed" (Pujo v11). Pujo's posted final and goddess v10b were graded close to the camera and approved. So the default grade **corrects the camera's faults and stops there**:
+- **Each shot is judged against its own camera file at the same framing**, never against a fixed number. `scripts/camera_fidelity.py` measures it (skill Phase 4):
+  - brightness at or a little above the camera's. Lift dark night shots only until burn starts: any channel at 255 beyond the light sources on ≤ 2 % of the frame. Fixed targets (reel mean 0.40, no stretch under 0.30) burnt goddess v9c's night shots ("0:22 is burnt"); they're reported, never aimed at;
+  - saturation within ±5 % and midtone hue within ±3° of the camera;
+  - blacks crushed no more than the camera's own; whites never pulled below the camera unless they clip;
+  - deliberate departures (a cast fix, blown highlights recovered) are named in the brief and passed to `--allow`.
+- **No creative look by default** (§A3), and no Hue vs Sat curve.
+- **No extra sharpening.** Light denoise only on shots whose noise shows at phone size (After Effects `denoise`, `after-effects.md`).
+- **Texture is optional** (§A4): never grain on night phone footage; elsewhere ≤ 5 %, only if the brief has it.
+
 ### A1. Primary correction: per clip, on the clip itself
-Goal: neutral, correctly exposed footage with natural skin.
+Goal: neutral, correctly exposed footage with natural skin, as close to the camera file as its faults allow (§A0). Fix casts, blown or crushed areas and dark night exposure; don't restyle.
 - Read `analysis/summary.md` and look at each `contact.png` first.
 - Call `color_correct` **exactly once per clip**, with **only `contrast`, `temperature` and `tint`**. Every call adds a *new* Lumetri effect, and it can't be removed. It ignores brightness, highlights and shadows, and `saturation` turns the clip black and white.
 - Then set Exposure (stops), Highlights, Shadows and Basic Saturation (0–200, 100 = neutral) by ExtendScript on that same Lumetri, and keep Creative Saturation at 100. See the reality doc's Lumetri recipe.
 - Never call `color_correct` again on that clip. Note that `set_effect_property` hits only the first property with a given name.
 - The "brightness +N" starting points below were written for `color_correct`. Exposure is in stops and there's no verified conversion, so start small (about +0.3 to +0.5 stops), then adjust by render.
 - Starting points from the analyser:
-  - exposure < 0.30 → brightness +15…+30, shadows +10…+20
+  - the analyser reads the clip as dark → a small lift (about +0.3 to +0.5 stops), shadows +10…+20, then check `camera_fidelity.py`: lift only until burn starts (§A0)
   - "flat / log-like" → contrast +20…+35, saturation +10…+20 (or the camera's log→Rec709 LUT, applied once as the clip's only Lumetri via `apply_lut`)
   - warm cast → temperature −10…−25; cool cast → temperature +10…+25
   - green tint → tint +5…+15 (toward magenta); magenta tint → tint −5…−15
@@ -26,9 +37,11 @@ Goal: neutral, correctly exposed footage with natural skin.
 - Clips shot on the same setup: correct one, then `copy_effects_between_clips` to the rest.
 
 ### A2. Shot matching
-Re-run `scripts/analyze_footage.py` on a frame export, or compare contact sheets. Adjacent shots should land within about ±0.04 exposure and ±0.03 warm/cool of each other. Tweak with `set_effect_property`.
+Re-run `scripts/analyze_footage.py` on a frame export, or compare contact sheets. Adjacent shots should land within about ±0.04 exposure and ±0.03 warm/cool of each other, **without leaving their camera bands** (§A0): when matching would push a shot past them, let the neighbours differ as the camera recorded them. Tweak with `set_effect_property`.
 
 ### A3. Creative look: V3 adjustment layer only
+**Optional, off by default (v0.8).** Use a look only when the director picks it over the camera-true grade on a camera | now | proposed sheet at phone size, plus a short phone sample of the hardest shots (skill Round 2). Stills alone weren't enough: goddess approved a baked look on stills and rejected it on the full reel. When a look is on, start at **30 % Creative Intensity**; the table's intensities show each look's full character. `camera_fidelity.py --look` then reports its colour shifts as WARN, while brightness, crush, burn and framing still FAIL.
+
 One adjustment layer across the reel. `add_adjustment_layer` doesn't make a real one, so the director makes it with one manual click (reality doc). Place it on V3 with `add_to_timeline`, then on that layer:
 - **look:** use the route the film table gives for the look.
   - **preset**: run `app.project.applyLumetriPreset("<preset name>")` on the selected layer clip.
@@ -45,11 +58,11 @@ One adjustment layer across the reel. `add_adjustment_layer` doesn't make a real
 Look presets to propose:
 | Name | Recipe |
 |---|---|
-| **Warm Film** | warm LUT (Kodak 2383-style) 60 %, contrast +15, saturation −10, temp +8, soft vignette, grain on V4 |
+| **Warm Film** | warm LUT (Kodak 2383-style) 60 %, contrast +15, saturation −10, temp +8, soft vignette, grain per §A4 |
 | **Teal & Orange** | contrast +20, push shadows teal / highlights orange via LUT, skin kept natural, saturation +5 |
 | **Moody Desat** | saturation −30, contrast +25, temp −8, crushed blacks (shadows −15), heavy vignette |
 | **Clean Bright** | exposure +5, contrast +10, saturation +10, no grain: creator / lifestyle look |
-| **Mono Drama** | `Black & White` on the adjustment layer, contrast +30, grain heavy |
+| **Mono Drama** | `Black & White` on the adjustment layer, contrast +30, grain per §A4 |
 | **Match Reference** | measure the reference with the analyser, mirror its exposure / contrast / warmth numbers |
 
 **Scriptable built-in look presets** (`getAllLumetriPresetsList()` lists all 325):
@@ -76,7 +89,7 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 
 | id | Premiere look (route) | Intensity | Measured character | Lumetri on the V3 layer (by occurrence) | Best for |
 |---|---|---|---|---|---|
-| `k500t_2383` | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` | 50 % | Gentle: contrast +0.035, sat +0.013, warmth +0.018. **Hue +1.5° toward gold**, deep blacks kept, highlights roll off (clip 1.0 → 0.5 %) | Contrast +10, Shadows −5, vignette −0.8. No tint fix needed | **Night festivals and pandals: default night look for `cinematic-montage`** |
+| `k500t_2383` | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` | 50 % | Gentle: contrast +0.035, sat +0.013, warmth +0.018. **Hue +1.5° toward gold**, deep blacks kept, highlights roll off (clip 1.0 → 0.5 %) | Contrast +10, Shadows −5, vignette −0.8. No tint fix needed | **Night festivals and pandals**: the best-measured look for gold at night, when the director wants one |
 | `k500t_2395` | dropdown: `Kodak 5218 Kodak 2395 (by Adobe)` | 50 % | **Lifts blacks** (crush 5.5 → 0 %), brighter +0.028, contrast −0.019, sat −0.038: a soft, faded print | Leave the fade for a memory feel; for depth, Blacks −10 and Contrast +10 | Calm, nostalgic and memory sections |
 | `k250d_3510` | dropdown: `Kodak 5205 Fuji 3510 (by Adobe)` | 50 % | Clean and warm: contrast +0.024, sat +0.027, warmth +0.034, hue +1.6° | Contrast +5 | Daylight people and street |
 | `f125_2393` | preset: `Fuji F125 Kodak 2393 (by Adobe)` (verified) | **40–50 %** | Darker −0.019, contrast +0.039, sat +0.051, warmth +0.048, **hue −1.0° toward red** (−2.4° on the arches), crush 7.4 % | **Verified recipe** (my-reel, puja-night-2): Contrast +15, Shadows −10, Basic Saturation 85–95, Temperature +4 and Tint −10 against the red push, vignette −0.8…−1.0. Check with `colour_report.py --gold` | Warm Film: rich warm night and day |
@@ -84,7 +97,7 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 | `eterna_3510` | preset: `Fuji Eterna 250D Fuji 3510 (by Adobe)` | 40–50 % | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
 | `eterna_2395` | preset: `Fuji Eterna 250d Kodak 2395 (by Adobe)` | 50 % | **The brightest** (+0.039), lifted blacks, sat −0.024: airy and soft | Exposure −0.1 if skies clip | Gentle daytime, morning, nostalgia |
 | `reala_2393` | preset: `Fuji Reala 500D Kodak 2393 (by Adobe)` | 40–50 % | Like `eterna_3510`: sat +0.060, warmth +0.057, crush 7.2 % | Shadows +5 if dark detail drops | Punchy colour with neutral hue |
-| `mono_500t` ≈ | dropdown: `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain on V4 15–20 % | Mono Drama: a black-and-white section or reel |
+| `mono_500t` ≈ | dropdown: `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain per §A4 | Mono Drama: a black-and-white section or reel |
 | `mono_eterna` ≈ | dropdown: `Monochrome Fuji ETERNA 250D Kodak 2395 (by Adobe)` | 100 % | Softer, brighter B&W | Contrast +15 | Gentle B&W memories |
 | `cinestill` ≈ | dropdown: `Kodak 5218 Kodak 2383 (by Adobe)` + **halation bake** | 50 % | 500T plus a soft red bloom around point lights. Visible on bulbs against dark; **subtle on scenes that are already warm**. Clip stays ≤ 2 % after the look | As `k500t_2383`. Halation is baked per shot **before** Premiere (below) | Neon and bulb-lit night, concerts |
 | `bleach` ≈ | dropdown: `SL BLEACH NDR` | 40–60 % | Contrast +0.094, sat −0.113, cooler −0.066, crush 8.6 % | Shadows +5 to keep detail; no skin warmth to rely on | Gritty, intense moments. Not for idols or faces that need warmth |
@@ -130,7 +143,7 @@ ffmpeg -i <clip> -an -filter_complex "format=gbrp,split[c][h];[h]colorlevels=rim
 Grain, dust, light leaks and film burns from `assets/overlays/` go on V4 in a blend mode:
 - `set_blend_mode` is broken, so set the mode by script with the enum: Overlay 19, Soft Light 23, Screen 22 (reality doc).
 - **Fade V4 texture together with V1 at every fade to or from black.** Grain in Overlay over black reads as a grey veil (frame luma 0.24 instead of about 0 in the pilot).
-- grain → Overlay or Soft Light, `set_clip_opacity` **10–15 % by default**; go higher only if the director asks. The pilot's 40 % was "too much grain" on dark 8-bit footage that's already noisy. Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
+- grain → Overlay or Soft Light, `set_clip_opacity`: **optional; none on night phone footage, ≤ 5 % otherwise (v0.8)**; more only if the director asks. The phone's 8-bit night footage already carries noise: the pilot's 40 % was "too much grain", and goddess's 10 % added to what the director called over-processed. Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
 - light leaks → Screen, 40–80 %, on transitions or emotional beats
 - film burn / flash → Screen or Add, 3–8 frames, on hard cuts
 - green- or blue-screen stock elements (smoke, sparks, petals) → key them first into a ProRes 4444 alpha overlay with the `ffmpeg-color-grading-chromakey` skill (sample the screen colour, `despill`), then place them on V4/V5 in Normal mode
@@ -150,6 +163,16 @@ Don't grade the reel or its export there.
 
 **Handheld footage:** no impact shake and no snap zoom. On top of real hand movement they read as jumps or shakes, which is how the director described them in the pilot. Put push/pull on the static holds from `motion.json` instead, and stabilise handheld moves (skill Phase 5).
 
+**Framing (v0.8 default): show at least 80 % of the camera frame's width.** Every enlargement magnifies the phone's 8-bit night noise. Goddess v8 showed about 67 % and looked "horrible" next to the camera file, while Pujo's approved final showed 86 %.
+- For the director's vertical 4K clips (2160 wide) in the 1080 sequence: **Scale ≤ 62.5 %**. Width shown = 50 / Scale.
+- Pushes are gentle, about +6 points of Scale over the shot (e.g. 56 → 62), in the subject's direction.
+- Tighter only on a shot the brief names with its reason (a face, a detail), and never under 70 % of the width (Scale 71).
+- **Named moves** (a punch-in, a snap zoom, creator-explainer's emphasis zooms) may go tighter for their few frames. The floor applies to the shot's base framing; `camera_fidelity.py` samples mid-shot, so sample outside the move (`--at`) or list the shot in the brief's framing exceptions.
+- Landscape sources can't reach 80 % in 9:16: frame them for the subject and say so in the brief.
+- `camera_fidelity.py` reports the width shown per shot (WARN under 80 %, FAIL under 70 %).
+
+The Scale numbers in the table below assume 1080-wide footage; on 4K vertical clips, add the move to the framing scale (Slow push 56 → 62, not 100 → 106).
+
 | Move | Recipe | Use for |
 |---|---|---|
 | **Punch-in** | razor at an emphasis word, Motion Scale 100→108 % on the second half (hard, no keyframe) | stressing a key word, hiding a jump cut |
@@ -163,7 +186,7 @@ Don't grade the reel or its export there.
 
 | Move | Recipe | Notes |
 |---|---|---|
-| **Slow-mo B-roll** | `speed_change` 0.4–0.8 + `set_frame_blend` (Optical Flow) | Best with source fps ≥ 50. At 25 fps, Optical Flow slow-mo works on **calm shots** (holds, slow pans, little crossing motion), but check it in motion for warping |
+| **Slow-mo B-roll** | **Source ≤ 30 fps (all the director's footage so far): After Effects Timewarp, Pixel Motion, at camera size** (`after-effects.md`), swapped in at 100 % with the Premiere framing re-applied. Premiere Optical Flow (QE `setSpeed` + `setTimeInterpolationType(2)`) only on calm shots, checked in motion | Goddess v10: Premiere Optical Flow fell back to frame blends on a night crowd (a doubled arm, a 12.5 Hz sharp/soft pulse) and failed review; AE Timewarp on the same shots passed. Speed-changed clips have reality-doc gotchas (in/out points, Scale keys). True slow-mo needs ≥ 50 fps footage |
 | **Speed ramp** | razor the clip into parts → `speed_change` on the fast part. With this MCP it **keeps the timeline length and uses more source** (2.0 = 2× source) → `slip_edit {deltaSeconds}` the next part forward by the extra source used, so motion stays continuous | Real time-remap curves aren't scriptable. Recipe verified in `my-reel`; recheck if the MCP changes |
 | **Freeze + text** | `freeze_frame` on the beat, then a title / HyperFrames card on top | "this is me 2 years ago" moments |
 | **Rewind** | `reverse_clip` 0.3–0.6 s + rewind SFX | callbacks, "wait, go back" |
