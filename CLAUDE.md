@@ -15,7 +15,7 @@ The menu is `.claude/skills/cinematic-reel/effects-playbook.md`. **Which** moves
 ## 0. How a reel moves through this studio
 
 ```
-interview director  →  analyse clips + references  →  YOU write brief.md + EDL  →  ⏸ approve
+interview director  →  analyse clips + references  →  YOU write brief.md + EDL  →  storyboard + offline preview  →  ⏸ approve
   → rough cut (V1/A1) → colour: correct → match → look → texture (V1/V2, V3, V4)
   → motion, effects, B-roll, graphics, captions (V1/V2/V5) → sound design (A2/A3)
   → QA + export → ⏸ notes → new version … → Instagram package
@@ -105,9 +105,10 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - **Kill dead air** > 0.25 s (unless it's a deliberate dramatic pause the director wants), false starts, fillers (um, uh, like, you know), and repeated takes. Default to the last, most confident take.
 - **J-cuts**: audio leads video by 2–4 frames on scene changes to keep it from feeling robotic.
 - **Every cut lands on a word boundary** from the word-level transcript. Use `timeline_view.py` to visually check any cut that feels risky (filmstrip + waveform PNG).
+- **Cut on the clause onset, by the waveform.** Whisper's word starts can run early (about 0.3 s on the goddess VO): find the clause in the transcript, then put the cut 0–2 frames before the speech starts on the waveform.
 
 ### 4c. `music-montage`: no speech, the music drives the timing
-- **No transcription, no ElevenLabs.**
+- **No transcription.**
 - **Get the beat grid first.** Run `scripts/gemini_audio_and_beat_analyzer.py --music <track> -o projects/<reel>/analysis`. It gives BPM, every beat, every 4th beat and the strongest accents (`analysis/beats.json`). The hook and the EDL are planned on it.
 - **Cuts land on beats.**
   - Section changes and hero shots go on accents or every 4th beat.
@@ -131,6 +132,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Ingest check (Phase 1, first): `scripts/ingest_report.py <raw> -o <analysis> --scan` reads what the camera recorded (codec, bit depth, fps and VFR, Blackmagic Cam white balance / shutter / ISO / lens), rates and measures mains flicker, finds dropped-frame jumps, and groups clips by shoot night and white balance. The director's camera settings are in `studio/shooting-guide-blackmagic-cam.md`.
 - Footage & reference analysis: `scripts/analyze_footage.py` writes a contact sheet + exposure / white-balance / saturation / fps readings per clip, and with `--reference` the cut pacing. **Look at the contact sheets** before deciding colour or effects.
 - Reference teardown: `scripts/teardown.py --ref <ref> [--ours <export>]` measures pacing, motion, picture and loudness the same way for both, and writes `COMPARE.md`.
+- Planning and previews: `scripts/pick_sheet.py` (6 frames per clip from the analysis folders; the whole pool with `--all`), then, from `analysis/edl_v<N>.json`, `scripts/storyboard.py` (in / mid / out per shot through its framing, Instagram UI bands shaded) and `scripts/preview_edl.py` (the cut off the camera files with overlays and audio, in minutes, no Premiere; `--only` for a sample of chosen shots). Pace, picks and framing are settled on previews; the grade on the Premiere export.
 - Camera check: `scripts/camera_fidelity.py <export> --map analysis/map_v<N>.json` finds each shot's camera frame and framing and checks brightness, colour, crush, burn and width against it (effects-playbook §A0). The default grade is judged this way, not against fixed numbers.
 - Delivery: Premiere exports a ProRes 422 master; `scripts/encode_master.py` makes the H.264 High deliverables (~18 Mb/s) and `--phone`, a ≤ 29 MB review copy.
 - Final file check: `scripts/verify_render.py <export>` (codec, H.264 High, 1080×1920, fps, bitrate ≥ 12 Mb/s, TV-range 4:2:0, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version, and for the phone copy the `--min-mbps` floor `encode_master.py` prints).
@@ -139,7 +141,7 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Look previews: `scripts/look_preview.py` renders Premiere's own film-stock looks (effects-playbook §A3) on the director's stills, for Round 2.
 - FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.
 - SFX prep: `scripts/sfx_prep.py` (trim leading silence, peak −3 dBFS) before placing sounds. Generated or stock clips: `scripts/conform_clip.py` (frame rate, 1080×1920, colour match to the footage).
-- Transcription: `.vendor/video-use/helpers/transcribe.py` (ElevenLabs Scribe — needs `ELEVENLABS_API_KEY` in `.env`). Wrapped by `scripts/transcribe_reel.sh <reel-name>`.
+- Transcription: `scripts/transcribe_reel.sh <reel-name> [files]`, local Whisper by default (`scripts/transcribe_local.py`: free, offline, word-level, the same JSON as Scribe). `--scribe` uses ElevenLabs Scribe (`.vendor/video-use/helpers/transcribe.py`) when `.env` has a working `ELEVENLABS_API_KEY`.
 - Packing: `pack_transcripts.py` → `projects/<name>/transcripts/takes_packed.md`. Read this, not raw frames.
 - Cut inspection: `.vendor/video-use/helpers/timeline_view.py <video> <start> <end> -o out.png`.
 - Watching a video without playing it: `scripts/watch.py` (2 fps contact sheets per shot, with the audio waveform). The **review gate** (skill Phase 7b, `.claude/skills/cinematic-reel/review-gate.md`) runs the `reel-reviewer` agent on a different model before every Checkpoint 2.

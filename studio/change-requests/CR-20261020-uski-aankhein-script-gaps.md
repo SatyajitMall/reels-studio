@@ -6,7 +6,7 @@
 | Arch version | 0.6.0 |
 | Type | script · skill |
 | Severity | workaround |
-| Status | partly done (v0.7.0, v0.8.0) |
+| Status | partly done (v0.7.0, v0.8.0, v0.9.0) |
 
 ## What happened
 Phase 0–2 of a music-montage pilot where the soundtrack is the reference's own audio, the footage is a 5-shoot pool, and one stock clip is used as a blended layer.
@@ -103,4 +103,9 @@ Phase 0–2 of a music-montage pilot where the soundtrack is the reference's own
 ## HQ decision (v0.8.0, 2026-11-01)
 - **(a) Delivery path: done.** Premiere exports a ProRes 422 master and `scripts/encode_master.py` encodes from it. `verify_render.py` fails Main profile, < 12 Mb/s and yuvj420p. On goddess v10b, `aq-mode 3` gained nothing over CRF 16 at the same cap (PSNR 42.7 vs 43.0 dB), so it isn't in the default.
 - **(1) `teardown.py --ours`: done** in v0.7.0.
+- Everything else stays open.
+
+## HQ decision (v0.9.0, 2026-11-04)
+- **(4) 9:16 reframe preview: done** in `scripts/preview_edl.py` and `scripts/storyboard.py`. Framing is in Premiere's terms (Scale, Position, Rotation), with keys for crop-follow and `rate: 0` for a freeze. Eye-line centring stays a per-reel calculation that writes those values.
+- **(24) Preview colour range: done.** Previews encode through `encode_master.py`'s settings (TV range, BT.709-tagged).
 - Everything else stays open.

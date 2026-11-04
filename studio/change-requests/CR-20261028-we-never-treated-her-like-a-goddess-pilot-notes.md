@@ -6,7 +6,7 @@
 | Arch version | 0.7.1 |
 | Type | script · skill · rule |
 | Severity | workaround |
-| Status | partly done (v0.7.3, v0.8.0) |
+| Status | partly done (v0.7.3, v0.8.0, v0.9.0) |
 
 First story-montage pilot (external English VO from a reference reel, 409 clips across 8 shoot folders). Phase 0–1 findings; more will be appended as the reel goes on.
 
@@ -157,3 +157,13 @@ First story-montage pilot (external English VO from a reference reel, 409 clips 
 - **38, 39 (slow motion):** reality-doc rows for the speed-changed in/out points, the Scale keys and Optical Flow. After Effects Timewarp at camera size is the slow-mo default; `ae_roundtrip.py` feeds AE an upright trim of rotated phone clips.
 - **34 (partly):** SKILL Phase 4 says to disable an inherited V3 layer and its Hue vs Sat curve when there's no look.
 - **Still open:** 1–7, 9–11, 13, 15, 17–25, 27–29, 31, 32, 35 and 40, most of them planned in Batches B and C; and from 39, a `vector_detail` setting for the AE `timewarp` op (backlog).
+
+## HQ decision (v0.9.0, 2026-11-04)
+**Items 1, 5, 7, 11, 25 and 40 accepted, and 23 in part, v0.9.0 (Batch B of the v0.8 plan, with the director's go-ahead).**
+- **1 (transcription):** local Whisper is the default. New `scripts/transcribe_local.py` (faster-whisper in `.venv` via `setup.sh`, audio decoded with ffmpeg as this reel did) writes Scribe-shaped JSON; `transcribe_reel.sh` takes named files (an external VO), `--model`, `--language`, and `--scribe` for ElevenLabs. On this reel's VO: 78 words in 4 s.
+- **5, 40 (existing audio):** SKILL Round 1 question 7 asks whether the soundtrack is existing Instagram audio; Phase 1 then checks its page and the creator's OK.
+- **7, 11 (storyboard, pick sheets):** new `scripts/storyboard.py` (in / mid / out through the EDL's framing, overlays composited, Instagram UI bands shaded, fps / speed / width flags, the line each shot carries) and `scripts/pick_sheet.py` (full stems, shoot date and time, sample times, `--all` for the whole pool).
+- **25 (shots that don't show their line):** SKILL Phase 2 line table (one row per clause, searched across the whole pool), the brief template's line table, and a "Pictures and words" major in the reviewer's checklist.
+- **23 (Whisper onsets early), in part:** CLAUDE.md §4b says to place each cut on the waveform, 0–2 frames before the speech. The speech-band onset refiner isn't built yet (backlog).
+- **Also from this reel:** the offline preview (`scripts/preview_edl.py`) makes the "preview as ffmpeg crops before Premiere" step from item 26 a studio tool.
+- **Still open:** 2–4, 6, 9, 10, 13, 15, 17–22, 24, 27–29, 31, 32, 35, most of them in Batch C; and from 39, `vector_detail`.

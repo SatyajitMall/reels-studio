@@ -48,6 +48,12 @@
 | Clip | Role (A-roll / B-roll / hero) | Notes from the analysis |
 |---|---|---|
 
+### Line table (VO and dialogue reels)
+One row per spoken clause, searched across the whole pool (`scripts/pick_sheet.py --all`). One subject per line; no person twice unless it's a callback.
+
+| Line | Shot | What in the frame shows it |
+|---|---|---|
+
 ## 6. Must-haves / must-NOT-haves
 -
 

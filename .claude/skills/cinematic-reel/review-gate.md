@@ -6,7 +6,7 @@ Why: in the my-reel pilot, every defect the director or a later frame-by-frame c
 
 ## Steps
 0. **The brief must be current.** Before the gate, update `brief.md` so it describes the plan the director has approved *so far*: structure, runtime, looks, type, must-haves. Log changes in its changelog section. The first gate run on my-reel judged v8 against the v1 brief and reported "brief drift" instead of real problems.
-1. **Shot map:** write `analysis/map_v<N>.json` in **reel time** from this version's cut (skill Phase 3), one object per shot:
+1. **Shot map:** write `analysis/map_v<N>.json` in **reel time** from this version's cut (skill Phase 3), one object per shot. For an offline preview, the EDL it was rendered from is the map, and the pregate takes `--profile ig-quiet`:
    ```json
    [{"name": "01_C010", "start": 0.00, "end": 2.32, "clip": "projects/<reel>/raw/b-roll/A001_10211852_C010.mov", "src_in": 0.00, "rate": 1.0},
     {"name": "05_C051", "start": 8.40, "end": 10.24, "clip": "projects/<reel>/raw/b-roll/A001_10212101_C051.mov", "src_in": 4.00, "rate": 0.553},

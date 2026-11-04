@@ -14,8 +14,8 @@ You direct, Claude edits, in Adobe Premiere Pro. You drop in your clips, answer 
    ```bash
    bash setup.sh
    ```
-   This installs the Premiere MCP bridge, ffmpeg, the transcription tools, and the HyperFrames and Instagram skills.
-2. Put your ElevenLabs API key in `.env` (`ELEVENLABS_API_KEY=...`). Transcription needs it for word-accurate cuts.
+   This installs the Premiere MCP bridge, ffmpeg, local Whisper for word-level transcripts, and the HyperFrames and Instagram skills.
+2. Optional: an ElevenLabs key in `.env` (`ELEVENLABS_API_KEY=...`). Transcripts use local Whisper without it; the key only adds `transcribe_reel.sh --scribe`.
 3. In **Premiere Pro** (one time):
    - Settings → Plugins → turn on **UXP developer mode**, then restart Premiere
    - Window → Extensions → **MCP Bridge (CEP)**
@@ -46,7 +46,7 @@ scripts/new_reel.sh gym-morning-routine
 Claude will:
 1. **Ask you a few quick questions**: the idea, the goal, references, then look and pace options picked to fit your footage.
 2. **Analyse every clip and reference**: exposure, colour cast, slow-mo headroom, and the reference's cut pacing.
-3. **Write `brief.md`** with the full treatment, plus 3 hooks and a cut list. ⏸ *You approve.*
+3. **Write `brief.md`** with the full treatment, plus 3 hooks and a cut list, then send a **storyboard and an offline preview** of the planned cut to watch on your phone. ⏸ *You approve, or change pace and picks before Premiere is touched.*
 4. Cut it in a **duplicate sequence**, so your original is never touched.
 5. Colour: correct each clip toward its camera file → match the shots → a look or texture only if you picked one.
 6. Add the planned moves, transitions, B-roll, graphics and captions, then the sound design and a music mix that dips under speech.
@@ -87,11 +87,12 @@ CLAUDE.md                     rules Claude follows (tracks, guardrails, editing 
 .claude/skills/cinematic-reel the 7-phase workflow behind /cinematic-reel
 .mcp.json                     Premiere MCP config for Claude Code in Terminal
 scripts/                      the studio's tools (CLAUDE.md §5 lists them): ingest and footage analysis, camera check,
-                              delivery encode, file check, pregate, review sheets, After Effects round-trip, and more
+                              offline previews, storyboards and pick sheets, delivery encode, file check, pregate,
+                              review sheets, After Effects round-trip, local Whisper transcripts, and more
 projects/<reel>/              brief.md (Claude writes) · project.md · raw/ · references/ · analysis/ · transcripts/ · renders/
 ```
 
 ## Troubleshooting
 - **"Premiere not connected"**: Premiere must be open with a project loaded, and the CEP panel must show the bridge as started. If it still fails, right-click the panel and choose **Reload**.
 - **Health check**: run `premiere-pro-mcp --doctor`.
-- **No transcript**: check `ELEVENLABS_API_KEY` in `.env`, then run `scripts/transcribe_reel.sh <reel>`.
+- **No transcript**: run `scripts/transcribe_reel.sh <reel>` (local Whisper; the first run downloads the model, about 0.5 GB). For an external voiceover, name the file: `scripts/transcribe_reel.sh <reel> projects/<reel>/audio/vo.wav`.

@@ -42,10 +42,12 @@ Never patch `CLAUDE.md`, skills, scripts or the template.
 ---
 
 ## Phase 0: Interview the director
-Read `project.md` and `studio/director-profile.md` first. If a round is already in progress, resume it. Check `Arch version` against `studio/VERSION`. If they differ:
+Read the `## Now` block at the top of `project.md` and its latest round (not the whole log), and `studio/director-profile.md`, first. If a round is already in progress, resume it. Check `Arch version` against `studio/VERSION`. If they differ:
 - check `studio/CHANGELOG.md` for changes since then;
 - adopt minor or patch changes at the start of the next round;
 - ask the director before adopting a major change.
+
+**Keep `## Now` current.** Rewrite it at the end of every round, in at most 30 lines: status, the locked sequence and latest export, approved decisions, open questions, next step. Once `project.md` passes about 4,000 words, move every round but the last two to `log/rounds.md`. The first five reels' logs reached 10–21k words and were reread at every session start.
 
 Ask in **two short rounds**, with multiple choice wherever possible (AskUserQuestion when available). Never ask something the footage or a reference can answer.
 
@@ -57,6 +59,7 @@ Ask in **two short rounds**, with multiple choice wherever possible (AskUserQues
 4. Length? (15–20 s · 30–45 s · 60 s · whatever the story needs)
 5. Branding, only if `studio/director-profile.md` doesn't already answer it: handle, type style, brand colours. Ask now, not at the end card. Anything new goes into `project.md` and a CR to update the profile.
 6. References: 1–3 reels or creators whose *feel* they want. Ask them to drop video files in `projects/<name>/references/` or paste links. Instagram links often can't be fetched, so ask for a screen recording or the downloaded file.
+7. Is the soundtrack existing audio: an Instagram library song, or another reel's original audio (often the reference's)? If yes, Phase 1 checks its Instagram page (library song or "Original audio", and who made it) and, for another creator's audio, whether the director has their OK. The cut then uses a guide copy (CLAUDE.md §4c). Pujo found out at the Share screen and rebuilt six versions.
 
 **Round 2: taste (ask after analysing footage and references, so the options are concrete)**
 Offer choices that fit *this* footage, for example:
@@ -74,7 +77,7 @@ Offer choices that fit *this* footage, for example:
      - If you find them, list them for the director and ask before removing anything.
      - On a yes, remove them with the temp-bin delete in `premiere-mcp-reality.md` (`delete_multiple_project_items` and `delete_project_item` are broken), plus `delete_sequence`. Confirm with `list_project_items`. Only the project references go; Adobe's sample files on disk stay untouched.
      - Never delete a sequence the director made.
-3. If the director's footage lives outside the studio, link it in rather than copying it. The originals stay untouched:
+3. If the director's footage lives outside the studio, link it in for analysis rather than copying it; the originals stay untouched. Once the shortlist is chosen, copy those clips into `raw/`: the director wants copies of what a reel uses (director profile).
    ```
    scripts/link_footage.sh <name> "<source folder>" [a-roll|b-roll]
    ```
@@ -108,7 +111,7 @@ Offer choices that fit *this* footage, for example:
    It gives cuts per minute, shot lengths, flashes, motion, picture (luma, contrast, saturation, warmth) and loudness. Put the numbers in the brief as targets.
 4. Timing source, by reel type (CLAUDE.md §4):
    - **If the soundtrack is existing Instagram audio** (a library song, or another reel's original audio): open its Instagram page now and note whether it's a library song or "Original audio" and who made it, then cut to a stereo guide copy of it (CLAUDE.md §4c). Don't wait until posting.
-   - `talking-head` / `hybrid`: transcribe dialogue with `scripts/transcribe_reel.sh <name>`, which produces `transcripts/takes_packed.md`. If there's no ElevenLabs key, use `detect_silence` and tell the director word-level cutting is off.
+   - `talking-head` / `hybrid`: transcribe the speech with `scripts/transcribe_reel.sh <name>` (local Whisper: free, offline, word-level), which produces `transcripts/takes_packed.md`. It reads `raw/a-roll/`, or the files you name: pass an external VO or the reference's audio (`scripts/transcribe_reel.sh <name> projects/<name>/audio/vo.wav`). Hindi or Bangla: add `--model large-v3-turbo --language hi` (or `bn`). `--scribe` uses ElevenLabs Scribe instead, when `.env` has a working key.
    - `music-montage` / `hybrid`: run the beat grid on the music track:
      ```
      .venv/bin/python scripts/gemini_audio_and_beat_analyzer.py --music assets/music/<track> -o projects/<name>/analysis
@@ -135,15 +138,26 @@ Offer choices that fit *this* footage, for example:
    - 3 hook options with a recommendation. Talking-head hooks quote the line and its source timecode. Music-montage hooks give the shot, its source timecode and the accent beat it lands on;
    - EDL table: `# | clip | in | out | text / action | V1 move | V2/V5 | transition out | SFX`;
    - estimated runtime.
+3. **VO and dialogue reels: the line table.** In the brief, one row per spoken clause: `line | shot | what in the frame shows it`. Search the whole pool for each line, not a themed shortlist: `scripts/pick_sheet.py projects/<name>/analysis --all -o projects/<name>/analysis/picks/pool.jpg`, then a sheet of the best 3–6 clips per line. One subject per line, and never the same person twice unless it's a callback (director profile). In the first five reels, 11 rounds went to shots that didn't show their line.
+4. **Write the EDL as `analysis/edl_v1.json`** (format in `scripts/preview_edl.py`'s header): per shot the camera clip, in-point and speed, the planned framing in Premiere's terms (Scale, Position, keys for pushes, at least 80 % of the width), dissolves and fades, and its `line` and `shows`. The storyboard, the offline preview, the pregate and the Premiere build all read this one file.
+5. **Storyboard and offline preview:**
+   ```
+   .venv/bin/python scripts/storyboard.py projects/<name>/analysis/edl_v1.json -o projects/<name>/analysis/storyboard_v1.jpg
+   .venv/bin/python scripts/preview_edl.py projects/<name>/analysis/edl_v1.json -o projects/<name>/renders/previews/<name>_p1.mp4
+   .venv/bin/python scripts/encode_master.py projects/<name>/renders/previews/<name>_p1.mp4 -o projects/<name>/renders/previews/<name>_p1_phone.mp4 --phone
+   ```
+   - The storyboard shows in / mid / out frames through the framing, with the overlays and the Instagram UI bands, so a face under a caption shows now.
+   - The preview is the planned cut in the camera's own colour, with the VO or music, in a few minutes and without Premiere. Run the pregate on it (review-gate.md, with `--profile ig-quiet`, since its audio isn't loudness-matched) to catch jumps, black edges and framing before the build.
+   - **Pace, picks, framing and slow-mo windows are settled on previews**; the build follows. Tell the director with every preview that its colour is the camera's, not the grade: goddess approved a look on stills and rejected it on the full reel.
 
 ### ⏸ Checkpoint 1: brief + cut plan
-Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Wait for a yes or for changes.
+Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Send the storyboard and the phone preview as files. Wait for a yes or for changes. Notes on pace, picks or framing become a new EDL version and preview (`edl_v1b`), not a Premiere build.
 
 ## Phase 3: Rough cut (V1 / A1)
 1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline. `create_sequence` needs an `.sqpreset`, so use `create_sequence_from_clips` on a clip that has the target size and fps.
-2. Assemble the approved EDL with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
-3. Reframe to 9:16 (`auto_reframe_sequence` or `set_clip_scale` / `set_clip_position`), **showing at least 80 % of the camera width** (Scale ≤ 62.5 on vertical 4K clips, effects-playbook §B). Name any tighter shot and its reason in the brief.
-   Then write `analysis/map_v<N>.json`, the shot map `camera_fidelity.py` and `pregate.py` read: per shot its reel start/end, camera clip, camera in-point and rate. Build it from a Premiere read-back; the formula is in `camera_fidelity.py`'s header.
+2. Assemble the approved EDL (`analysis/edl_v<N>.json`) with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
+3. Reframe to 9:16 with the EDL's values (`set_clip_scale` / `set_clip_position`, Rotation, and the push keys), **showing at least 80 % of the camera width** (Scale ≤ 62.5 on vertical 4K clips, effects-playbook §B). Name any tighter shot and its reason in the brief.
+   Then write `analysis/map_v<N>.json`, the shot map `camera_fidelity.py` and `pregate.py` read: per shot its reel start/end, camera clip, camera in-point and rate. Start from the EDL and correct it from a Premiere read-back; the formula is in `camera_fidelity.py`'s header.
 4. Check with `get_timeline_gaps` (zero unintended gaps) and `get_timeline_summary` (matches the EDL).
 5. A1: Constant Power crossfade at every cut (`batch_add_transitions`, ~1 frame). `save_project`.
 
@@ -223,7 +237,11 @@ Follow `review-gate.md` (same folder):
 Never skip it because your own metrics passed: in the pilot, every shipped defect had passed metric QA.
 
 ### ⏸ Checkpoint 2: review the cut
-Send the export path, runtime and a 3-line "what I did" summary. Ask the director to **watch it full-screen on a phone with sound**, then ask one question before accepting approval: "What would make it more cinematic?" (In the pilot, v1 was approved and then reopened five times.) On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes.
+Send the export path, runtime and a 3-line "what I did" summary. Ask the director to **watch it full-screen on a phone with sound**, then ask one question before accepting approval: "What would make it more cinematic?" (In the pilot, v1 was approved and then reopened five times.) On notes: start round N+1 and log the notes in `project.md`. Change only what was asked, on a new sequence version, then reply with a numbered list of changes mapped 1:1 to the notes. Route the notes first:
+- **pace, picks, framing or slow-mo windows:** a new EDL version and offline preview; rebuild in Premiere once the director OKs the preview;
+- **grade:** before any Lumetri change, show camera | now | proposed: `camera_fidelity.py` sheets of the current export and of a `preview_edl.py --only <the 3 hardest shots>` sample carrying the proposed `grade`, plus that 6 s sample on the phone. The sample's grade is approximate; say so.
+
+Rewrite `## Now` when the round ends.
 
 ## Phase 8: Instagram package (after final approval)
 Read `instagram-strategy.md` (same folder) first: where it disagrees with the `ig-*` pack, it wins. Using `ig-hook-extractor`, `ig-caption-writer`, `ig-hashtag-strategist` and `ig-humanizer`, write to `project.md` (and the caption to `deliver/caption.txt`):

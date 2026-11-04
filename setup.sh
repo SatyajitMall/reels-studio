@@ -32,7 +32,7 @@ ok "premiere-pro-mcp $(premiere-pro-mcp --version 2>/dev/null || echo installed)
 # and registers the server with Claude Desktop / Claude Code if found.
 premiere-pro-mcp --install-cep || warn "CEP install reported a problem — see output above."
 
-step "3/6  video-use (word-level transcripts + cut inspection)"
+step "3/6  video-use (cut inspection) + local Whisper (word-level transcripts)"
 if [ ! -d .vendor/video-use/.git ]; then
   git clone --depth 1 https://github.com/browser-use/video-use .vendor/video-use
 else
@@ -40,7 +40,7 @@ else
 fi
 python3 -m venv .venv
 ./.venv/bin/pip install -q --upgrade pip
-./.venv/bin/pip install -q requests librosa matplotlib pillow numpy
+./.venv/bin/pip install -q requests librosa matplotlib pillow numpy faster-whisper
 mkdir -p .claude/skills
 ln -sfn ../../.vendor/video-use .claude/skills/video-use
 ok "video-use ready (Python env in .venv)"
@@ -57,10 +57,10 @@ npx -y skills add sergebulaev/instagram-skills -a claude-code -y \
 ls assets/luts/*.cube >/dev/null 2>&1 || ./.venv/bin/python scripts/gemini_generate_starter_pack.py
 
 step "5/6  API keys"
-if [ ! -f .env ]; then cp .env.example .env; warn "Created .env — add your ELEVENLABS_API_KEY for word-level transcripts."; fi
+if [ ! -f .env ]; then cp .env.example .env; warn "Created .env (API keys are optional: transcripts use local Whisper)."; fi
 # video-use looks for .env in its own folder too
 ln -sfn ../../.env .vendor/video-use/.env
-grep -q '^ELEVENLABS_API_KEY=.\+' .env && ok "ElevenLabs key present" || warn "ELEVENLABS_API_KEY is empty in .env"
+grep -q '^ELEVENLABS_API_KEY=.\+' .env && ok "ElevenLabs key present (optional: transcribe_reel.sh --scribe)" || ok "No ElevenLabs key: transcripts use local Whisper"
 
 step "6/6  Health check"
 premiere-pro-mcp --doctor || warn "Doctor found issues — usually fixed by opening Premiere and starting the bridge (below)."

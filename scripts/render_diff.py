@@ -52,8 +52,9 @@ def fps_of(path: Path) -> float:
 def load_shots(path: Path | None) -> list[tuple[str, float, float]]:
     if not path:
         return []
+    data = json.loads(path.read_text())
     out = []
-    for s in json.loads(path.read_text()):
+    for s in (data["shots"] if isinstance(data, dict) else data):      # an EDL or a plain map
         out.append((s["name"], s["start"], s["end"]) if isinstance(s, dict) else (s[0], s[1], s[2]))
     return out
 

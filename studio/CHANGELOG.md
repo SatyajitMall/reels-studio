@@ -1,5 +1,77 @@
 # Studio Changelog
 
+## 0.9.0 — 2026-11-04
+**Offline previews first, local transcripts** (Batch B of the v0.8 plan, `studio/plans/v0.8-plan.md`, with the director's go-ahead).
+
+Why: the first five reels took about 11 director rounds each. 17 rounds were about pace or story, and 11 about shots that didn't show their line. Each was found on a Premiere export, while five reels shared one Premiere. ElevenLabs Scribe returned 401 on three reels in a row.
+
+- **New `scripts/preview_edl.py`** (promoted from Pujo's `tools/preview_assemble.py`, which built v6–v10 while Premiere was busy). It renders the cut from **one EDL file**, `analysis/edl_v<N>.json`, straight off the camera files, in minutes:
+  - Premiere-style Scale and Position, with keys (ease or linear), and Rotation;
+  - speed and conform through `rate` (0 = a freeze);
+  - dissolves centred on the cut, fades, stills and black, V5 overlays (PNG or alpha video);
+  - the VO / music tracks and each shot's own sound;
+  - an "offline preview · colour approximate" label in the top band.
+
+  It checks first, and renders nothing on a missing clip, a shot that runs past its clip, an overlap or an unknown key. It reports the width shown per shot and any framing that leaves black edges. `--only` renders chosen shots back to back (a grade sample) with a re-timed EDL beside it. Tested on goddess (13 shots, 29.84 s, rendered in 48 s). Ungraded, `camera_fidelity.py` puts every shot within 0.005 luma, saturation × 0.98–1.00 and < 1° hue of its camera file. The 0.553 slow-mo shot repeats 44 % of its frames and the conformed 30 fps shot none. The pregate runs on it.
+- **The EDL is the shot map:** `camera_fidelity.py`, `render_diff.py` and `pregate.py` take the EDL object (`"shots"`) as well as a plain map list. The storyboard, the preview, the pregate and the Premiere build read the same file.
+- **New `scripts/storyboard.py`** (from goddess, uski and Pujo, rebuilt for the third time by a reel). It shows in / mid / out frames through each shot's framing, with the overlays on screen and the **Instagram UI bands shaded**. Labels give the clip, its in-point, speed or conform, the width shown (orange < 80 %, red < 70 %), and the line the shot carries.
+- **New `scripts/pick_sheet.py`** (from goddess and Pujo). It shows 6 frames per clip with camera times, and the shoot date and time decoded from Blackmagic names (clip numbers repeat across shoots). `--all` covers the whole pool.
+- **Measurement fix in `camera_fidelity.py`:**
+  - frames are now decoded with exact YUV→RGB rounding (`accurate_rnd+full_chroma_int`). ffmpeg's default read every frame about 0.007 darker, with about 1 point more "crushed";
+  - v0.8.0 read camera and render the same way, so its camera-vs-render deltas hold to about 0.0005. Absolute numbers (reel mean luma, crushed %) now read true;
+  - found because the preview baked the bias in on decode.
+- **Local Whisper is the studio transcriber.**
+  - New `scripts/transcribe_local.py` uses faster-whisper 1.2.1, installed in `.venv` by `setup.sh`. It decodes audio with ffmpeg and writes the Scribe JSON shape, so `pack_transcripts.py` and `timeline_view.py` read it unchanged. On the goddess VO: 78 words in 4 s on `small`.
+  - `transcribe_reel.sh` uses it by default. It takes files (an external VO or a reference's audio), plus `--model` and `--language` (`large-v3-turbo` for Hindi or Bangla); `--scribe` keeps ElevenLabs.
+  - The key is optional in `setup.sh`, README and `.env.example`.
+  - Removed `scripts/gemini_transcribe_fallback.py`: no backend was installed, so it never ran (backlog G2).
+- **CLAUDE.md §4b:** cut on the clause onset, placed on the waveform 0–2 frames before the speech; Whisper's starts ran 0.3 s early on goddess.
+- **SKILL:**
+  - **Phase 0:** reads `project.md`'s new **`## Now`** block and the latest round, not the whole log. `## Now` is rewritten every round, and old rounds move to `log/rounds.md` past about 4,000 words (logs reached 10–21k words).
+  - **Round 1:** question 7, "is the soundtrack existing audio?".
+  - **Phase 1:** copy the shortlist into `raw/` (the director wants copies), and transcribe with local Whisper.
+  - **Phase 2:**
+    - a **line table** for VO and dialogue reels: one row per clause, searched across the whole pool;
+    - the EDL JSON;
+    - the storyboard and the phone preview, sent at Checkpoint 1;
+    - pregate on previews (`--profile ig-quiet`).
+  - **Pace, picks, framing and slow-mo windows are settled on previews**, and Checkpoint 1 notes become a new EDL and preview, not a Premiere build.
+  - **Phase 3:** builds from the EDL's values.
+  - **Checkpoint 2 routes notes:**
+    - pace, picks and framing → a new preview first;
+    - grade → camera | now | proposed, plus a 6 s `--only` sample on the phone, before any Lumetri change.
+- **Reviewer:** a "Pictures and words" major for a shot that doesn't show its line, a picture change in a pause, or the same person on two lines. **review-gate.md:** the EDL is the map for a preview.
+- **Director profile** (CRs uski and Pujo director-profile, goddess):
+  - a new **Taste** section: natural and HD, never processed; pictures change on the words; literal depiction; vary the people; the deity only with a reason; steady moves; drama from holds and slow motion;
+  - judged on the phone, with review copies sent as files;
+  - copies, not links;
+  - stock only on the director's ask;
+  - the footage paths and `<shoot>:<clip>` naming;
+  - the existing-audio habit;
+  - the five reels in the content table.
+- **Templates:** `project.md` gets `## Now` (approved decisions moved into it); `brief.md` gets the line table.
+- **CRs:**
+  - done: uski director-profile and Pujo director-profile;
+  - goddess pilot-notes: items 1, 5, 7, 11, 25 and 40, and 23 in part;
+  - Pujo pool-survey, external-vo-audio and premiere-ops: in part;
+  - uski script-gaps: items 4 and 24;
+  - puja-night-2 script-bugs: item 5.
+
+  Deferred to the backlog: the copy mode of `link_footage.sh` (Batch C), the VO onset refiner, and the beat analyser's speech warning.
+- **Reviewed before release** by an independent agent (Sonnet), with synthetic clips whose every frame carries its number. Fixed and retested:
+  - duplicate shot names rendered the wrong framing (now an error);
+  - a dissolved shot that starts on its clip's first frame ran one frame late;
+  - a dissolve handle before reel frame 0 misaligned its shot;
+  - `--only` kept the full runtime;
+  - unknown keys on overlays, audio tracks and the EDL, negative rates and rotation keys rendered silently (now errors). A dissolve on the first shot or after a gap is a warning;
+  - every overlay was loaded at once, and video overlays' ffmpeg kept running (now loaded on first use and released after);
+  - every render left a temp folder;
+  - `transcribe_local.py` kept a transcript made with another model or language, and stopped on a clip with no audio;
+  - `transcribe_reel.sh` gets `--force`, `--vad` and clear errors for a missing value or an unknown option.
+
+  Found while retesting: bicubic resampling at a sub-pixel offset added about 1 point of crush on a dark shot. Static shots are now copied by an integer crop from the prescaled frame, which also renders faster.
+- **Reels in flight:** goddess and Pujo have locked pictures and aren't affected. A reel mid-edit (my-reel) picks this up at its next round (minor version). The next reel starts on 0.9.0.
+
 ## 0.8.0 — 2026-11-01
 **Camera-true pictures, cheaper review** (Batch A of the v0.8 plan, `studio/plans/v0.8-plan.md`, approved by the director; evidence from all five reels, 23 CRs and 4 retros).
 

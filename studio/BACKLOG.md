@@ -2,10 +2,10 @@
 
 Architecture work not yet done. HQ triages it at the start of each `/studio-hq` session. Change requests from reels are linked here when deferred.
 
-## Next: v0.8 plan, Batches B and C (`studio/plans/v0.8-plan.md`)
-Approved in outline by the director on 2026-11-01; Batch A shipped as v0.8.0. Each batch starts with the director's go-ahead in an HQ session.
-- **B, fewer rounds:** `scripts/preview_edl.py` (promote Pujo's `preview_assemble.py`: lock pace, picks and framing offline, then one Premiere build); a line-by-line shot table for VO reels; promote `storyboard.py` + `pick_sheet.py` with the IG safe-zone overlay; a Phase 0 "is the soundtrack existing audio?" question; a `## Now` block in `project.md`; director-profile update; **local faster-whisper as the default transcriber** (closes G2).
-- **C, tools that save hours:** a shared ExtendScript library (`scripts/es/studio.jsx`, including the read-back that writes `map_v<N>.json` for `camera_fidelity.py`); a one-reel-at-a-time Premiere lock; a full-resolution pre-screen of candidate windows (zoom steps, jerks, flicker, orientation, faces/phones in the IG bands; also the pregate items CR puja-night-2-review-gate still lists); `<shoot>:<clip>` identity across the analysers, the `link_footage.sh` reference skip and the `shake_report` fps parse; HTML word cards for Bangla/Devanagari.
+## Next: v0.8 plan, Batch C (`studio/plans/v0.8-plan.md`)
+Approved in outline by the director on 2026-11-01; Batch A shipped as v0.8.0, Batch B as v0.9.0. Batch C starts with the director's go-ahead in an HQ session.
+- ~~**B, fewer rounds**~~: done in v0.9.0 (offline previews, storyboard, pick sheets, line table, Round 1 audio question, `## Now`, director profile, local Whisper).
+- **C, tools that save hours:** a shared ExtendScript library (`scripts/es/studio.jsx`, including the read-back that writes `map_v<N>.json` for `camera_fidelity.py`); a one-reel-at-a-time Premiere lock; a full-resolution pre-screen of candidate windows (zoom steps, jerks, flicker, orientation, faces/phones in the IG bands; also the pregate items CR puja-night-2-review-gate still lists); `<shoot>:<clip>` identity across the analysers, the `link_footage.sh` reference skip, a `link_footage.sh --copy --only <clips>` mode (the director wants copies of a reel's clips; CR pujo pool-survey) and the `shake_report` fps parse; HTML word cards for Bangla/Devanagari.
 - **Open decision:** delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`, which can publish to Instagram directly (the director taps Share), plus `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md`.
 
 ## Untriaged: external review (`GEMINI_ARCHITECTURE_REVIEW.md`, added 2026-10-15 by another tool)
@@ -14,7 +14,7 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 | # | Claim | Verify by | Status |
 |---|---|---|---|
 | G1 | `assets/` is empty, so the LUT / SFX / grain steps have nothing to use. A starter pack generator is offered | Already true: assets are empty. Decide between a generated starter pack and real licensed assets | **done** v0.2.3: starter pack adopted, with 2 LUT fixes. Real licensed assets can be added alongside it at any time |
-| G2 | `transcribe.py` exits when there's no ElevenLabs key. A local Whisper fallback is offered | Read `.vendor/video-use/helpers/transcribe.py`. Test the fallback on a talking-head pilot | open |
+| G2 | `transcribe.py` exits when there's no ElevenLabs key. A local Whisper fallback is offered | Read `.vendor/video-use/helpers/transcribe.py`. Test the fallback on a talking-head pilot | **done differently** v0.9.0: the studio's own `scripts/transcribe_local.py` (faster-whisper) is the default; the offered `gemini_transcribe_fallback.py` was removed (no backend installed, never ran) |
 | G3 | There's no loudness or beat-grid measurement. A librosa analyser is offered | Review the script, then run it on the first music-montage pilot | **partly adopted** v0.2.0: the beat grid was reviewed and tested on a 120 BPM click track (read 117.5 BPM, beats placed within about 1 frame). Used by §4c. The loudness half hasn't been reviewed |
 | G4 | HyperFrames graphics on V2 sit under the V3 grade and get discoloured | Valid concern. Decide on a track layout change (graphics above the grade) | **rejected** 2026-10-16 by the director. Graphics stay on V2, under the grade |
 | G5 | `set_clip_opacity` / `speed_change` / `reverse_clip` may not exist as tools | Grep the tool registry in the installed `adobe-premiere-pro-mcp` package | **rejected** 2026-10-16. Claim is false. All 52 tool names in the rules exist in server 1.2.9 (283 tools), including the 3 named. Rerun `scripts/check_tool_names.sh` after any MCP upgrade |
@@ -44,7 +44,8 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
 
 ## From v0.6.0 (playbooks + the WeAreNoCode kit)
-- **Group B: talking-head tools (next minor version):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, a local transcription option (Parakeet / Whisper, see G2), and camera-move helpers for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
+- **Group B: talking-head tools (next minor version):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, and camera-move helpers (local transcription: done in v0.9.0) for the `creator-explainer` rules. Build them before or during the first talking-head pilot.
+- **VO timing (CR pujo external-vo-audio, goddess pilot-notes 23):** a speech-band onset refiner for Whisper's early word starts (first 5 ms frame within 8 dB of the word's peak), promoting Pujo's `tools/vo_timing.py`; a warning from the beat analyser when the track carries speech; maybe a `voiceover` sub-type of `hybrid`.
 - **`creator-explainer` needs its pilot.** Every rule is adapted from 16:9 YouTube; log every misfit as a CR.
 - **Premiere lock:** three reel sessions contend for one Premiere. A lock file (session, reel, since) checked before mutating tools, released at wrap-up.
 - ~~A final re-review step after the review gate's last loop~~: done in v0.8.0 (one focused check of the last fixes).

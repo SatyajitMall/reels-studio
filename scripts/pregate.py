@@ -25,7 +25,8 @@ Usage (from the studio root):
       [--prev projects/<reel>/renders/exports/<reel>_v3.mp4 --prev-map projects/<reel>/analysis/map_v3.json] \
       [--allow 01_C010] [--exclude-band 0.72,0.82] [--look] [--profile ig-quiet] [--min-mbps 12]
 --designed takes spans in seconds of reel time, T0-T1 (e.g. a fade-in 0-0.5 and an end card 27.3-29.84).
-The map is camera_fidelity.py's shot map (name, start, end, clip, src_in, rate); shots without a clip are fine.
+The map is camera_fidelity.py's shot map (name, start, end, clip, src_in, rate), or the EDL preview_edl.py renders;
+shots without a clip are fine. For an offline preview, pass --profile ig-quiet: its audio isn't loudness-normalised.
 """
 from __future__ import annotations
 
@@ -77,6 +78,7 @@ def main() -> None:
     for old in ("fidelity", "watch"):
         shutil.rmtree(out / old, ignore_errors=True)
     smap = json.loads(a.map.read_text())
+    smap = smap["shots"] if isinstance(smap, dict) else smap         # an EDL (preview_edl.py) or a plain map
     shots = [[s["name"], s["start"], s["end"]] if isinstance(s, dict) else list(s) for s in smap]
     (out / "shots.json").write_text(json.dumps(shots, indent=1))
     designed = [tuple(float(x) for x in span.split("-")) for span in a.designed]

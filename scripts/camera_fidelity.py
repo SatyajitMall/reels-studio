@@ -21,7 +21,8 @@ goddess reel (v9c). Deliberate deviations go in --allow, by shot name, and are l
 the V3 layer (effects-playbook §A3, director's pick), --look reports saturation and hue shifts as WARN; brightness, crush,
 burn and framing still FAIL.
 
-Input: a shot map, a JSON list with one object per shot, in reel time:
+Input: a shot map, a JSON list with one object per shot, in reel time (or an EDL object whose "shots" are these rows,
+scripts/preview_edl.py; its other keys are ignored here):
   {"name": "05_C051", "start": 8.40, "end": 10.20, "clip": "projects/<reel>/raw/b-roll/A001_..._C051.mov",
    "src_in": 4.00, "rate": 0.553}
   src_in  camera seconds (the camera file's own clock) at the shot's first frame
@@ -54,6 +55,8 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy import ndimage
 
 W_OUT, H_OUT = 1080, 1920
+# swscale's default YUV→RGB reads about 0.007 darker and ~1 point more "crushed" than exact rounding (v0.9 finding)
+EXACT = "accurate_rnd+full_chroma_int"
 LUMA = np.array([0.2126, 0.7152, 0.0722], np.float32)
 
 
@@ -83,7 +86,7 @@ def decode(path: Path, t: float, n: int, size: tuple[int, int], scale: tuple[int
     """n frames from t (accurate input seek), autorotated; optionally area-scaled. Returns (n, h, w, 3) float32 0..1
     (uint8 with as_uint8, to keep a search window small in memory). Fewer frames come back past the clip's end."""
     w, h = scale or size
-    vf = f"scale={w}:{h}:flags=area,format=rgb24" if scale else "format=rgb24"
+    vf = f"scale={w}:{h}:flags=area+{EXACT},format=rgb24" if scale else f"scale=flags=bicubic+{EXACT},format=rgb24"
     raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{max(t, 0):.4f}", "-i", str(path), "-an", "-frames:v", str(n),
                           "-vf", vf, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
     fr = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3)
@@ -95,7 +98,7 @@ def render_frames(path: Path, idx: list[int], size: tuple[int, int]) -> dict[int
     if not idx:
         return {}
     sel = "+".join(f"eq(n\\,{i})" for i in sorted(set(idx)))
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-an", "-vf", f"select={sel},format=rgb24", "-fps_mode", "passthrough",
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-an", "-vf", f"select={sel},scale=flags=bicubic+{EXACT},format=rgb24", "-fps_mode", "passthrough",
                           "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
     w, h = size
     fr = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3).astype(np.float32) / 255
@@ -285,6 +288,7 @@ def main() -> None:
 
     a.out.mkdir(parents=True, exist_ok=True)
     shots = json.loads(a.map.read_text())
+    shots = shots["shots"] if isinstance(shots, dict) else shots      # an EDL (preview_edl.py) or a plain map
     rp = probe(a.render)
     if (rp["w"], rp["h"]) != (W_OUT, H_OUT):
         sys.exit(f"render is {rp['w']}×{rp['h']}, expected {W_OUT}×{H_OUT}")
