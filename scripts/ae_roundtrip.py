@@ -34,7 +34,9 @@ Ops (built-in effects only; match names verified on AE 26.5 with `ae_bridge.py e
               "passes" (2), "temporal": true adds temporal filtering. AE's defaults (1.0, 3 passes) cut
               noise 30 % on my-reel C027 but smeared texture
   timewarp    Timewarp (ADBE Timewarp), Pixel Motion, speed % (comp length = shot / speed)
-  time_remap  speed ramp: points are [comp_s, source_s relative to in_s], Bezier keys with ease %
+  time_remap  speed ramp: points are [comp_s, source_s relative to in_s], Bezier keys with ease %.
+              "blend": "pixel" turns on Pixel Motion frame blending, so the slow part of a ramp (e.g. 100 → 40 %)
+              doesn't stutter on repeated frames (CR-20261108-kolkata-footage-catalogue item 4); "mix" = Frame Mix
   stabilise   NOT SUPPORTED. Added by script, Warp Stabilizer never analyses: every rendered frame
               carried a "Click Analyze to begin." banner (tested 2026-10-17). Stabilise in Premiere
               (skill Phase 5), or have the director click Analyze in AE by hand.
@@ -162,6 +164,14 @@ for (var i = 0; i < S.ops.length; i++) {
             trp.setTemporalEaseAtKey(k, [ease], [ease]);
         }
         layer.outPoint = compDur;
+        if (op.blend == "pixel" || op.blend == "mix") {
+            // The remap samples the nested source comp at in-between times, so the blending has to be on the
+            // footage layer inside it; on the outer precomp layer alone it rendered identical repeats.
+            var fbt = op.blend == "pixel" ? FrameBlendingType.PIXEL_MOTION : FrameBlendingType.FRAME_MIX;
+            fl.frameBlendingType = fbt; srcComp.frameBlending = true;
+            layer.frameBlendingType = fbt; comp.frameBlending = true;
+            report.params.time_remap_blend = op.blend;
+        }
         report.applied.push("time_remap");
         continue;
     } else if (op.op == "stabilise") {

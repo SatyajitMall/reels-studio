@@ -86,7 +86,7 @@ Sequence: **1080×1920**. **Frame rate = the most common frame rate in the foota
 | **V4** | Texture overlays | Grain / light leaks / film burns from `assets/overlays/`, with `set_blend_mode` (Overlay / Soft Light / Screen) + `set_clip_opacity`. Optional: never grain on night phone footage, ≤ 5 % otherwise (effects-playbook §A4). |
 | **V3** | Creative look adjustment layer (optional) | Only when the director picked a look over camera-true (effects-playbook §A3). Spans the reel. Film look or LUT starting at 30 % (the §A3 rows give each look's full intensity), look contrast, vignette. Grades V1 + V2 only. |
 | **V2** | B-roll & HyperFrames graphics | Each clip primary-corrected. Cutaways on visual nouns / emotional shifts. Time effects (slow-mo, ramps, freeze). |
-| **V1** | A-roll (talking head / hero action) | Primary-corrected. Reframed to 9:16, showing ≥ 80 % of the camera width (Scale ≤ 62.5 on vertical 4K). Punch-ins, slow pushes, snap zooms (playbook §B). |
+| **V1** | A-roll (talking head / hero action) | Primary-corrected. Reframed to 9:16, showing ≥ 80 % of the camera width on vertical footage (Scale ≤ 62.5 on vertical 4K); landscape footage takes the framing the director picks in the brief (playbook §B). Punch-ins, slow pushes, snap zooms (playbook §B). |
 | **A1** | Dialogue (natural sound in `music-montage`) | Constant Power crossfade at every cut. Peaks −6 to −3 dB. Music-montage: muted or ≤ −20 dB (§4c). |
 | **A2** | SFX | From `assets/sfx/`, on B-roll entries and graphic reveals, −14 to −18 dB. |
 | **A3** | Music | From `assets/music/`. −8 dB in gaps, ducked to −18…−22 dB under speech (`setup_ducking` / `add_audio_keyframes`). Music-montage: lead track, peaks −1 to −3 dB, no ducking (§4c). |

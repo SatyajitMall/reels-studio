@@ -48,6 +48,11 @@ Two different things. Don't mix them up:
 ## Director's standing choices
 From `studio/director-profile.md`: no collab-post invites, no sharing the reel to Story. Don't suggest them as traction tactics.
 
+## Cover
+- **The profile grid shows a 3:4 crop of the cover** (re-check this yearly; it was 4:5 before). On 1080×1920 that's y 240–1680.
+- The cover is a full 9:16 picture judged in that crop. A frame from a windowed reel (kolkata's 4:5 matte) shows the black band in the grid, so take the cover from the camera file at full frame, with the reel's look and title applied.
+- Upload it from the camera roll at posting (`ig-posting-reality.md`).
+
 ## Posting
 Instagram-library music can't be added outside the app, so posts that use it go through the phone.
 - **iPhone Mirroring:** follow `ig-posting-reality.md`. Prepare the post **only when the director asks for that post**, and **stop before Share**: the director taps it.

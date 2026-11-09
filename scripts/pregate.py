@@ -11,7 +11,9 @@ script can see. This runs them first, and the reviewer is only called on a clean
                         (look at it, then fix it, or add the span to --designed and say why in project.md)
   3. camera_fidelity.py each shot against its camera file: brightness, colour, crush, burn, framing         FAIL → stop
                         (skipped with --no-fidelity, or when the map has no camera clips)
-  4. render_diff.py     with --prev: what changed since the last reviewed version, so the review can be focused
+  4. render_diff.py     with --reviewed: what changed since the last version that PASSED the gate, so the review can
+                        be focused. Not merely the previous export: after an unreviewed in-between version the
+                        scope would miss changes (kolkata v8 → v8b missed the title). --prev is the old name.
   5. watch.py           2 fps contact sheets for the reviewer (only when 1–3 pass)
 A check that crashes or leaves no output counts as a FAIL. Old outputs in -o are cleared first.
 
@@ -22,7 +24,7 @@ Usage (from the studio root):
   ./.venv/bin/python scripts/pregate.py projects/<reel>/renders/exports/<reel>_v4.mp4 \
       --map projects/<reel>/analysis/map_v4.json -o projects/<reel>/analysis/pregate_v4 \
       --fps 25 --expect 29.84 --designed 27.3-29.84 \
-      [--prev projects/<reel>/renders/exports/<reel>_v3.mp4 --prev-map projects/<reel>/analysis/map_v3.json] \
+      [--reviewed projects/<reel>/renders/exports/<reel>_v3.mp4 --reviewed-map projects/<reel>/analysis/map_v3.json] \
       [--allow 01_C010] [--exclude-band 0.72,0.82] [--look] [--profile ig-quiet] [--min-mbps 12]
 --designed takes spans in seconds of reel time, T0-T1 (e.g. a fade-in 0-0.5 and an end card 27.3-29.84).
 The map is camera_fidelity.py's shot map (name, start, end, clip, src_in, rate), or the EDL preview_edl.py renders;
@@ -56,8 +58,10 @@ def main() -> None:
     ap.add_argument("export", type=Path)
     ap.add_argument("--map", type=Path, required=True)
     ap.add_argument("-o", "--out", type=Path, required=True)
-    ap.add_argument("--prev", type=Path, help="the last export the reviewer saw")
-    ap.add_argument("--prev-map", type=Path, help="that version's map, to tell a moved cut from a changed shot")
+    ap.add_argument("--reviewed", "--prev", dest="prev", type=Path,
+                    help="the last export that PASSED the review gate (not just the previous export)")
+    ap.add_argument("--reviewed-map", "--prev-map", dest="prev_map", type=Path,
+                    help="that version's map, to tell a moved cut from a changed shot")
     ap.add_argument("--fps", type=float)
     ap.add_argument("--expect", type=float, help="expected duration, s")
     ap.add_argument("--profile", choices=["mix", "ig-quiet"], default="mix")
@@ -143,7 +147,7 @@ def main() -> None:
     changed: list[str] = []
     if a.prev:
         if not a.prev_map:
-            rows.append(("INFO", "render_diff", "no --prev-map, so a moved cut can't be ruled out: full review"))
+            rows.append(("INFO", "render_diff", "no --reviewed-map, so a moved cut can't be ruled out: full review"))
         args = [str(HERE / "render_diff.py"), str(a.prev), str(a.export), "-o", str(out / "diff.json"), "--shots", str(a.map)]
         if a.prev_map:
             args += ["--prev-shots", str(a.prev_map)]

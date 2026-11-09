@@ -101,6 +101,7 @@ Offer choices that fit *this* footage, for example:
    **Look at the `overview_*.jpg` sheets first.** They show every clip's middle frame, labelled. Use them to:
    - shortlist hero clips;
    - spot upside-down or sideways clips; orientation isn't auto-detected, so fix those with a 180° / 90° rotation and log it.
+   - **Landscape phone footage** (the clips all carry the same −90 tag, so middle frames show them on their side): confirm each clip's rotation on frames turned both ways (+90 / −90) at its best steady moment, not its middle, and record it in `analysis/orientation.json`. Re-check any clip you'd call unusable at its best window before dropping it: on kolkata, 4 of 101 mid-frame calls were wrong, including one of the best shots. Then show the director the landscape framing options (effects-playbook §B).
 
    Then open the `contact.png` of each candidate and read `summary.md`. On dark shoots (night, stage, candle-lit), exposure is judged relative to the shoot's median, so "darker than the shoot" is the flag that matters. If a reference's contact sheet shows more distinct shots than the cut count, rerun it with `--scene-threshold 0.1`. Trust the count once two thresholds agree. Note per clip: exposure, colour cast, flat/log, fps (slow-mo headroom), orientation, what's actually in the shot, hero moments.
 
@@ -151,12 +152,12 @@ Offer choices that fit *this* footage, for example:
    - **Pace, picks, framing and slow-mo windows are settled on previews**; the build follows. Tell the director with every preview that its colour is the camera's, not the grade: goddess approved a look on stills and rejected it on the full reel.
 
 ### ⏸ Checkpoint 1: brief + cut plan
-Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Send the storyboard and the phone preview as files. Wait for a yes or for changes. Notes on pace, picks or framing become a new EDL version and preview (`edl_v1b`), not a Premiere build.
+Give the director a short summary in chat: the concept, hook, look, 4–6 signature moments, runtime, and anything from their answers you couldn't honour. Send the storyboard and the phone preview as files. Wait for a yes or for changes. Notes on pace, picks or framing become a new EDL version and preview (`edl_v1b.json`), not a Premiere build.
 
 ## Phase 3: Rough cut (V1 / A1)
 1. `duplicate_sequence`, or create a 1080×1920 sequence at the footage's most common frame rate (CLAUDE.md §3) → `Reel_<name>_v<round>`, then open it in the timeline. `create_sequence` needs an `.sqpreset`, so use `create_sequence_from_clips` on a clip that has the target size and fps.
 2. Assemble the approved EDL (`analysis/edl_v<N>.json`) with `add_to_timeline_batch`, or razor + `ripple_delete` on the duplicate.
-3. Reframe to 9:16 with the EDL's values (`set_clip_scale` / `set_clip_position`, Rotation, and the push keys), **showing at least 80 % of the camera width** (Scale ≤ 62.5 on vertical 4K clips, effects-playbook §B). Name any tighter shot and its reason in the brief.
+3. Reframe to 9:16 with the EDL's values (`set_clip_scale` / `set_clip_position`, Rotation, and the push keys), **showing at least 80 % of the camera width** on vertical footage (Scale ≤ 62.5 on vertical 4K clips, effects-playbook §B; landscape footage: the framing the brief records). Name any tighter shot and its reason in the brief.
    Then write `analysis/map_v<N>.json`, the shot map `camera_fidelity.py` and `pregate.py` read: per shot its reel start/end, camera clip, camera in-point and rate. Start from the EDL and correct it from a Premiere read-back; the formula is in `camera_fidelity.py`'s header.
 4. Check with `get_timeline_gaps` (zero unintended gaps) and `get_timeline_summary` (matches the EDL).
 5. A1: Constant Power crossfade at every cut (`batch_add_transitions`, ~1 frame). `save_project`.

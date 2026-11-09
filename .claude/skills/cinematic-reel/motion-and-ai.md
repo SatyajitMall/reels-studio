@@ -46,6 +46,7 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 ## 3. AI-generated video (OpenRouter → Google Veo 3.1 Lite, no audio)
 **Policy** (director, 2026-10-18):
 - **Only** for shots the director's own footage can't provide.
+- **When the director has allowed stock for the reel, search free stock video *and photos* before proposing an AI shot.** A real photo with a slow push (`conform_clip.py --push 1.06`) can carry a line. Record both searches in the brief's AI row. Kolkata spent $0.64 on an AI tram while Unsplash had about 200 real ones, and the director picked a photo.
 - **Never** for the subject itself (the idol, the people).
 - Every generated shot is listed in `brief.md` as **"AI-generated"**, with its prompt, why it's needed and its cost. The director approves it at **Checkpoint 1**, and approves the chosen draft before its final.
 - **No raw footage is ever sent.** At most one or two stills from the director's footage go up as first or last frames, to anchor the look. Everything else (selects, motion, QA, cut-outs, graphics) runs locally and free; the reviewer sees only contact sheets.

@@ -2,11 +2,24 @@
 
 Architecture work not yet done. HQ triages it at the start of each `/studio-hq` session. Change requests from reels are linked here when deferred.
 
-## Next: v0.8 plan, Batch C (`studio/plans/v0.8-plan.md`)
-Approved in outline by the director on 2026-11-01; Batch A shipped as v0.8.0, Batch B as v0.9.0. Batch C starts with the director's go-ahead in an HQ session.
-- ~~**B, fewer rounds**~~: done in v0.9.0 (offline previews, storyboard, pick sheets, line table, Round 1 audio question, `## Now`, director profile, local Whisper).
-- **C, tools that save hours:** a shared ExtendScript library (`scripts/es/studio.jsx`, including the read-back that writes `map_v<N>.json` for `camera_fidelity.py`); a one-reel-at-a-time Premiere lock; a full-resolution pre-screen of candidate windows (zoom steps, jerks, flicker, orientation, faces/phones in the IG bands; also the pregate items CR puja-night-2-review-gate still lists); `<shoot>:<clip>` identity across the analysers, the `link_footage.sh` reference skip, a `link_footage.sh --copy --only <clips>` mode (the director wants copies of a reel's clips; CR pujo pool-survey) and the `shake_report` fps parse; HTML word cards for Bangla/Devanagari.
-- **Open decision:** delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`, which can publish to Instagram directly (the director taps Share), plus `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md`.
+## Next: kolkata batches (triaged 2026-11-08) and Batch C
+v0.9.1 shipped the rules, notes and small fixes from the kolkata retro and its 12 CRs. The rest, in order, each with the director's go-ahead in an HQ session:
+- **v0.10, process (kolkata's biggest losses: story ~5 h, song ~3 h, title and cover ~2 h):**
+  - a line table for **every** reel type, by lyric meaning for songs, and a **story check** in `review-gate.md` / `reel-reviewer` (CR montage-line-table 1–2);
+  - the `lyric-shots` skill the director asked for (CR lyric-shot-skill), tested on the kolkata song first;
+  - a song-research step after the story spine, a "⏸ song audition" checkpoint, `song-research.md` and `scripts/song_fit.py` (CR song-research 1–3);
+  - title words and a type sheet in Round 2, `scripts/make_title.py`, an `assets/fonts/` README, and a Phase 8 cover step (CR cover-title-type 1, 2, 4).
+- **v0.11, tools (with Batch C below):**
+  - `scripts/preview_fx.py` (stabilise, motion-compensated slow-mo, ramps, whips, Screen overlays) and a shake ranking of planned windows (CR preview-fx);
+  - `scripts/stock_search.py` (Pexels video and photos; the director adds the free key to `.env`) and a repeated-frame intake check with `conform_clip.py --dedup` (CR stock-intake);
+  - an upright orientation sheet, an EDL `window` key in the preview and storyboard, and `camera_fidelity.py` decoding upright and measuring inside the window (CR landscape 1, 5, 6, 8);
+  - `scripts/premiere_swap.py` on the ExtendScript library, and `frame_scan.py` ignoring V5 overlay regions (CR late-round-edits);
+  - `shake_report.py --background`, played/unplayed beats in the beat grid, mist and film-stack previews in `look_preview.py`.
+- **C, tools that save hours** (v0.8 plan, approved in outline 2026-11-01): a shared ExtendScript library (`scripts/es/studio.jsx`, including the read-back that writes `map_v<N>.json`, set Lumetri by occurrence and by `Look` ≠ 0, the in-point read-back, and transitions that warn when they come back short); a one-reel-at-a-time Premiere lock; a full-resolution pre-screen of candidate windows (zoom steps, jerks, flicker, orientation, faces/phones in the IG bands; also the pregate items CR puja-night-2-review-gate still lists); `<shoot>:<clip>` identity across the analysers, the `link_footage.sh` reference skip and a `link_footage.sh --copy --only <clips>` mode (CR pujo pool-survey); HTML word cards for Bangla/Devanagari. (The `shake_report` fps parse is done in v0.9.1.)
+- **Open decisions for the director:**
+  - a shared footage catalogue, `studio/footage/<shoot>.md`, that reel sessions append to (an ARCHITECTURE change; CR footage-catalogue 1–2);
+  - Bengali shaping: try `brew install fribidi` (Pillow's wheels load it at run time; needs the director's OK), else the HTML cards;
+  - delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`, which can publish to Instagram directly (the director taps Share), plus `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md`.
 
 ## Untriaged: external review (`GEMINI_ARCHITECTURE_REVIEW.md`, added 2026-10-15 by another tool)
 Each item needs to be verified before it's adopted. The scripts it ships (`scripts/gemini_*.py`) haven't been reviewed yet.

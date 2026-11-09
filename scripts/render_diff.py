@@ -22,9 +22,13 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from media_info import fps_of  # noqa: E402  (robust on rotation-tagged camera files)
 
 W, H = 54, 96
 
@@ -40,13 +44,6 @@ def audio_md5(path: Path) -> str | None:
     p = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-vn", "-ac", "2", "-ar", "48000", "-f", "s16le", "-"],
                        capture_output=True)
     return hashlib.md5(p.stdout).hexdigest() if p.stdout else None
-
-
-def fps_of(path: Path) -> float:
-    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate",
-                          "-of", "csv=p=0", str(path)], capture_output=True, text=True).stdout.strip()
-    n, d = (out.splitlines()[0] if out else "25/1").split("/")
-    return float(n) / float(d) if float(d) else 25.0
 
 
 def load_shots(path: Path | None) -> list[tuple[str, float, float]]:

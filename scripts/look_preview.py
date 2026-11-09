@@ -166,16 +166,16 @@ def main() -> None:
                 report[name][label] = dict(zip(KEYS, [round(v, 4) for v in stats(np.asarray(im, dtype=np.float32) / 255.0)]))
                 imgs.append((label, k, im))
             rows.append(imgs)
-    # Sheet
-    w, h = rows[0][0][2].size
+    # Sheet: each row keeps its own still's aspect (portrait and landscape stills can be mixed; CR-20261104-kolkata item 4)
     tw = a.tile
-    th = round(h * tw / w)
-    sheet = Image.new("RGB", (tw * len(rows[0]), th * len(rows) + 0), "black")
+    heights = [round(imgs[0][2].height * tw / imgs[0][2].width) for imgs in rows]
+    sheet = Image.new("RGB", (tw * len(rows[0]), sum(heights)), "black")
     try:
         font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 14)
     except OSError:
         font = ImageFont.load_default()
-    for r, imgs in enumerate(rows):
+    y = 0
+    for imgs, th in zip(rows, heights):
         for c, (label, k, im) in enumerate(imgs):
             t = im.resize((tw, th), Image.LANCZOS)
             d = ImageDraw.Draw(t)
@@ -183,7 +183,8 @@ def main() -> None:
             d.text((6, th - 37), label, font=font, fill=(255, 255, 255))
             if k:
                 d.text((6, th - 19), f"intensity {k}", font=font, fill=(200, 200, 200))
-            sheet.paste(t, (c * tw, r * th))
+            sheet.paste(t, (c * tw, y))
+        y += th
     sheet.save(a.out / "looks_sheet.png")
     (a.out / "looks.json").write_text(json.dumps({"lut_dir": str(lut_dir), "looks": {k: {"label": v[0], "kind": v[1],
                                        "preview_lut": v[2], "premiere": v[5], "intensity": a.intensity if a.intensity is not None else v[3]}

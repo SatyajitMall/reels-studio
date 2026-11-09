@@ -94,7 +94,7 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 | `k250d_3510` | dropdown: `Kodak 5205 Fuji 3510 (by Adobe)` | 50 % | Clean and warm: contrast +0.024, sat +0.027, warmth +0.034, hue +1.6° | Contrast +5 | Daylight people and street |
 | `f125_2393` | preset: `Fuji F125 Kodak 2393 (by Adobe)` (verified) | **40–50 %** | Darker −0.019, contrast +0.039, sat +0.051, warmth +0.048, **hue −1.0° toward red** (−2.4° on the arches), crush 7.4 % | **Verified recipe** (my-reel, puja-night-2): Contrast +15, Shadows −10, Basic Saturation 85–95, Temperature +4 and Tint −10 against the red push, vignette −0.8…−1.0. Check with `colour_report.py --gold` | Warm Film: rich warm night and day |
 | `f125_2395` | preset: `Fuji F125 Kodak 2395 (by Adobe)` | 50 % | Lifted blacks, sat −0.030, **hue −3.1°, the strongest red push** | Tint −10…−15 and check gold hue; Blacks −5 | Soft portraits in daylight. Avoid on gold idols |
-| `eterna_3510` | preset: `Fuji Eterna 250D Fuji 3510 (by Adobe)` | 40–50 % | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
+| `eterna_3510` | preset: `Fuji Eterna 250D Fuji 3510 (by Adobe)` (verified, kolkata) | 30–50 % (kolkata: 30 %) | **The most saturated** (+0.063) and warm (+0.060). Not pastel, despite Eterna's reputation | Creative Saturation 85 on night footage (it's already saturated) | Vivid colour: costumes, markets, daylight |
 | `eterna_2395` | preset: `Fuji Eterna 250d Kodak 2395 (by Adobe)` | 50 % | **The brightest** (+0.039), lifted blacks, sat −0.024: airy and soft | Exposure −0.1 if skies clip | Gentle daytime, morning, nostalgia |
 | `reala_2393` | preset: `Fuji Reala 500D Kodak 2393 (by Adobe)` | 40–50 % | Like `eterna_3510`: sat +0.060, warmth +0.057, crush 7.2 % | Shadows +5 if dark detail drops | Punchy colour with neutral hue |
 | `mono_500t` ≈ | dropdown: `Monochrome Kodak 5218 Kodak 2395 (by Adobe)` | 100 % | B&W with the 2395 print's lifted blacks | Contrast +20, Blacks −10; grain per §A4 | Mono Drama: a black-and-white section or reel |
@@ -105,12 +105,12 @@ Premiere ships Adobe's film-stock emulation LUTs: a camera negative (Kodak Visio
 
 **Premiere build** (V3 adjustment layer; reality doc for the occurrence method):
 1. Load the look by its route:
-   - **preset**: select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it;
+   - **preset**: select the layer clip, run `app.project.applyLumetriPreset("<name>")`, and deselect it. **If the layer already has a Lumetri, the preset adds a second one and inserts it before the old one** (kolkata v7). Find the look's Lumetri by `Look` ≠ 0 or a non-empty look path (prop 32), never by position, and neutralise the old one (or start from a layer with no Lumetri);
    - **dropdown**: the director picks it in Lumetri → Creative → Look on the V3 layer, or computer use does, with the director's OK. Don't trust the `Look` index readback as proof (2383 read as 11 on one reel); the render check in step 4 is the proof.
-2. Set Creative Intensity, the **2nd** "Intensity", to the table value.
+2. Set Creative Intensity, the **2nd** "Intensity", to the table value, on the look's Lumetri (step 1).
 3. Set the table's adjustments by occurrence, then write the values back to a file (reality doc, Rule 2). Basic Saturation is 0–200, with 100 neutral.
 4. **Verify by render (CLAUDE.md §2a):** export a still and compare it with the `look_preview.py` tile of the same frame at the same intensity, then run `colour_report.py --gold`.
-   - `exact` looks should land within about 0.02 luma before the adjustments. That assumes Lumetri's Intensity mixes linearly, which is the first thing to confirm.
+   - `exact` looks should land within about 0.02 luma before the adjustments. **Creative Intensity mixes linearly (verified, kolkata):** at 30 % Eterna → 3510, Premiere matched the preview tile within 0.003 on luma, saturation and warmth on two night stills; crush rose a little less in Premiere (+0.5 %) than in the preview (+0.8–1.0 %).
    - The first reel to use a look reports the comparison in a CR, and HQ marks it verified here.
 
 **Hue vs Sat (the `muted_red` look).** Premiere 2026 has no Leave Color effect anywhere: it's not in the Effects panel, not under Legacy, and QE can't find it. Build "muted except red" on the V3 layer's own Lumetri instead, with Curves → **Hue vs Sat**:
@@ -146,6 +146,7 @@ Grain, dust, light leaks and film burns from `assets/overlays/` go on V4 in a bl
 - grain → Overlay or Soft Light, `set_clip_opacity`: **optional; none on night phone footage, ≤ 5 % otherwise (v0.8)**; more only if the director asks. The phone's 8-bit night footage already carries noise: the pilot's 40 % was "too much grain", and goddess's 10 % added to what the director called over-processed. Starter clip: `assets/overlays/gemini_film_grain_16mm.mp4`, a 4 s loop, so repeat it end to end across the reel.
 - light leaks → Screen, 40–80 %, on transitions or emotional beats
 - film burn / flash → Screen or Add, 3–8 frames, on hard cuts
+- **soft bloom / mist (whole reel, Premiere-native; verified on kolkata, 13 shots):** per V1 shot, an identical copy on V2 (same item, in-point, start, Motion values and keys; remove its linked audio) with one Lumetri that keeps only the highlights (Exposure −2, Contrast 100, Shadows −100, Blacks −100, plus the V1 clip's own primary), Gaussian Blur **Amount** 20 (reality doc), Opacity 30 %, blend Screen (22). Against the approved ffmpeg mist tile it measured luma +0.009–0.020, p98 +0.001–0.019, saturation −0.002…−0.03. The first try (Exposure −1, Contrast 60, Amount 40, 40 %) was 3–5× too strong: hazy, p02 doubled. The V3 look grades V1 and V2 together. After Effects `glow` (`after-effects.md`) stays for halation on point lights
 - green- or blue-screen stock elements (smoke, sparks, petals) → key them first into a ProRes 4444 alpha overlay with the `ffmpeg-color-grading-chromakey` skill (sample the screen colour, `despill`), then place them on V4/V5 in Normal mode
 
 ### A5. FFmpeg colour (outside Premiere)
@@ -163,12 +164,12 @@ Don't grade the reel or its export there.
 
 **Handheld footage:** no impact shake and no snap zoom. On top of real hand movement they read as jumps or shakes, which is how the director described them in the pilot. Put push/pull on the static holds from `motion.json` instead, and stabilise handheld moves (skill Phase 5).
 
-**Framing (v0.8 default): show at least 80 % of the camera frame's width.** Every enlargement magnifies the phone's 8-bit night noise. Goddess v8 showed about 67 % and looked "horrible" next to the camera file, while Pujo's approved final showed 86 %.
+**Framing (v0.8 default): for vertical footage, show at least 80 % of the camera frame's width.** Every enlargement magnifies the phone's 8-bit night noise. Goddess v8 showed about 67 % and looked "horrible" next to the camera file, while Pujo's approved final showed 86 %.
 - For the director's vertical 4K clips (2160 wide) in the 1080 sequence: **Scale ≤ 62.5 %**. Width shown = 50 / Scale.
 - Pushes are gentle, about +6 points of Scale over the shot (e.g. 56 → 62), in the subject's direction.
 - Tighter only on a shot the brief names with its reason (a face, a detail), and never under 70 % of the width (Scale 71).
 - **Named moves** (a punch-in, a snap zoom, creator-explainer's emphasis zooms) may go tighter for their few frames. The floor applies to the shot's base framing; `camera_fidelity.py` samples mid-shot, so sample outside the move (`--at`) or list the shot in the brief's framing exceptions.
-- Landscape sources can't reach 80 % in 9:16: frame them for the subject and say so in the brief.
+- **Landscape sources can't reach 80 % in 9:16** (full-bleed keeps about 32 % of the width). Show the director the options on their own stills with the IG bands, and record the pick in the brief: **A** full-bleed (state the % of width kept), **B** a 16:9 film frame (100 %), or **C** a 4:5 window, 1080×1350 centred in the safe area (≈ 45 %; kolkata's choice, used for every shot). Landscape phone shots recorded with Blackmagic Cam's orientation lock on arrive tagged as portrait and lying on their side: confirm each clip's rotation in Phase 1 (skill) before framing.
 - `camera_fidelity.py` reports the width shown per shot (WARN under 80 %, FAIL under 70 %).
 
 The Scale numbers in the table below assume 1080-wide footage; on 4K vertical clips, add the move to the framing scale (Slow push 56 → 62, not 100 → 106).

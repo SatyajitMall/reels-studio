@@ -29,7 +29,7 @@ f.open("w"); f.write(JSON.stringify(result)); f.close();
 | `delete_multiple_project_items` | ❌ `deleteResults.filter is not a function` | Temp-bin delete (below) |
 | `delete_project_item` (footage) | ❌ says `deleted: true`, item stays | Temp-bin delete (below) |
 | `execute_extendscript`, `evaluate_expression` | ⚠️ run, but return `"undefined"` | Rule 2 |
-| `export_frame` with `format:"png"` | ❌ `Illegal Parameter type` | Omit `format` |
+| `export_frame` with `format:"png"`, or into a folder that doesn't exist | ❌ `Illegal Parameter type` (same error for both) | Omit `format`; create the folder first |
 | `color_correct` | ⚠️ writes only Contrast, Temperature, Tint. Brightness/Highlights/Shadows are ignored. `saturation` lands as 0 **and** zeroes Creative Saturation, so the clip turns **black & white** | Lumetri recipe (below). Never pass `saturation` |
 | `set_effect_property` | ⚠️ sets only the **first** property with that name. Lumetri has 3 × "Saturation", 2 × "Intensity", 2 × "Contrast" | Set by occurrence in ExtendScript |
 | `add_adjustment_layer` | ❌ makes a transparent PNG, not an adjustment layer. No scripting API for adjustment layers exists | Director makes one by hand (below) |
@@ -47,6 +47,13 @@ f.open("w"); f.write(JSON.stringify(result)); f.close();
 | `get_encoder_presets` | ⚠️ finds no factory presets | Built-in `.epr` paths (below) |
 | `create_sequence` | ⚠️ needs an `.sqpreset` | `create_sequence_from_clips` on a clip with the target size and fps |
 | `exportAsMediaDirect` / `export_sequence` | ⚠️ correct picture, **silent audio** in the pilot (cause unknown) | Always check audio after export. Fallback: `scripts/mix_from_edl.py` |
+| `applyLumetriPreset` on a clip that **already has a Lumetri** | ⚠️ adds a second Lumetri and inserts it **before** the old one; the `Look` slot reads 1 after any preset (kolkata v7: intensity 30 landed on the old, look-less Lumetri, so the look rendered at 100 %) | Find the look's Lumetri by `Look` ≠ 0 or a non-empty look path (prop 32), never by position; or apply the preset to a layer with no Lumetri |
+| QE `addTransition` where the clip has no media past its out-point (or before its in-point) | ⚠️ silently makes a shorter, one-sided transition: 5–6 of 10 frames, ending on the cut (kolkata C076) | Read back `transitions[j].start/end` and flag any shorter than asked |
+| `setInPoint` + `overwriteClip` | ⚠️ landed 1 frame early on 2 of 26 video clips and on audio (kolkata v2, v3, v6) | In-point read-back (snippet below), on every placed clip |
+| `stabilize_clip` (Warp Stabilizer) | ✅ applies and analyses by itself. `AnalysisStatusCounter` 104 = running, 408 = done; the property name carries the auto-scale ("Auto-scale (103.1%)"). Changing Smoothness after analysis doesn't re-solve | Wait for 408 before exporting; set Smoothness before analysis |
+| Gaussian Blur (Premiere 2026, `AE.Impact_Blur_FX`) | ⚠️ the size property is **Amount**; scripts looking for "Blurriness" fail with `null is not an object` | Find properties by `displayName` "Amount" |
+| Wonder Glow, Echo Glow, Edge Glow, VR Glow, Alpha Glow (new in 2026) | untested | Soft bloom: the V2 highlight-copy recipe (effects-playbook §A4) |
+| `$.evalFile` on a missing or empty file | ⚠️ fails silently | Check the file exists and is non-empty before running it |
 
 ## Snippets
 
@@ -96,6 +103,19 @@ var tr = qe.project.getVideoTransitionByName("Cross Dissolve");  // or "Dip to B
 qe.project.getActiveSequence().getVideoTrackAt(t).getItemAt(k).addTransition(tr, true, "00;00;00;08"); // true = clip START, false = END
 ```
 Check the result with `seq.videoTracks[t].transitions[j].start/end`. Remove a wrong one with `transitions[j].remove(true, true)`.
+A transition shorter than asked means the clip had no handle on that side (see the table); say so rather than re-adding it.
+
+**In-point read-back (every placed clip):** `setInPoint` + `overwriteClip` can land a frame early, and nothing reports it. Work in frames (`TPF` = ticks per frame = 254016000000 / fps):
+```javascript
+function T(fr) { var t = new Time(); t.ticks = String(Math.round(fr * TPF)); return t; }
+function F(t) { return Math.round(t.ticks / TPF); }
+item.setInPoint(T(src), 4); item.setOutPoint(T(src + dur), 4);
+track.overwriteClip(item, T(f0)); item.clearInPoint(4); item.clearOutPoint(4);
+var c = /* the track item now starting at frame f0 */;
+if (F(c.inPoint) != src) { c.inPoint = T(src); c.start = T(f0); }
+if (F(c.end) != f0 + dur) c.end = T(f0 + dur);
+```
+Verified on kolkata v6–v8 (`projects/kolkata/tools/swap_v7.py`).
 
 **Audio level:**
 - Premiere's clip Level is linear, with `0.17783` = 0 dB.

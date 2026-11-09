@@ -18,14 +18,14 @@ Why: in the my-reel pilot, every defect the director or a later frame-by-frame c
    ./.venv/bin/python scripts/pregate.py projects/<reel>/renders/exports/<reel>_v<N>.mp4 \
        --map projects/<reel>/analysis/map_v<N>.json -o projects/<reel>/analysis/pregate_v<N> \
        --fps <seq fps> --expect <runtime s> --designed <T0-T1 …> \
-       [--prev projects/<reel>/renders/exports/<reel>_v<N-1>.mp4 --prev-map projects/<reel>/analysis/map_v<N-1>.json] \
+       [--reviewed projects/<reel>/renders/exports/<reel>_v<last PASS>.mp4 --reviewed-map projects/<reel>/analysis/map_v<last PASS>.json] \
        [--allow <shots>] [--look] [--exclude-band 0.72,0.82]
    ```
    - `--designed`: the intended black or flagged spans in seconds (a fade-in `0-0.5`, an end card `27.3-29.84`).
    - `--exclude-band`: leave the subtitle band out of the colour stats (white captions can trip the burn check).
    - `--allow` / `--look`: the shots and the look the brief names as deliberate departures from the camera.
 
-   It runs `verify_render.py`, `frame_scan.py` (every frame), `camera_fidelity.py` and, with `--prev`, `render_diff.py`, then `watch.py` for the sheets. A check that crashes counts as a FAIL. **Fix every FAIL first:** in the first five reels 47 of 59 gate runs failed, mostly on things a script can see. It writes `shots.json` and states the review scope in `PREGATE.md`: full, focused on the changed shots, sound only, or no change (nothing to review).
+   It runs `verify_render.py`, `frame_scan.py` (every frame), `camera_fidelity.py` and, with `--reviewed` (the last version that **passed** the gate, not just the previous export), `render_diff.py`, then `watch.py` for the sheets. A check that crashes counts as a FAIL. **Fix every FAIL first:** in the first five reels 47 of 59 gate runs failed, mostly on things a script can see. It writes `shots.json` and states the review scope in `PREGATE.md`: full, focused on the changed shots, sound only, or no change (nothing to review).
 3. **Call the reviewer:** the Agent tool with `subagent_type: "reel-reviewer"` and a **`model` other than the editor's own**: Fable for an Opus editor; Opus for a Fable or Sonnet editor. If that model is out of credits or unavailable, take the remaining model that still isn't the editor's (Sonnet for an Opus or Fable editor, Fable for a Sonnet editor). Never the editor's own model; if none is available, stop and tell the director.
    - **Full review** for a new cut (the first review, or when pregate says the structure changed). The prompt gives the export path, the pregate folder (`scan.json`, `watch/index.md`, `fidelity/FIDELITY.md` and `fidelity/fidelity_sheet.jpg`), `brief.md`, the brief's playbook (`playbooks/<name>.md`) and `studio/director-profile.md`.
    - **Focused review** for a fix version with the same cut: the same inputs plus `diff.json`, and the instruction to judge **only the changed shots** and confirm the rest is untouched (frames and audio md5). Goddess v9b–v10b ran this way. For a sound-only change, the reviewer judges the sound at the changed moments.

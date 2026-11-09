@@ -1,5 +1,29 @@
 # Studio Changelog
 
+## 0.9.1 — 2026-11-08
+**Kolkata pilot fixes** (patch, safe mid-reel). The first batch from the kolkata retro and its 12 CRs, triaged with the director; the rest is planned as v0.10 (process) and v0.11 (tools, with Batch C) in `BACKLOG.md`.
+
+Why: kolkata (hybrid, 76.2 s, 26 shots) took 8 rounds and 16 gate runs, and its retro logs about 22 hours of friction. This patch takes the parts that are rules, notes and small script fixes.
+
+- **Frame-rate crash fixed in four scripts.** On the director's rotation-tagged camera files, ffprobe's csv output reads `25/1,`, so `shake_report.py`, `colour_report.py`, `frame_scan.py` and `render_diff.py` all failed with `ValueError: '1,'` (verified). New `scripts/media_info.py` `fps_of` (ffprobe JSON, avg → r_frame_rate fallback) replaces their parsers; all four now run on a kolkata camera clip.
+- **`look_preview.py`** keeps each still's own aspect per row, so portrait and landscape stills can share a sheet.
+- **`pregate.py --reviewed / --reviewed-map`**: the last export that **passed** the gate, not just the previous export (kolkata's scope after an unreviewed v8 missed the title change). `--prev` stays as the old name; `review-gate.md` updated. Tested end to end on kolkata v8b → v8c.
+- **`ae_roundtrip.py` `time_remap` `"blend": "pixel"`** (or `"mix"`): Pixel Motion frame blending for speed ramps. It has to sit on the footage layer inside the nested source comp; on the outer layer alone a 100 → 40 % ramp still rendered 21 of 37 slow frames as exact repeats, with it inside 0 of 37.
+- **Reality doc:** `applyLumetriPreset` on a clip with a Lumetri adds a second one *before* it (find the look by `Look` ≠ 0); QE transitions come back shorter and one-sided without a handle; `setInPoint` + `overwriteClip` can land 1 frame early (read-back snippet); Warp's status codes (104 running, 408 done); Gaussian Blur's **Amount**; the new glow effects untested; `export_frame` fails on a missing folder; `$.evalFile` fails silently on an empty file.
+- **effects-playbook:**
+  - §A3: `eterna_3510` verified (kolkata, 30 %); **Creative Intensity mixes linearly** (verified within 0.003 of the preview tile); preset step 1 finds the look's Lumetri by `Look` ≠ 0.
+  - §A4: the Premiere-native **soft bloom** (a V2 highlight copy, Screen 30 %) with kolkata's verified numbers.
+  - §B: the 80 % width rule is for vertical footage; landscape footage gets full-bleed, a 16:9 frame or a 4:5 window, picked by the director (also CLAUDE.md §3 V1, SKILL Phase 3).
+- **SKILL Phase 1:** landscape phone footage: confirm each clip's rotation on frames turned both ways at its best moment, record `analysis/orientation.json`, re-check "unusable" clips at their best window.
+- **`motion-and-ai.md` §3:** with stock allowed, search stock video *and photos* before proposing an AI shot (kolkata: $0.64 on an AI tram, then a real photo).
+- **`film-emulation-prompts`:** rule 6, words Veo takes literally (signs, regional objects); the Daylight street row's sunny and overcast wordings, from kolkata's two drafts.
+- **`instagram-strategy.md`:** a Cover section (the grid shows a 3:4 crop; full 9:16 cover, upload from the camera roll).
+- **Shooting guide:** holding the phone landscape (check the orientation lock, or note it on the slate).
+- **Director profile:** lyrics and montages get one shot per line too; the song carries the story (never the reference's song by default); few but strong Pujo shots in a city reel; stabilise handheld moves by default; plain cuts; their own title words and characterful type; the KOLKATA2026 orientation note and the kolkata content row.
+- `SKILL.md`'s `edl_v1b` example now reads `edl_v1b.json`, so `check_tool_names.sh` passes again (all tool names exist in server 1.2.9).
+
+CRs: kolkata film-emulation-first-use and look-preset-second-lumetri done; landscape, soft-bloom, song-research, montage-line-table, preview-fx, cover-title-type, footage-catalogue, late-round-edits and stock-intake partly done; lyric-shot-skill accepted for v0.10.
+
 ## 0.9.0 — 2026-11-04
 **Offline previews first, local transcripts** (Batch B of the v0.8 plan, `studio/plans/v0.8-plan.md`, with the director's go-ahead).
 

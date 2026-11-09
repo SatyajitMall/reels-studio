@@ -28,6 +28,9 @@ description: |
    Put the effects you don't want in `--negative` (below).
 4. **The first-frame still is the strongest colour anchor** (verified 2026-10-18: frame 0 matched the still to 0.6/255). When you use one, the prompt's light must agree with it: same light source, same time, same white balance.
 5. **Check the draft by numbers before the final** (below), then conform it with `conform_clip.py --match <still>` and grade it in Premiere like any clip.
+6. **Words Veo takes literally** (kolkata, 2026-11-07):
+   - Never name what a sign, board or label says ("route number board", "shop sign"): Veo writes the word (a board reading "ROUTE" with invented numbers). Ask for a "plain" or "blank" board and add "readable words" to `--negative`.
+   - Regional objects need a visual description, not a name: "a yellow Ambassador taxi" came out as a New York checker cab. Better still, leave them out and let the real neighbouring shot carry them.
 
 ## The prompt's light and colour block
 `gen_video.py --prompt` = the shot (subject, action, framing, move, from the brief) followed by this block:
@@ -56,7 +59,7 @@ Pick the row that matches the shots the AI shot sits between. Check those shots'
 | Pandal exterior / street, night | "mixed white LED and warm bulb light, dark sky, light falling off into the street" | Coloured LED arches: name their colours plainly ("blue and pink LED arches") |
 | Sodium street / bridge, night | "orange sodium street lamps, dark blue sky" | Strongly mono-orange; the per-clip correction tames it |
 | Oil lamps, diyas, aarti | "small flames as the only light, warm, faces lit from below" (no faces in AI shots: light the object) | Point lights for `cinestill` (below) |
-| Daylight street | "soft daylight under light cloud" / "low afternoon sun from the side" | 5600 K footage is close to neutral here |
+| Daylight street | sunny: "low afternoon sun from the side". Overcast: "a hazy overcast afternoon, no direct sun, a soft white-grey sky", with "bright sunshine, blue sky, hard shadows" in `--negative` | 5600 K footage is close to neutral here. **"Soft daylight under light cloud" came out as bright sun and a blue sky** (kolkata draft 1); the overcast wording fixed it in one draft. Overcast gives a pale, neutral, partly clipped sky, so a warm hazy anchor still needs `conform_clip.py --match` and the Premiere primary. Untested candidate for warm haze: "late-afternoon haze, the sky a small pale strip between treetops" |
 | River ghat at dusk (Dashami) | "blue dusk sky, last light on the water, a few warm lamps on the bank" | Mixed cool and warm. Don't call it "golden hour" unless the anchor still is |
 
 Camera words that match the footage: phone, 13 / 26 / 52 mm, 4K vertical, Rec.709, 25 fps. Veo outputs 24 fps; `conform_clip.py` retimes it. Many night clips are ISO 1000+ and noisy (75 of 329), but ask for a **clean** image: grain comes from V4, and Veo noise doesn't match ours.
