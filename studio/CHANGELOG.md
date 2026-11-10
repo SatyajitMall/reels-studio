@@ -1,5 +1,64 @@
 # Studio Changelog
 
+## 0.10.0 — 2026-11-11
+**AI shots as the last step of a bad-footage ladder** (minor: new capability and a policy change, safe mid-reel; reels pick it up at their next round). Decided with the director on 2026-11-10; plan in `studio/plans/ai-shots-plan.md`.
+
+Why: the director wants AI video wherever stock doesn't fit or our own footage is bad, and asked for Claude Fable 5.2 to make it in-house.
+- **Checked:** Fable 5.2 (`claude-fable-5-2`, released 2026-11-09) is "Text and images → text" on Anthropic's model page, and Anthropic has released no video generation, frame filling or stabilisation.
+- **So:** Claude plans, prompts and checks each shot, and the frames still come from a paid video model.
+
+**Policy (director, 2026-11-10):**
+- AI is the last step of the **ladder**:
+  1. fix locally for free: Warp, After Effects Pixel Motion for gaps under about 1 s, denoise, a crop within the width floor;
+  2. another take;
+  3. free stock;
+  4. a code-built shot;
+  5. a paid AI shot from stills.
+- It **may show the subjects** (before: never), and is still never proof.
+- **Stills only:** no clip is ever uploaded.
+- **Caps $4, 4 shots and 24 s per reel; $20 a month** (before: $2, 2 shots, 16 s; $10).
+
+**`gen_video.py`:**
+- `--model omni` (Gemini Omni 1.2 Flash, 3–15 s). A first and a last still fill the frames between them.
+- Omni has no silent price, so the estimate includes sound (4 s 720p draft $0.28, 8 s 1080p final $0.83). A negative prompt is written into the prompt for models that take none.
+- Stills are checked against what the model accepts. The ledger records the stills and `sound_billed`, and the label names the model.
+- **Removed:** `--provider google`. Its Veo `-preview` models on the Gemini API were shut down on 2026-10-22 (Google's video docs), so the route was dead. OpenRouter is the only provider. `.env.example` says `GEMINI_API_KEY` is unused.
+- Verified by dry runs only (nothing spent):
+  - Veo draft $0.12; Omni draft between two Diwali stills $0.28; Omni final $0.83;
+  - a 5 s Veo duration and a missing still are refused.
+
+**Other changes:**
+- **Rules:** `motion-and-ai.md` §3 (the ladder, Omni, gap filling, no fallback, the widened policy); director profile; CLAUDE.md §5; SKILL Phase 2 (the AI row lists the ladder steps tried); `film-emulation-prompts` rule 1; the story-montage and cinematic-montage AI sections; `instagram-strategy.md` (say when a generated shot shows a person).
+- **`reel-reviewer`:** AI-shot checks for finger counts, bending tools, a generated person's face or clothes drifting or not matching their real shots, gibberish text, details dropped from the anchor still, and gap-fills whose motion doesn't continue. Any of these on a generated subject is a major.
+- **`studio/ai-budget.json`:** new caps and policy text.
+- The planned batches move up one version: process **v0.11**, tools **v0.12** (BACKLOG and the kolkata CRs).
+
+**Not done:** the first Omni shot. A Veo vs Omni comparison on the same Diwali still pair, about $0.40, runs only with the director's OK on that run.
+
+## 0.9.2 — 2026-11-10
+**Cinematic-mode depth bake** (patch, safe mid-reel), with the director's go-ahead ("Promote now").
+
+Why: the director shot the Diwali pool in Blackmagic Cam's Cinematic mode for its shallow depth of field, and saw it on the phone but not on the Mac. Apple Cinematic Video stores a sharp picture plus a depth track (`dish`) and focus metadata (`mebx`). Only Apple frameworks draw the blur, so Premiere, ffmpeg and every studio script showed it sharp, and nothing in ingest said so (CR-20261109-could-not-go-home-diwali-cinematic-depth).
+
+- **New `scripts/cine_bake.swift`**, promoted from the Diwali reel's tool, built to `scripts/bin/cine_bake` by `setup.sh` (git-ignored). It renders the depth with Apple's Cinematic framework (`CNRenderingSession`, macOS 14+) at the recorded focus and f-number (`--fnumber` overrides), into ProRes 422 HQ with BT.709 tags and the source's rotation tag. Two fixes over the reel version:
+  - `--audio` no longer hangs (it wrote a 0-byte file): sound is now read and written alongside the picture;
+  - `--start` snaps to the nearest camera frame, and frames before it are dropped, so t = 0 is exactly that camera frame (verified: a passthrough bake's first frame differs by 0.34 grey levels from camera frame 3, against 1.9–2.1 from its neighbours).
+- **New `scripts/cine_bake.py`:**
+  - `--check` lists the Cinematic clips (Diwali: 18 of 19; app proxies skipped);
+  - `--edl` bakes every Cinematic clip an EDL uses, over the used span plus 0.48 s handles (spans under 1 s apart share a bake), with sound. It writes `raw/baked/<camera stem>_f<F>_<start>-<end>.mov`, `analysis/bake_map_<edl>.json` and `analysis/<edl>_baked.json` (clips repointed, `src_in` shifted);
+  - non-Cinematic shots are left alone, unchanged bakes are reused, and `--fnumber-for C062=2.8` sets one clip's f-number.
+
+  Tested on a 4-shot Diwali EDL (2 bakes, 5.1 s of 4K in 1.7 s); `preview_edl.py` renders the baked EDL.
+- **`ingest_report.py`:** a `cinematic` flag (format tag `com.apple.quicktime.cinematic-video-intent=1` or a `dish` track) with what to do, and the recorded aperture in the Lens column.
+- **Rules:**
+  - SKILL Phase 1: bake from the first EDL on, before anything renders. Storyboard, preview, pregate (so `camera_fidelity.py` compares against the bake) and the Premiere build read `edl_v<N>_baked.json`;
+  - CLAUDE.md §5: a one-line pointer;
+  - effects-playbook §B: depth as recorded; f/2.8 for slowed hands and tools crossing the focus; focus pulls only when the director asks (Diwali p1b's pulls read as "in and out focus").
+- **Shooting guide:** a Cinematic mode row: fine for depth, the blur needs the bake, f/2.8 is safer for slowed hands.
+- **Director profile:** shoots Cinematic mode for depth; wants the depth as shot, with no pulls unless asked.
+
+Reels in flight: could-not-go-home-diwali keeps its own `tools/cine_bake` (same output, apart from the fixes above) and can switch at its next bake.
+
 ## 0.9.1 — 2026-11-08
 **Kolkata pilot fixes** (patch, safe mid-reel). The first batch from the kolkata retro and its 12 CRs, triaged with the director; the rest is planned as v0.10 (process) and v0.11 (tools, with Batch C) in `BACKLOG.md`.
 

@@ -51,4 +51,4 @@
 - **(3) Done.** Shooting guide: a "Holding the phone landscape" row (avoid it; check the orientation lock is off, or note "landscape" on the slate). The lock is the likely cause, not a confirmed one.
 - **(4) Done.** `look_preview.py` keeps each still's own aspect per row (tested: a landscape row 152 px and a portrait row 480 px on one sheet).
 - **(7) Done as a rule.** SKILL Phase 1: confirm rotation on frames turned both ways at each clip's best steady moment, record it in `analysis/orientation.json`, and re-check "unusable" clips at their best window. Director profile notes the KOLKATA2026 tagging.
-- **(1, 5, 6, 8) Accepted for v0.11:** the upright orientation sheet in the analysers, an EDL `window` key in `preview_edl.py` / `storyboard.py`, and `camera_fidelity.py` decoding the upright frame (`-noautorotate` for a −90 clip, per item 8) and measuring inside the window.
+- **(1, 5, 6, 8) Accepted for v0.12:** the upright orientation sheet in the analysers, an EDL `window` key in `preview_edl.py` / `storyboard.py`, and `camera_fidelity.py` decoding the upright frame (`-noautorotate` for a −90 clip, per item 8) and measuring inside the window.

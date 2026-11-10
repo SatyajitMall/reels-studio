@@ -31,7 +31,7 @@ Two different things. Don't mix them up:
 | The reel… | Caption | Instagram's "AI info" label |
 |---|---|---|
 | was **edited** with AI (cut, graded, finished) from the director's **own footage** | **One detailed credit line** saying what AI did, and that the footage and direction are the director's | **Off.** It signals AI-*generated* content, which this isn't |
-| contains **any AI-generated shot** (`motion-and-ai.md` §3) | The same credit line, plus which shot was generated | **On**: Meta requires it for realistic generated content. Non-negotiable |
+| contains **any AI-generated shot** (`motion-and-ai.md` §3) | The same credit line, plus which shot was generated (and, when it shows a person or the idol, say so) | **On**: Meta requires it for realistic generated content. Non-negotiable |
 
 - **Why detailed:** studies of AI labels report about a 7–8 % engagement drop. A specific disclosure ("AI edited my footage") softens it more than a vague "made with AI" (JCR 2026; SSIR).
 - **The line used on Pujo ki Asolei Sobar** (adapt per reel):

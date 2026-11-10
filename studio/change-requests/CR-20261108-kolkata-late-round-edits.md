@@ -48,4 +48,4 @@ So every change was a hand-written script. Problems found on the way:
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(3) Done.** `pregate.py --reviewed <export> --reviewed-map <map>`: the last version that **passed** the gate (`--prev` / `--prev-map` remain as old names), with `review-gate.md` updated. Explicit, not auto-detected from `review_*.md`, because reels name those files differently.
 - **(1, partly) Done in the reality doc:** the one-sided shorter transition and the Warp status codes (104 running, 408 done).
-- **(1) `scripts/premiere_swap.py` and (2) `frame_scan.py` ignoring overlays: accepted for v0.11**, with Batch C's ExtendScript library. Reproduced (2) on kolkata v8c: without designed spans the title raises 5.76–7.6 s blur-dip flags.
+- **(1) `scripts/premiere_swap.py` and (2) `frame_scan.py` ignoring overlays: accepted for v0.12**, with Batch C's ExtendScript library. Reproduced (2) on kolkata v8c: without designed spans the title raises 5.76–7.6 s blur-dip flags.

@@ -33,4 +33,4 @@ Tuned by render against the approved ffmpeg mist tile (luma +0.003–0.017, p98 
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(1) Done.** effects-playbook §A4: the V2 highlight-copy soft bloom with the verified numbers, as the whole-reel route; After Effects `glow` stays for halation on point lights.
 - **(2) Done.** Reality doc rows: Gaussian Blur (2026) uses **Amount**; the new glow effects are listed as untested.
-- **(3) Accepted for v0.11:** "mist" and "film stack" recipes in `look_preview.py`, so Round 2 shows them with measured deltas.
+- **(3) Accepted for v0.12:** "mist" and "film stack" recipes in `look_preview.py`, so Round 2 shows them with measured deltas.

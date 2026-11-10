@@ -42,5 +42,5 @@
 
 ## HQ decision (v0.9.1, 2026-11-08)
 - **Director profile done:** "the picture shows the word being said" now covers sung lyrics and montages.
-- **(1, 2) Accepted for v0.10:** the line table for every reel type (`song moment | story line | shot | what in the frame shows it`, at most a third empty places), and a story check in `review-gate.md` / `reel-reviewer`.
-- **(3) Accepted for v0.11:** played / unplayed beats in the beat grid; cuts land on played beats.
+- **(1, 2) Accepted for v0.11:** the line table for every reel type (`song moment | story line | shot | what in the frame shows it`, at most a third empty places), and a story check in `review-gate.md` / `reel-reviewer`.
+- **(3) Accepted for v0.12:** played / unplayed beats in the beat grid; cuts land on played beats.

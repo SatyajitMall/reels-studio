@@ -6,7 +6,7 @@
 | Arch version | 0.9.0 |
 | Type | skill |
 | Severity | workaround |
-| Status | accepted (v0.10) |
+| Status | accepted (v0.11) |
 | Requested by | **the director**, in the reel session (2026-11-07): "Try and understand the lyric and determine the shots, post it create that skill" |
 
 ## What happened
@@ -94,5 +94,5 @@ If the director wants words removed (a name, a filler line):
 ````
 
 ## HQ decision (v0.9.1, 2026-11-08)
-- **Accepted for v0.10**, as the director asked: a `lyric-shots` skill, called from SKILL Phase 2 for any reel whose soundtrack has words, with its checks wired into the review gate's new story check (CR-20261107-kolkata-montage-line-table). The draft in this CR is the starting point; HQ will test the transcription route (large-v3 for sung lines, no initial prompt, the speech-band envelope) on the kolkata song before shipping.
+- **Accepted for v0.11**, as the director asked: a `lyric-shots` skill, called from SKILL Phase 2 for any reel whose soundtrack has words, with its checks wired into the review gate's new story check (CR-20261107-kolkata-montage-line-table). The draft in this CR is the starting point; HQ will test the transcription route (large-v3 for sung lines, no initial prompt, the speech-band envelope) on the kolkata song before shipping.
 - Director profile already carries the rule in v0.9.1: sung lyrics and montages get one shot per line that shows what it means.

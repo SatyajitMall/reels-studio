@@ -1,11 +1,11 @@
 {
- "provider": "OpenRouter (default) -> Google Veo 3.1 Lite, no audio; Google Gemini API direct as fallback",
- "set_by": "director, 2026-10-18",
- "policy": "Generated footage only for shots the director's own footage can't provide; never the subject; labelled AI-generated in the brief; approved per reel at Checkpoint 1. No raw footage is sent, only optional first/last still frames.",
- "monthly_limit_usd": 10,
- "per_reel_usd": 2,
- "max_final_shots_per_reel": 2,
- "max_generated_seconds_per_reel": 16,
+ "provider": "OpenRouter only -> Google Veo 3.1 Lite (default) or Gemini Omni 1.2 Flash (--model omni), no audio requested",
+ "set_by": "director, 2026-10-18; widened 2026-11-10",
+ "policy": "The last step of the bad-footage ladder (motion-and-ai.md §3): for shots the director's footage can't provide, or whose footage and free stock are unusable after the free fixes. May show the subjects (2026-11-10); never proof, never words put in someone's mouth; labelled AI-generated in the brief; approved per shot at Checkpoint 1 and per paid run. No raw footage is sent, only optional first/last still frames.",
+ "monthly_limit_usd": 20,
+ "per_reel_usd": 4,
+ "max_final_shots_per_reel": 4,
+ "max_generated_seconds_per_reel": 24,
  "max_drafts_per_shot": 3,
  "max_finals_per_shot": 1
 }

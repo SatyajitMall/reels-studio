@@ -12,8 +12,8 @@ description: |
 
 ## Studio rules (read first)
 1. **Only for an AI shot the brief already approved**, under every rule in `motion-and-ai.md` §3:
-   - only when the footage can't provide the shot;
-   - never the idol or the people;
+   - only as the last step of the bad-footage ladder;
+   - the idol or the people only when the brief says so (allowed since 2026-11-10): describe them as the director's footage shows them, from the anchor still;
    - never proof;
    - within the caps, with the director's yes before each paid run.
 

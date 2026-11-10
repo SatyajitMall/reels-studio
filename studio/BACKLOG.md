@@ -3,13 +3,13 @@
 Architecture work not yet done. HQ triages it at the start of each `/studio-hq` session. Change requests from reels are linked here when deferred.
 
 ## Next: kolkata batches (triaged 2026-11-08) and Batch C
-v0.9.1 shipped the rules, notes and small fixes from the kolkata retro and its 12 CRs. The rest, in order, each with the director's go-ahead in an HQ session:
-- **v0.10, process (kolkata's biggest losses: story ~5 h, song ~3 h, title and cover ~2 h):**
+v0.9.1 shipped the rules, notes and small fixes from the kolkata retro and its 12 CRs. v0.9.2 (Cinematic depth bake) and v0.10.0 (AI shots and the bad-footage ladder, `studio/plans/ai-shots-plan.md`) came in between, so the process batch is now v0.11 and the tools batch v0.12. Still open from v0.10.0: the Veo vs Omni comparison run (about $0.40, director's OK). The rest, in order, each with the director's go-ahead in an HQ session:
+- **v0.11, process (kolkata's biggest losses: story ~5 h, song ~3 h, title and cover ~2 h):**
   - a line table for **every** reel type, by lyric meaning for songs, and a **story check** in `review-gate.md` / `reel-reviewer` (CR montage-line-table 1–2);
   - the `lyric-shots` skill the director asked for (CR lyric-shot-skill), tested on the kolkata song first;
   - a song-research step after the story spine, a "⏸ song audition" checkpoint, `song-research.md` and `scripts/song_fit.py` (CR song-research 1–3);
   - title words and a type sheet in Round 2, `scripts/make_title.py`, an `assets/fonts/` README, and a Phase 8 cover step (CR cover-title-type 1, 2, 4).
-- **v0.11, tools (with Batch C below):**
+- **v0.12, tools (with Batch C below):**
   - `scripts/preview_fx.py` (stabilise, motion-compensated slow-mo, ramps, whips, Screen overlays) and a shake ranking of planned windows (CR preview-fx);
   - `scripts/stock_search.py` (Pexels video and photos; the director adds the free key to `.env`) and a repeated-frame intake check with `conform_clip.py --dedup` (CR stock-intake);
   - an upright orientation sheet, an EDL `window` key in the preview and storyboard, and `camera_fidelity.py` decoding upright and measuring inside the window (CR landscape 1, 5, 6, 8);

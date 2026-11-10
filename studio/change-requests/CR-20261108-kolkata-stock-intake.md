@@ -47,4 +47,4 @@ KOLKATA used free stock where the director's footage couldn't tell the story. Th
 
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(3) Done.** `motion-and-ai.md` §3: when the director has allowed stock, search free stock video **and photos** before proposing an AI shot, and record both searches in the brief's AI row.
-- **(1, 2) Accepted for v0.11:** `scripts/stock_search.py` (Pexels API, video and photos; the director adds the free key to `.env`), and a repeated-frame check on intake with `conform_clip.py --dedup`.
+- **(1, 2) Accepted for v0.12:** `scripts/stock_search.py` (Pexels API, video and photos; the director adds the free key to `.env`), and a repeated-frame check on intake with `conform_clip.py --dedup`.

@@ -50,5 +50,5 @@ Four gaps showed up:
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(4, the grid) Done.** `instagram-strategy.md` has a Cover section: the profile grid shows a 3:4 crop (y 240–1680), the cover is a full 9:16 picture judged in that crop, uploaded from the camera roll.
 - **Director profile done:** their own words on screen and on the cover, in type with character; ask for the title early with a type sheet.
-- **(1, 2, 4 the Phase 8 step) Accepted for v0.10:** title copy and a type sheet in Round 2, `scripts/make_title.py` promoted from `make_title_v7.py` (styles JSON, `--sheet`, safe-zone check, reports any shrink, `--avoid` box), and a Phase 8 cover step.
-- **(3) Fonts:** already in `assets/fonts/` with their OFL files; a README comes with v0.10. Bengali shaping: Pillow here reports no raqm. HQ will test `brew install fribidi` (Pillow's wheels load it at run time) with the director's OK, else use Batch C's HTML cards.
+- **(1, 2, 4 the Phase 8 step) Accepted for v0.11:** title copy and a type sheet in Round 2, `scripts/make_title.py` promoted from `make_title_v7.py` (styles JSON, `--sheet`, safe-zone check, reports any shrink, `--avoid` box), and a Phase 8 cover step.
+- **(3) Fonts:** already in `assets/fonts/` with their OFL files; a README comes with v0.11. Bengali shaping: Pillow here reports no raqm. HQ will test `brew install fribidi` (Pillow's wheels load it at run time) with the director's OK, else use Batch C's HTML cards.

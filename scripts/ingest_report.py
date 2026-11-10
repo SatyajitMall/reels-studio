@@ -17,6 +17,8 @@ and flags
                   25 fps → 0 Hz, no pulsing). Only matters under mains-powered light (LED, tube, bulbs)
   variable fps    frames may be missing; with --scan, the gaps and the picture jumps they cause are listed with times
   colour cast     strong warm / cool / green cast, usually a white balance set for another light
+  cinematic       Apple Cinematic Video (Cinematic mode): the depth of field is a separate track only Apple apps
+                  draw, so the picture here is sharp. Bake with scripts/cine_bake.py before anything else reads it
 --scan decodes every frame (small) to MEASURE flicker (lock-in on the lamp alias, whole frame and 6 horizontal
 bands, since rolling shutters band) and to find jumps (frame difference > 6× the clip's median). Slower: use it on the
 reel's own clips, not a whole card.
@@ -84,6 +86,8 @@ def probe(p: Path) -> dict:
     v = next((s for s in d.get("streams", []) if s.get("codec_type") == "video"), {})
     t = d.get("format", {}).get("tags", {})
     rot = next((x.get("rotation") for x in v.get("side_data_list", []) if "rotation" in x), 0)
+    cinematic = (t.get("com.apple.quicktime.cinematic-video-intent") == "1"
+                 or any(s.get("codec_tag_string") == "dish" for s in d.get("streams", [])))   # disparity track
     bits = 10 if "10" in (v.get("pix_fmt") or "") or v.get("profile") in ("Main 10", "High 10") else 8
     note = " · ".join(x for x in (t.get("com.apple.proapps.logNote"), t.get("com.blackmagic-design.camera.projectName"),
                                   t.get("com.apple.quicktime.comment"), t.get("comment")) if x)
@@ -103,6 +107,7 @@ def probe(p: Path) -> dict:
             "wb_tint": t.get("com.blackmagic-design.camera.whiteBalanceTint"),
             "shutter": t.get("com.blackmagic-design.shutterSpeed"), "iso": t.get("com.blackmagic-design.camera.iso"),
             "sensor_fps": t.get("com.blackmagic-design.sensorFPS"),
+            "cinematic": cinematic, "aperture": t.get("com.blackmagic-design.camera.aperture"),
             "recorded": recorded, "note": note}
 
 
@@ -203,6 +208,8 @@ def scan(r: dict) -> dict:
 
 def flags(r: dict) -> list[str]:
     f = []
+    if r.get("cinematic"):
+        f.append("cinematic")
     if r["bits"] == 8:
         f.append("8-bit")
     # Log looks flat AND lifted: grey blacks, mid-grey average, little colour. Dark shots are flat too, so they need the lift.
@@ -279,6 +286,9 @@ def main() -> None:
           "", "## Flags", "",
           "| Flag | Clips | What to do |", "|---|---|---|"]
     advice = {
+        "cinematic": "Cinematic mode: the depth of field the director saw on the phone is a separate track that only Apple apps draw; "
+                     "Premiere, ffmpeg and our scripts see it sharp. Bake first (scripts/cine_bake.py --edl, at the recorded "
+                     "f-number) and point previews, sheets, checks and Premiere at the bakes (CLAUDE.md §5)",
         "8-bit": "Grade gently: primary pushes ≤ about ½ stop and modest saturation; strong looks band. Our own renders stay 10-bit ProRes",
         "log/HDR?": "Check the stills: a flat, grey clip needs a log → Rec.709 conversion before anything else (CLAUDE.md §2.5 exception)",
         "VFR": "Variable frame rate: check placed windows for jumps (run with --scan); avoid the listed gap times",
@@ -322,7 +332,7 @@ def main() -> None:
         if m.get("dropped"):
             meas += f" · {m['dropped']} dropped"
         md.append(f"| {Path(r['clip']).stem} | {r['night'] or r['folder']} | {r['fps']:g} ({r['avg_fps']:g}) | {r['shutter'] or '–'} | {r['wb_k'] or '–'} | "
-                  f"{r['iso'] or '–'} | {(r['lens'] or '–').replace('iPhone 17 ', '')} | {r['mbps']:g} | {r['flicker']['risk']} | {meas} | "
+                  f"{r['iso'] or '–'} | {(r['lens'] or '–').replace('iPhone 17 ', '')}{' ' + r['aperture'] if r.get('aperture') else ''} | {r['mbps']:g} | {r['flicker']['risk']} | {meas} | "
                   f"{r['note'] or ''} | {', '.join(r['flags'])} |")
     (a.out / "ingest.md").write_text("\n".join(md) + "\n")
     (a.out / "ingest.json").write_text(json.dumps(rows, indent=1, default=str))

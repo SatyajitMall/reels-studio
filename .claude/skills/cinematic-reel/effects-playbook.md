@@ -183,6 +183,10 @@ The Scale numbers in the table below assume 1080-wide footage; on 4K vertical cl
 | **Reframe** | `set_clip_position` + `set_clip_scale` to keep eyes on the upper third | horizontal source in 9:16 |
 | **Split-screen** | `crop_clip` + `set_clip_position` on V1/V2 | before/after, comparisons |
 
+**Depth on Cinematic-mode footage (v0.9.2).** The blur is baked by `scripts/cine_bake.py` (skill Phase 1) at the **recorded focus and f-number**: that is the picture the director framed, and the recorded focus held steady on every Diwali clip measured (≤ 0.11 disparity within a shot), so it doesn't pump.
+- **f/2.8 instead of f/2** (`--fnumber-for <clip>=2.8`) on shots where hands or tools move through the focal plane and the shot is slowed: at f/2 they shimmer once the slow motion interpolates them (Diwali).
+- **Focus pulls** (`scripts/bin/cine_bake --rack`, between two screen regions or onto the recorded subject) **only when the director asks for one.** Diwali p1b's three pulls at f/1.4 read as "in and out focus" and were removed. Never add synthetic bokeh to non-Cinematic footage (director profile: Taste).
+
 ## C. Time
 
 | Move | Recipe | Notes |

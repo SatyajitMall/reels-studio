@@ -82,7 +82,7 @@ Measured on the reference's colour footage (17–183 s), on a 0–1 scale:
 - Grain: as cinematic-montage (none on night phone footage, ≤ 5 % otherwise).
 
 ## AI shots
-- Not used in the reference. The story depends on real people and places, so the cinematic-montage rule applies: never generate the people, the idol or the crowd (`motion-and-ai.md` §3).
+- Not used in the reference. The story depends on real people and places, so real footage of them comes first. Generated people, the idol or a crowd only as the ladder's last step, labelled, and never as proof (`motion-and-ai.md` §3).
 
 ## QA thresholds for this style (review gate)
 - **Section pacing:** each section's median shot within ±25 % of the brief's target (from the table above, scaled). The sizzle's flashes are 4–7 frames each. The calm section's cuts are within ±2 frames of the bar.

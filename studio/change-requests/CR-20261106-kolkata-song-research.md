@@ -43,4 +43,4 @@ Intake note: director copies are often music-video rips, sometimes AAC under a `
 
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(4) Done.** Director profile: "The song carries a story the footage can show; never default to the reference's song. Choose the story first, then research and audition songs."
-- **(1–3) Accepted for v0.10** (process batch): the song-research step after the story spine, the "⏸ song audition" checkpoint, `song-research.md` from the reel's method, and `scripts/song_fit.py` promoted from `projects/kolkata/tools/song_fit.py` (with the WAV-on-intake note).
+- **(1–3) Accepted for v0.11** (process batch): the song-research step after the story spine, the "⏸ song audition" checkpoint, `song-research.md` from the reel's method, and `scripts/song_fit.py` promoted from `projects/kolkata/tools/song_fit.py` (with the WAV-on-intake note).

@@ -50,4 +50,4 @@
 
 ## HQ decision (v0.9.1, 2026-11-08)
 - **(2, the crash) Done.** `shake_report.py` uses the shared `media_info.fps_of` and runs on rotation-tagged camera files (verified on a kolkata clip).
-- **(1, 3) and (2, the shake ranking step) accepted for v0.11:** `scripts/preview_fx.py` promoted from `projects/kolkata/tools/fx_prerender.py` (stabilise, motion-compensated slow-mo, eased ramps, whips, Screen-blend overlays), the rule that a preview shows the brief's planned effects, and a shake ranking of every planned window before the first preview (with Batch C's pre-screen).
+- **(1, 3) and (2, the shake ranking step) accepted for v0.12:** `scripts/preview_fx.py` promoted from `projects/kolkata/tools/fx_prerender.py` (stabilise, motion-compensated slow-mo, eased ramps, whips, Screen-blend overlays), the rule that a preview shows the brief's planned effects, and a shake ranking of every planned window before the first preview (with Batch C's pre-screen).

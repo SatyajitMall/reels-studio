@@ -43,7 +43,7 @@
 - **Denoise dark shots** in After Effects (`denoise`) when the frame scan or your eye shows noise. *Source:* my-reel v7, −12…−29 % dark-area noise.
 
 ## AI shots
-- Rarely needed: both reels had **no gap** the footage couldn't fill. If one is needed, follow the policy in `motion-and-ai.md` §3, and never generate the idol or the crowd.
+- Rarely needed: both reels had **no gap** the footage couldn't fill. If one is needed, follow the ladder and policy in `motion-and-ai.md` §3. The idol or the crowd only when the brief names the shot, and never as proof.
 
 ## QA thresholds for this style (review gate)
 - Every shot within its camera bands (`camera_fidelity.py`, effects-playbook §A0). Adjacent shots within ±0.04 luma unless their camera files differ more, a shot is a deliberate dark establisher, or it's a blue accent.

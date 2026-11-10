@@ -92,6 +92,11 @@ Offer choices that fit *this* footage, for example:
    - **8-bit:** grade gently;
    - **colour casts and match groups:** these become Phase 4's starting corrections;
    - **LUT:** the camera doesn't record a burned-in LUT. If no slate note says so and a clip already looks graded on its stills, ask the director in Round 2.
+   - **`cinematic`:** the clip was shot in Cinematic mode, and its depth of field is a separate track only Apple apps draw. Every tool here, Premiere included, sees it sharp. Run the analysers on the camera files as usual (for picking shots), but **from the first EDL on, bake before anything renders**:
+     ```
+     .venv/bin/python scripts/cine_bake.py --edl projects/<name>/analysis/edl_v<N>.json [--fnumber-for <clip>=2.8]
+     ```
+     It bakes each used span plus 0.48 s handles at the recorded f-number (ProRes 422 HQ, rotation kept, with sound) and writes `edl_v<N>_baked.json`. The storyboard, the preview, the pregate (so `camera_fidelity.py` compares against the bake, the director's intended picture) and the Premiere build all read that file. Re-run it after every EDL change; unchanged spans are reused. Focus pulls and other f-numbers: effects-playbook §B.
 
    Then run the analysers (no API key needed):
    ```
@@ -133,7 +138,7 @@ Offer choices that fit *this* footage, for example:
 1. Fill in `projects/<name>/brief.md` completely: **playbook** (and any rule this reel overrides, with the reason), idea, hook, references turned into measured parameters, **Treatment** (pace, colour stages A1–A4 with A3/A4 marked "none" unless the director picked a look or texture, named effects and transitions with their beats, type, sound), the clip table, must/must-nots, open questions.
    For **music-montage**, the Treatment must also include:
    - **Energy arc:** which song sections go up or down and where the shot length changes. Default: slow open → build → full → breath → payoff → outro. **Never one shot per bar for the whole reel.** That read as mechanical in the pilot. The music may be edited (e.g. intro joined to the main section on a downbeat).
-   - **Generated shots (if any):** every AI-generated shot gets its own row, labelled **AI-generated**, with the prompt, why your footage can't provide it, and the cost from the `gen_video.py` dry run. The director approves each at Checkpoint 1 (`motion-and-ai.md` §3).
+   - **Generated shots (if any):** every AI-generated shot gets its own row, labelled **AI-generated**, with the prompt, why the footage can't provide it (or why its footage and stock are unusable), the ladder steps already tried, and the cost from the `gen_video.py` dry run. The director approves each at Checkpoint 1 (`motion-and-ai.md` §3).
    - **Motion style:** which shots stay as handheld movement, which are held, and where digital push/pull goes (only on `motion.json` holds). Plus where slow-mo goes (calm shots only).
 2. In `project.md`, under `## Round 1 — Proposal`:
    - 3 hook options with a recommendation. Talking-head hooks quote the line and its source timecode. Music-montage hooks give the shot, its source timecode and the accent beat it lands on;

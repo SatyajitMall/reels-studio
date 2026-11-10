@@ -37,3 +37,6 @@ assets/**/*
 
 # Python bytecode
 __pycache__/
+
+# Compiled studio tools (built by setup.sh from their sources in scripts/)
+scripts/bin/

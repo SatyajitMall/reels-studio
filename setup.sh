@@ -22,6 +22,14 @@ command -v ffmpeg >/dev/null || brew install ffmpeg
 ok "ffmpeg $(ffmpeg -version | head -1 | awk '{print $3}')"
 command -v python3 >/dev/null || brew install python
 ok "python $(python3 --version | awk '{print $2}')"
+# Apple Cinematic depth bake (Cinematic-mode footage: scripts/cine_bake.py). Needs macOS 14+ and the Command Line Tools.
+if command -v swiftc >/dev/null; then
+  mkdir -p scripts/bin
+  if swiftc -O -o scripts/bin/cine_bake scripts/cine_bake.swift; then ok "cine_bake built (Cinematic depth bake)"
+  else warn "cine_bake didn't build (needs macOS 14+). Only Cinematic-mode footage needs it."; fi
+else
+  warn "swiftc not found: run  xcode-select --install  then re-run, to build cine_bake (Cinematic-mode footage only)"
+fi
 
 step "2/6  Premiere Pro MCP server + CEP bridge (hetpatel-11/Adobe_Premiere_Pro_MCP)"
 if ! command -v premiere-pro-mcp >/dev/null; then

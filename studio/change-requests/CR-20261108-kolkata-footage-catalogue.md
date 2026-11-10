@@ -70,5 +70,5 @@ Two script problems got in the way:
 - **(3, the crash) Done** with the shared `fps_of` (see CR film-emulation-first-use).
 - **(4) Done.** `ae_roundtrip.py` `time_remap` takes `"blend": "pixel"` (or `"mix"`). The blending has to sit on the footage layer inside the nested source comp: on the outer layer alone, a 100 → 40 % ramp rendered 21 of 37 slow frames as exact repeats; with it inside, 0 of 37 (tested on a kolkata clip in `projects/_hqtest/`).
 - **(5) Done.** Reality doc: a row for the 1-frame-early `setInPoint` + `overwriteClip`, and the in-point read-back snippet from `projects/kolkata/tools/swap_v7.py`. Batch C's ExtendScript library will carry it as a function.
-- **(1, 2) Need the director's decision** (reel sessions appending to a shared `studio/footage/`, an ARCHITECTURE change); planned for v0.11 if approved.
-- **(3, `--background`) Accepted for v0.11.**
+- **(1, 2) Need the director's decision** (reel sessions appending to a shared `studio/footage/`, an ARCHITECTURE change); planned for v0.12 if approved.
+- **(3, `--background`) Accepted for v0.12.**
