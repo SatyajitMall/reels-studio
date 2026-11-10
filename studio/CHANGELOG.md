@@ -1,5 +1,40 @@
 # Studio Changelog
 
+## 0.10.1 — 2026-11-11
+**First Veo vs Omni gap-fill test** (patch, safe mid-reel). The director approved both runs ($0.40). Both models got the same two stills, 4 s apart, from Diwali C047, and the real 4 s between them was the ground truth.
+
+- **Veo 3.1 Lite** ($0.12):
+  - smooth (biggest frame step 0.022, against the camera's 0.012);
+  - but it invented traffic beside the auto, including a man on a motorbike with his face visible.
+- **Gemini Omni** ($0.28):
+  - kept the street close to the real one;
+  - turned the driver's head into profile, which the prompt said to avoid;
+  - popped at 3.36 s (a 9× frame step) snapping toward the last still.
+- **Neither landed exactly on still B.**
+- **Rule (`motion-and-ai.md` §3):** Veo Lite is the default for gap fills. Omni waits until its end snap is solved. Never cut straight from a gap-fill's last frame into the real shot.
+- **`gen_video.py` fix:** Omni refused `generate_audio: false` (400, not charged), so models without a silent price now ask for the sound they bill, and `conform_clip.py` strips it.
+- Files: `projects/_hqtest/renders/gen/cmp_c047_*` (both drafts, `side_by_side_phone.mp4`, the sheet and the numbers).
+- **Round 2, Omni with the camera block** (1080p, 4 s, $0.42, the director asked):
+  - no pop (biggest frame step 0.017, was 0.106), lands on still B, the driver faces forward, nothing invented near the camera;
+  - best of the three, so it's the pick for gap fills (one test).
+  - Spliced into the real C047 in place of 3–7 s (`cmp_c047_spliced_*`), after a sharpness match (it was 1.4× crisper, so `gblur` sigma 1.0), a saturation match (×1.14) and 3-frame seam dissolves. The seams measured 0.012 and 0.011, against the camera's 0.009, and the frame scan flags only the camera clip's own end.
+  - `scripts/gap_fill.py` added to the v0.12 backlog.
+- **Depth-aware clarity** (director: "the depth and clarity can be better enhanced"):
+  - **`cine_bake --disparity-out F`** writes the phone's recorded depth map (Float16 512×288 per frame, plus focus per frame in `F.json`).
+  - **The pass:** denoise, then sharpening and local contrast only on the focus plane. On C047, near-plane detail rose 31 % and near/far separation went from 1.69 to 2.36, with the bokeh unchanged.
+  - **The AI fill:** its bokeh and near-plane detail were matched to the camera's, so its separation went from 1.18 to 2.30, against the real parts' 2.36. Seams 0.012 against a 0.009 frame step.
+  - f/1.4 over f/2 gained little (2.42 against 2.36).
+  - An image-only focus mask failed on night phone footage, so the depth map is needed.
+  - Effects-playbook §B; `scripts/depth_clarity.py` added to the v0.12 backlog.
+- **Cinematic at generation** (director: "add the cinematic effect while creating the video itself"). `film-emulation-prompts` gets a **camera block** that goes in every prompt:
+  - shallow depth of field matched to the reel's bakes, naming what is sharp and what falls off;
+  - an angle and height with a reason;
+  - the lens;
+  - one motivated, steady move (dolly, gimbal or tripod, so it intercuts with phone footage);
+  - a foreground layer and natural motion blur.
+
+  The colour stays ungraded, since Premiere's look would otherwise land twice. Gap fills keep the angle of their stills. The negative list adds deep focus, everything sharp, shaky camera and jerky motion. `motion-and-ai.md` §3 and the director profile now say the same.
+
 ## 0.10.0 — 2026-11-11
 **AI shots as the last step of a bad-footage ladder** (minor: new capability and a policy change, safe mid-reel; reels pick it up at their next round). Decided with the director on 2026-11-10; plan in `studio/plans/ai-shots-plan.md`.
 

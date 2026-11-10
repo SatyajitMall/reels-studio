@@ -185,6 +185,15 @@ The Scale numbers in the table below assume 1080-wide footage; on 4K vertical cl
 
 **Depth on Cinematic-mode footage (v0.9.2).** The blur is baked by `scripts/cine_bake.py` (skill Phase 1) at the **recorded focus and f-number**: that is the picture the director framed, and the recorded focus held steady on every Diwali clip measured (≤ 0.11 disparity within a shot), so it doesn't pump.
 - **f/2.8 instead of f/2** (`--fnumber-for <clip>=2.8`) on shots where hands or tools move through the focal plane and the shot is slowed: at f/2 they shimmer once the slow motion interpolates them (Diwali).
+- **Depth-aware clarity, from the phone's own depth map** (HQ test on Diwali C047, 2026-11-11; the director: "the depth and clarity can be better enhanced"). `cine_bake --disparity-out F` writes the recorded disparity (512×288 per frame) and the focus per frame. The pass then works like this:
+  1. a light denoise;
+  2. sharpening (radius 1.2) and local contrast (radius 12) **only on the plane the camera focused on**, using the mask exp(−((d − d_focus) / 0.25 d_focus)²);
+  3. the bokeh is left as it is.
+
+  On C047 it lifted near-plane detail 31 % (0.0101 → 0.0132) and the near/far separation from 1.69 to 2.36, with no change to the background. A depth map is what makes this work: an image-only focus mask couldn't separate the planes on night phone footage (in-focus edges scored only slightly above the bokeh, 1.27 against 1.17).
+  - Scratch tool: `projects/_hqtest/tools/depth_clarity.py`; `scripts/depth_clarity.py` is in the v0.12 backlog.
+  - Run it before Premiere, like denoise. The grade stays in Premiere.
+- **f/1.4 instead of f/2 gains little when the background is already well out of focus** (C047 separation 2.42 against 2.36). Sharpen the focus plane instead.
 - **Focus pulls** (`scripts/bin/cine_bake --rack`, between two screen regions or onto the recorded subject) **only when the director asks for one.** Diwali p1b's three pulls at f/1.4 read as "in and out focus" and were removed. Never add synthetic bokeh to non-Cinematic footage (director profile: Taste).
 
 ## C. Time

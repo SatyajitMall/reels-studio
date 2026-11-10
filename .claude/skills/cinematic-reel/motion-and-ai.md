@@ -83,7 +83,10 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 
 **How:**
 1. Pick a still from the director's footage that the shot should continue from (optional, but it cuts retries). Export it with `ffmpeg -ss <t> -i <clip> -frames:v 1 still.png`.
-2. Write the prompt's light and colour with the `film-emulation-prompts` skill. It describes the scene ungraded, as the director's camera records it, and leaves out film stocks, grades, grain and halation, since the reel's V3 look and V4 grain grade the AI shot like every clip. It also gives the `--negative` list and the draft check.
+2. Write the prompt with the `film-emulation-prompts` skill.
+   - **The camera is cinematic**: shallow depth of field matched to the reel's real shots, an angle and lens with a reason, one steady move (director, 2026-11-11).
+   - **The colour is ungraded**: no film stocks, grades, grain or halation, since the reel's V3 look and V4 grain grade the AI shot like every clip.
+   - The skill also gives the `--negative` list and the draft check.
    Dry run: `./.venv/bin/python scripts/gen_video.py --reel <reel> --shot <name> --why "<why footage can't>" --prompt "<prompt>" --negative "<avoid>" [--first-frame still.png]`. It prints the cost and every cap, and spends nothing.
 3. Put the shot and its draft cost in the brief, and get the director's yes. Run the draft with `--yes`.
 4. Check the draft's numbers against its anchor (`film-emulation-prompts`, "Check the draft"), then show it. On a yes, run the final: `--mode final --yes`.
@@ -96,7 +99,38 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 **Facts:**
 - 9:16 is supported, at 4, 6 or 8 s.
 - Every Veo clip has Google's **SynthID** AI watermark (Omni: assumed the same, not verified).
-- **Untested:** no Omni shot has been made in the studio yet. The first one is a comparison run (plan in `studio/plans/ai-shots-plan.md`), only with the director's OK on that run.
+- **Gap-fill test, Veo vs Omni (HQ, 2026-11-11, $0.40, director approved).** Both models got the same first and last stills, 4 s apart, from Diwali C047: an auto driver from the back seat at night, with the auto rolling forward. The real 4 s between the stills was the ground truth (`projects/_hqtest/renders/gen/cmp_c047_*`).
+
+  | | Veo 3.1 Lite ($0.12) | Gemini Omni 1.2 Flash ($0.28) |
+  |---|---|---|
+  | First frame vs still A (0–255) | 2.5, same as the camera | 4.1 |
+  | Lands on still B | ends 8.1 off; closest at 3.68 s | ends 9.4 off; closest at 3.68 s |
+  | Motion | smooth: biggest frame step 0.022, against the camera's 0.012 | **pops** at 3.36 s: one frame step of 0.106 (9×) as it snaps toward still B |
+  | Content | **invents traffic**: a white car, and a man on a red motorbike with his face visible, passing beside the auto | keeps the street close to the real one, but **turns the driver's head into profile** despite "Avoid: the driver's face", and moves his hands |
+
+  - **Round 2: Omni with the cinematic camera block** (`film-emulation-prompts`), at 1080p, 4 s, for $0.42. It came out best of the three:
+    - **no pop** (biggest frame step 0.017);
+    - lands on still B at 3.96 s;
+    - the driver faces forward throughout;
+    - nothing invented near the camera;
+    - the street falls off softly.
+
+    **The camera block fixed what the plain prompt broke.** "The motion stays smooth and continuous right to the last frame" plus naming what stays sharp removed the end snap and the head turn.
+  - **Pick:** Omni with the camera block for gap fills; Veo Lite for cheap first drafts of a new idea. This rests on one test, so re-check it on the next reel.
+  - **Round 3, depth-aware clarity:**
+    - the AI fill's background was blurred (sigma 2.4) until its detail matched the real bokeh (0.0061 against 0.0056);
+    - its near plane was softened (sigma 0.8) until it matched the real near plane after clarity (0.0141 against 0.0132);
+    - the masks come from the real depth map at the same moment (the interior is fixed to the camera).
+
+    The AI stretch's separation went from 1.18 to 2.30, against the real parts' 2.36. Effects-playbook §B; `projects/_hqtest/tools/depth_clarity.py`.
+  - **An AI fill comes out crisper and paler than the director's camera.** Omni was 1.4× sharper (Laplacian 0.107 against 0.075) and 10 % less saturated. Before Premiere:
+    - soften it to the camera's measured sharpness (`gblur` sigma 1.0 here);
+    - match saturation and colour;
+    - dissolve 3 frames at each seam.
+
+    The seams then measured 0.012 and 0.011, against the camera's 0.009 frame step. The scratch tools that did this are `projects/_hqtest/tools/gap_fill_splice.py` and `gap_fill_compare.py`; `scripts/gap_fill.py` is in the v0.12 backlog.
+  - **Omni always returns sound** (AAC; OpenRouter refuses `generate_audio: false` with a 400 that isn't charged). `gen_video.py` asks for it, and `conform_clip.py` strips it.
+  - Neither model landed exactly on its last still. **Never cut straight from a gap-fill's last frame into the real shot**: cut at the frame closest to the still, or dissolve 2–4 frames.
 - OpenRouter's video generation isn't eligible for zero data retention: providers keep outputs briefly.
 - Google direct deletes videos after 2 days.
 - Typical generation time is 30 s to a few minutes.

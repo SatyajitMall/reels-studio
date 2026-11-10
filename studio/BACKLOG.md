@@ -10,6 +10,8 @@ v0.9.1 shipped the rules, notes and small fixes from the kolkata retro and its 1
   - a song-research step after the story spine, a "⏸ song audition" checkpoint, `song-research.md` and `scripts/song_fit.py` (CR song-research 1–3);
   - title words and a type sheet in Round 2, `scripts/make_title.py`, an `assets/fonts/` README, and a Phase 8 cover step (CR cover-title-type 1, 2, 4).
 - **v0.12, tools (with Batch C below):**
+  - `scripts/depth_clarity.py`, from `projects/_hqtest/tools/depth_clarity.py` (HQ C047, 2026-11-11). It uses `cine_bake --disparity-out` for denoise plus sharpening and local contrast on the focus plane only. With an AI fill it also matches the fill's bokeh and near-plane detail to the camera's, measured. It should run from the EDL next to `cine_bake.py`;
+  - `scripts/gap_fill.py`, from `projects/_hqtest/tools/gap_fill_splice.py` (HQ C047 test, 2026-11-11). It puts an AI gap fill into a camera clip: bake-aware, upright, matched to the camera's colour, saturation and measured sharpness, with seam dissolves, and it reports the seam frame steps against the camera's. Also landscape and window support in `conform_clip.py`, which today crops to 1080×1920 only;
   - `scripts/preview_fx.py` (stabilise, motion-compensated slow-mo, ramps, whips, Screen overlays) and a shake ranking of planned windows (CR preview-fx);
   - `scripts/stock_search.py` (Pexels video and photos; the director adds the free key to `.env`) and a repeated-frame intake check with `conform_clip.py --dedup` (CR stock-intake);
   - an upright orientation sheet, an EDL `window` key in the preview and storyboard, and `camera_fidelity.py` decoding upright and measuring inside the window (CR landscape 1, 5, 6, 8);

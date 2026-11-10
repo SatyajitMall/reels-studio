@@ -45,7 +45,7 @@ Why: the director wants AI video wherever stock doesn't fit or our own footage i
    - Veo Lite for a new shot;
    - Omni for the frames between two good stills.
 
-## Build (done in v0.10.0, except item 5)
+## Build (done: items 1–4 in v0.10.0, item 5 on 2026-11-11, results in `motion-and-ai.md` §3)
 1. **`gen_video.py`:**
    - an `omni` alias, and a `between` mode that requires `--first-frame` and `--last-frame`;
    - pricing that knows Omni bills sound;

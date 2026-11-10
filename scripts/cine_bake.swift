@@ -16,6 +16,9 @@
 //   --start      snapped to the nearest camera frame, so the bake's first frame is exactly that camera frame
 //   --audio      passes the clip's sound through (AAC → 24-bit PCM)
 //   --passthrough writes the source picture unblurred (for testing alignment and tone)
+//   --disparity-out F  also writes the recorded depth: F = raw Float16 disparity, one frame after another (stored
+//                orientation, like the video), and F.json = {w, h, fps, frames, focus: [the focus disparity per frame]}.
+//                For depth-aware work (e.g. sharpening only the plane in focus).
 //   --rack       focus pull between two rects. Off by default: the director rejected pulls on Diwali p1b
 //                ("in and out focus"); use only when the director asks for one (effects-playbook §B)
 
@@ -46,6 +49,7 @@ var passthrough = false
 // "the camera's recorded focus" (Apple's face/subject tracking), for a subject that moves across the frame.
 var rack: [Double]? = nil
 var focusDump = false
+var dispOut: String? = nil
 while !args.isEmpty {
     let a = args.removeFirst()
     switch a {
@@ -56,6 +60,7 @@ while !args.isEmpty {
     case "--passthrough": passthrough = true
     case "--rack": rack = args.removeFirst().split(separator: ",").map { Double($0)! }; if rack!.count != 10 { die("--rack needs 10 numbers") }
     case "--focus-dump": focusDump = true
+    case "--disparity-out": dispOut = args.removeFirst()
     default: die("unknown arg \(a)")
     }
 }
@@ -133,6 +138,10 @@ Task {
 
         var started = false
         var t0src = CMTime.zero
+        var dispHandle: FileHandle? = nil
+        var dispW = 0, dispH = 0
+        var focusList: [Float] = []
+        if let dp = dispOut { FileManager.default.createFile(atPath: dp, contents: nil); dispHandle = FileHandle(forWritingAtPath: dp) }
         var n = 0
         var pendingD: CMSampleBuffer? = nil
         var pendingM: CMSampleBuffer? = nil
@@ -187,6 +196,18 @@ Task {
             } else if focusDump {
                 print(String(format: "  t=%.2f recorded focus=%.3f  centre=%.3f", tl, fa.focusDisparity, rectDisparity(disp, 0.4, 0.4, 0.2, 0.2)))
             }
+            if let h = dispHandle {
+                CVPixelBufferLockBaseAddress(disp, .readOnly)
+                dispW = CVPixelBufferGetWidth(disp); dispH = CVPixelBufferGetHeight(disp)
+                let row = CVPixelBufferGetBytesPerRow(disp)
+                if let base = CVPixelBufferGetBaseAddress(disp) {
+                    var data = Data(capacity: dispW * dispH * 2)
+                    for yy in 0..<dispH { data.append(Data(bytes: base.advanced(by: yy * row), count: dispW * 2)) }
+                    h.write(data)
+                }
+                CVPixelBufferUnlockBaseAddress(disp, .readOnly)
+                focusList.append(fa.focusDisparity)
+            }
             var dst: CVPixelBuffer? = nil
             CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &dst)
             guard let dstBuf = dst else { die("no dst buffer") }
@@ -210,6 +231,15 @@ Task {
         }
         await writer.finishWriting()
         if writer.status != .completed { die("writer failed: \(String(describing: writer.error))") }
+        if let h = dispHandle, let dp = dispOut {
+            h.closeFile()
+            let meta: [String: Any] = ["w": dispW, "h": dispH, "fps": Double(fps), "frames": focusList.count,
+                                       "dtype": "float16", "orientation": "stored (as the video, before its rotation tag)",
+                                       "focus": focusList.map { Double($0) }]
+            let j = try JSONSerialization.data(withJSONObject: meta, options: [.prettyPrinted])
+            try j.write(to: URL(fileURLWithPath: dp + ".json"))
+            print("✓ disparity \(dispW)x\(dispH) × \(focusList.count) frames → \(dp)")
+        }
         print("✓ \(outURL.path): \(n) frames")
     } catch {
         FileHandle.standardError.write("error: \(error)\n".data(using: .utf8)!)

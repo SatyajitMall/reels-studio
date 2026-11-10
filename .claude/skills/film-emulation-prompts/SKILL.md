@@ -18,12 +18,20 @@ description: |
    - within the caps, with the director's yes before each paid run.
 
    This skill writes part of the prompt. It never approves a run.
-2. **Describe the scene as the director's camera would record it, ungraded.** The reel's look (V3) and grain (V4) are added in Premiere, on the AI shot like on every clip (CLAUDE.md §2.5 and §3). A look baked into the prompt gets the look twice.
+2. **Shoot it cinematic, leave the colour ungraded** (director, 2026-11-11: "add the cinematic effect while creating the video itself").
+   - **The camera is cinematic, in the prompt:** shallow depth of field, a chosen angle and height, the lens, one motivated, steady move, layered composition and natural motion blur. These are the shot itself; Premiere can't add them convincingly afterwards, and the director rejects synthetic blur added in post.
+   - **The colour isn't:** the reel's look (V3) and grain (V4) are added in Premiere, on the AI shot like on every clip (CLAUDE.md §2.5 and §3). A look baked into the prompt gets the look twice.
+   - **Match the shots around it:**
+     - the depth like the reel's real shots (a Cinematic-mode bake at f/2: "shallow depth of field like f/2"; f/2.8: "moderately shallow");
+     - the camera height and lens like its neighbours.
+
+     An AI shot more polished than the real shots beside it stands out as the fake one.
+   - **A gap fill between two real stills keeps their angle and framing.** The stills fix them: ask only for the depth, the motion and "no new people or vehicles close to the camera" (the C047 test, `motion-and-ai.md` §3).
 3. **Never put in the prompt:**
    - film-stock or print names (Kodak, Fuji, Vision3, 2383, CineStill, Ektachrome…);
    - grade words ("colour graded", "teal and orange", "bleach bypass", "film look", "LUT", "desaturated", "muted", "vintage");
    - "film grain", "halation", "bloom", "glow", "letterbox", "anamorphic";
-   - a lone "cinematic". Veo tends to read it as a grade plus bars; name the framing and the move instead.
+   - a lone "cinematic". Veo tends to read it as a grade plus bars; write the camera block below instead (depth, angle, lens, move).
 
    Put the effects you don't want in `--negative` (below).
 4. **The first-frame still is the strongest colour anchor** (verified 2026-10-18: frame 0 matched the still to 0.6/255). When you use one, the prompt's light must agree with it: same light source, same time, same white balance.
@@ -32,21 +40,33 @@ description: |
    - Never name what a sign, board or label says ("route number board", "shop sign"): Veo writes the word (a board reading "ROUTE" with invented numbers). Ask for a "plain" or "blank" board and add "readable words" to `--negative`.
    - Regional objects need a visual description, not a name: "a yellow Ambassador taxi" came out as a New York checker cab. Better still, leave them out and let the real neighbouring shot carry them.
 
-## The prompt's light and colour block
-`gen_video.py --prompt` = the shot (subject, action, framing, move, from the brief) followed by this block:
+## The prompt: shot, camera block, light block
+`gen_video.py --prompt` = the shot (subject, action, from the brief), then the **camera block**, then the **light block**:
 
 ```
-Filmed on a phone held vertically, [13 / 26 / 52] mm lens, 4K, 9:16, [handheld with light
-stabilisation | locked off], one slow [push-in / pan / tilt]. [LIGHT: source, direction,
-colour in plain words, from the table below]. Natural colour and white balance for that light,
-normal contrast, dark shadows that keep detail, bright lights that keep detail, clean image,
-no text.
+CAMERA  [Angle and height: low from the kerb / eye level over the shoulder / high from a balcony /
+        from the back seat], [26 / 52] mm lens, 4K, [9:16 | 16:9], [ONE motivated, steady move:
+        a slow dolly push-in / a smooth gimbal track alongside / a slow crane up / locked off on a
+        tripod]. Shallow depth of field like f/2: [the subject] sharp, [the background] softly out of
+        focus, distant lights as soft round out-of-focus discs. [A foreground layer: the soft edge of
+        X close to the lens.] Natural motion blur, steady frame.
+LIGHT   [Source, direction, colour in plain words, from the table below]. Natural colour and white
+        balance for that light, normal contrast, dark shadows that keep detail, bright lights that
+        keep detail, clean image, no text.
 ```
+
+- **Choose the camera like a cinematographer:**
+  - an angle with a reason (low for scale, eye level for intimacy, over the shoulder to put us in the scene);
+  - the lens for the feeling (26 mm puts us in the space, 52 mm isolates the subject);
+  - one move that follows the action, never a move for its own sake.
+- **Keep it believable for the reel.** The director's real shots are phone shots, steadied in the edit. A crane or drone move in a reel of handheld street shots reads as stock. Dolly, gimbal and tripod moves match best.
+- **Depth must have something to fall off to.** Name what is near and what is far ("the vendor sharp, the lit stalls behind him soft"). Otherwise the model keeps everything in focus.
 
 `--negative` (always, plus the shot's own, such as "faces, people" from the brief):
 ```
 colour grade, teal and orange, film grain, noise, halation, glow, lens flare, letterbox, black bars,
-vignette, faded blacks, oversaturated, text, watermark
+vignette, faded blacks, oversaturated, text, watermark, deep focus, everything sharp, shaky camera,
+jerky motion
 ```
 `--negative` reaches Veo as `negativePrompt` on both providers (`gen_video.py`).
 
@@ -62,7 +82,7 @@ Pick the row that matches the shots the AI shot sits between. Check those shots'
 | Daylight street | sunny: "low afternoon sun from the side". Overcast: "a hazy overcast afternoon, no direct sun, a soft white-grey sky", with "bright sunshine, blue sky, hard shadows" in `--negative` | 5600 K footage is close to neutral here. **"Soft daylight under light cloud" came out as bright sun and a blue sky** (kolkata draft 1); the overcast wording fixed it in one draft. Overcast gives a pale, neutral, partly clipped sky, so a warm hazy anchor still needs `conform_clip.py --match` and the Premiere primary. Untested candidate for warm haze: "late-afternoon haze, the sky a small pale strip between treetops" |
 | River ghat at dusk (Dashami) | "blue dusk sky, last light on the water, a few warm lamps on the bank" | Mixed cool and warm. Don't call it "golden hour" unless the anchor still is |
 
-Camera words that match the footage: phone, 13 / 26 / 52 mm, 4K vertical, Rec.709, 25 fps. Veo outputs 24 fps; `conform_clip.py` retimes it. Many night clips are ISO 1000+ and noisy (75 of 329), but ask for a **clean** image: grain comes from V4, and Veo noise doesn't match ours.
+Camera words that match the footage: 13 / 26 / 52 mm, 4K, Rec.709, 25 fps, and the depth of the reel's bakes. Veo outputs 24 fps; `conform_clip.py` retimes it. Many night clips are ISO 1000+ and noisy (75 of 329), but ask for a **clean** image: grain comes from V4, and Veo noise doesn't match ours.
 
 ## By the reel's look (effects-playbook §A3 film table)
 The brief names the look. Give that look a scene it lands well on, and leave out what it already adds. The "look adds" column is our measured character at the table's intensity.
@@ -102,12 +122,15 @@ A draft is ≈ $0.12, and a shot gets at most 3 drafts. Measure the draft before
 
 ## Example (night pandal reel, `k500t_2383`, no faces)
 ```
---prompt "Slow push-in toward a pandal entrance made of carved white thermocol arches at night,
-marigold strings hanging at the sides, no people. Filmed on a phone held vertically, 26 mm lens,
-4K, 9:16, handheld with light stabilisation, one slow push-in. Warm tungsten lamps and strings of
-small bulbs overhead, golden light on the arches, deep shadows at the edges. Natural colour and
-white balance for that light, normal contrast, dark shadows that keep detail, bright lights that
-keep detail, clean image, no text."
+--prompt "A pandal entrance made of carved white thermocol arches at night, marigold strings
+hanging at the sides, no people. Low angle from the ground just outside the entrance, 26 mm lens,
+4K, 9:16, a slow dolly push-in through the arch. Shallow depth of field like f/2: the nearest arch
+and its marigolds sharp, the lit idol hall behind it softly out of focus, the bulbs as soft round
+out-of-focus discs. The soft edge of a marigold string close to the lens on the left. Natural
+motion blur, steady frame. Warm tungsten lamps and strings of small bulbs overhead, golden light
+on the arches, deep shadows at the edges. Natural colour and white balance for that light, normal
+contrast, dark shadows that keep detail, bright lights that keep detail, clean image, no text."
 --negative "people, faces, colour grade, teal and orange, film grain, noise, halation, glow,
-lens flare, letterbox, black bars, vignette, faded blacks, oversaturated, text, watermark"
+lens flare, letterbox, black bars, vignette, faded blacks, oversaturated, text, watermark,
+deep focus, everything sharp, shaky camera, jerky motion"
 ```

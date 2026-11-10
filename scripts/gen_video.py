@@ -213,7 +213,10 @@ def main() -> None:
 
     hdr = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     body: dict = {"model": model, "prompt": prompt, "duration": duration, "resolution": res,
-                  "aspect_ratio": args.aspect, "generate_audio": audio}
+                  "aspect_ratio": args.aspect,
+                  # A model with no silent price (Gemini Omni) refuses generate_audio false ("always generates audio",
+                  # 400, 2026-11-11): ask for the sound it bills anyway; conform_clip.py strips it.
+                  "generate_audio": audio or sound_billed}
     frames = []
     for path, kind in ((args.first_frame, "first_frame"), (args.last_frame, "last_frame")):
         if path:
