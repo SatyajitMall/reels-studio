@@ -137,7 +137,15 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Camera check: `scripts/camera_fidelity.py <export> --map analysis/map_v<N>.json` finds each shot's camera frame and framing and checks brightness, colour, crush, burn and width against it (effects-playbook §A0). The default grade is judged this way, not against fixed numbers.
 - Delivery: Premiere exports a ProRes 422 master; `scripts/encode_master.py` makes the H.264 High deliverables (~18 Mb/s) and `--phone`, a ≤ 29 MB review copy.
 - Final file check: `scripts/verify_render.py <export>` (codec, H.264 High, 1080×1920, fps, bitrate ≥ 12 Mb/s, TV-range 4:2:0, BT.709 tags, black/frozen frames, −14 LUFS / −1 dBTP; `--profile ig-quiet` for the no-music version, and for the phone copy the `--min-mbps` floor `encode_master.py` prints).
-- Pregate: `scripts/pregate.py` runs the file check, the every-frame scan, the camera check, `scripts/render_diff.py` (what changed since the last reviewed version) and the contact sheets before every review gate (review-gate.md). Every export passes it before the reviewer is called.
+- Pregate: `scripts/pregate.py` runs before every review gate (review-gate.md):
+  - the file check;
+  - the every-frame scan, where typed `--designed` spans allow only their own flags;
+  - `scripts/motion_audit.py`: camera shake per shot, failing any step-print that jumps more than 4 px;
+  - the camera check;
+  - `scripts/render_diff.py` (what changed since the last reviewed version);
+  - the 2 fps sheets, plus full-rate strips of the hook, the designed spans and every REVIEW shot.
+
+  Every export passes it before the reviewer is called. A REVIEW shot is cleared only by the reviewer's verdict on its strip.
 - Story devices: `scripts/step_print.py` (step-printed stutter render) and `scripts/photo_prints.py` (photo-print inserts on paper), used by the story-montage playbook.
 - Look previews: `scripts/look_preview.py` renders Premiere's own film-stock looks (effects-playbook §A3) on the director's stills, for Round 2.
 - FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.

@@ -26,7 +26,7 @@ The reference's shot length changes by section, never by habit. Measured medians
 
 ## Camera and motion
 - **Motion is mostly in camera:** slow-shutter crowds (ghosted walkers), panning speed-blur on bikes, handheld orbits around the character, symmetrical locked frames in sacred spaces. Digital push-ins are rare.
-- **Step-print stutter** for the chaos beat: `scripts/step_print.py` (12 images/s, each held 2–3 frames, long-shutter smear). Use it on fast handheld moves or traffic passing close; on slow shots it barely reads. 1–2 s, at most twice per reel.
+- **Step-print stutter** for the chaos beat: `scripts/step_print.py` (12 images/s, each held 2–3 frames, long-shutter smear). Use it on traffic or people passing close, or on a fast but smooth camera move; on slow shots it barely reads. 1–2 s, at most twice per reel. **Only from a smooth camera path:** locked off, a steady pan, or stabilised to ≤ 2 px residual shake. Never on random handheld shake or from inside a moving vehicle, where every bump becomes a jump and the director reads it as glitchy (Diwali v3b). Check the render's hold shift (≤ 4 px) with `motion_audit.py --step-print` before placing it (effects-playbook §C).
 - Everything else follows the cinematic-montage motion rules: no impact shakes on handheld, pushes only on steady holds.
 
 ## Type and graphics

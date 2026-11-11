@@ -17,21 +17,26 @@ Why: in the my-reel pilot, every defect the director or a later frame-by-frame c
    ```
    ./.venv/bin/python scripts/pregate.py projects/<reel>/renders/exports/<reel>_v<N>.mp4 \
        --map projects/<reel>/analysis/map_v<N>.json -o projects/<reel>/analysis/pregate_v<N> \
-       --fps <seq fps> --expect <runtime s> --designed <T0-T1 …> \
+       --fps <seq fps> --expect <runtime s> --designed <T0-T1:type …> [--window x,y,w,h] \
        [--reviewed projects/<reel>/renders/exports/<reel>_v<last PASS>.mp4 --reviewed-map projects/<reel>/analysis/map_v<last PASS>.json] \
        [--allow <shots>] [--look] [--exclude-band 0.72,0.82]
    ```
-   - `--designed`: the intended black or flagged spans in seconds (a fade-in `0-0.5`, an end card `27.3-29.84`).
+   - `--designed`: **typed** spans in seconds where some scan flags are intended, e.g. `0-0.5:fade 0-1.56:step-print 27.3-29.84:end-card`.
+     - Each type expects only its own flags: a step-print expects holds, not blur; an end card expects black and a freeze.
+     - An untyped span allows black only.
+     - A designed span is still checked and still reviewed. Calling something designed doesn't make it good (v0.10.2, Diwali v3b).
+   - `--window`: the picture's window in the export (4:3 or 4:5 windowed reels), for the motion audit and the strips.
    - `--exclude-band`: leave the subtitle band out of the colour stats (white captions can trip the burn check).
    - `--allow` / `--look`: the shots and the look the brief names as deliberate departures from the camera.
 
-   It runs `verify_render.py`, `frame_scan.py` (every frame), `camera_fidelity.py` and, with `--reviewed` (the last version that **passed** the gate, not just the previous export), `render_diff.py`, then `watch.py` for the sheets. A check that crashes counts as a FAIL. **Fix every FAIL first:** in the first five reels 47 of 59 gate runs failed, mostly on things a script can see. It writes `shots.json` and states the review scope in `PREGATE.md`: full, focused on the changed shots, sound only, or no change (nothing to review).
+   It runs `verify_render.py`, `frame_scan.py` (every frame), **`motion_audit.py`** (camera shake per shot; a step-print whose held images jump more than 4 px FAILs; shake over the limits marks the shot REVIEW), `camera_fidelity.py` and, with `--reviewed` (the last version that **passed** the gate, not just the previous export), `render_diff.py`. Then `watch.py` makes the 2 fps sheets and the **full-rate strips** (`strips/`: the hook, every designed span, every REVIEW shot). A check that crashes counts as a FAIL. **Fix every FAIL first:** in the first five reels 47 of 59 gate runs failed, mostly on things a script can see. It writes `shots.json` and states the review scope in `PREGATE.md`: full, focused on the changed shots, sound only, or no change (nothing to review).
 3. **Call the reviewer:** the Agent tool with `subagent_type: "reel-reviewer"` and a **`model` other than the editor's own**: Fable for an Opus editor; Opus for a Fable or Sonnet editor. If that model is out of credits or unavailable, take the remaining model that still isn't the editor's (Sonnet for an Opus or Fable editor, Fable for a Sonnet editor). Never the editor's own model; if none is available, stop and tell the director.
-   - **Full review** for a new cut (the first review, or when pregate says the structure changed). The prompt gives the export path, the pregate folder (`scan.json`, `watch/index.md`, `fidelity/FIDELITY.md` and `fidelity/fidelity_sheet.jpg`), `brief.md`, the brief's playbook (`playbooks/<name>.md`) and `studio/director-profile.md`.
+   - **Full review** for a new cut (the first review, or when pregate says the structure changed). The prompt gives the export path, the pregate folder (`scan.json`, `motion.json`, `watch/index.md`, **`strips/index.md`**, `fidelity/FIDELITY.md` and `fidelity/fidelity_sheet.jpg`), `brief.md`, the brief's playbook (`playbooks/<name>.md`) and `studio/director-profile.md`.
    - **Focused review** for a fix version with the same cut: the same inputs plus `diff.json`, and the instruction to judge **only the changed shots** and confirm the rest is untouched (frames and audio md5). Goddess v9b–v10b ran this way. For a sound-only change, the reviewer judges the sound at the changed moments.
    - Both get a scratch dir for frames (`analysis/review_v<N>/frames/`), this round's director notes (what was supposed to change), and **the editor's model name**, so the reviewer can refuse to run on the same model.
 
-   **Don't** pass your own QA conclusions or your reasons for choices. The reviewer judges blind.
+   **Don't** pass your own QA conclusions or your reasons for choices. The reviewer judges blind. **A REVIEW shot can't be waived by the editor.** Only the reviewer's verdict on its strip clears it, and a "defect" verdict is answered like any major (step 5).
+   A focused review still reads the strips of any changed shot, the hook and any designed span.
    If `reel-reviewer` isn't listed as an agent type (an older session), use `general-purpose` with the same `model` rule and tell it to read and follow `.claude/agents/reel-reviewer.md`.
 4. **Save the report** as `analysis/review_v<N>.md`, unedited.
 5. **Answer every blocker and major** in `project.md` under `## Round N — Review gate`:

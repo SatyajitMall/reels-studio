@@ -1,5 +1,39 @@
 # Studio Changelog
 
+## 0.10.2 — 2026-11-11
+**The review gate can't be talked past** (patch, safe mid-reel; blocker CR from could-not-go-home-diwali). The director asked "how certain glitchy videos are passing the review cut". Diwali v3b's opening step-print was made from a handheld shot inside a moving auto, so every held image jumped 6–21 px. It passed pregate and four reviews.
+
+**Why it passed (each cause verified in the scripts):**
+1. **The editor's own `--designed` spans excused every scan flag inside them.**
+2. **The reviewer saw only 2 fps sheets.** It can't see an 8 Hz jerk, and it took the brief's "driver static" as a fact.
+3. **The reel-local motion numbers had no limit,** so they decided nothing.
+4. **No rule said what a step-print may be made from.**
+5. **The checklist had no "is it cinematic?" line.**
+
+**What changed:**
+- **New `scripts/motion_audit.py`** (promoted from the reel's tool, made general). It measures camera shake per shot on the frame's **outer ring**, so a moving subject isn't counted (Diwali S1's hands), with `--window` for 4:3 and 4:5 reels.
+  - **A step-print whose held images jump more than 4 px off the smooth path FAILs.**
+  - **Camera jerk p95 above 6, or a jump above 8 px, marks the shot REVIEW.**
+
+  On v3b: shot 01 FAILs (7.9 px), the reel's other step-print passes (0.3 px, a steady source), and shot 18 goes to REVIEW (jerk 7.9). The Diwali session had pulled shot 18's frames as a suspect too.
+- **`pregate.py`:**
+  - **typed designed spans** (`T0-T1:fade|end-card|title|step-print|flash|transition|freeze`). Each type allows only its own scan flags: v3b's blur flash inside the step-print now FAILs. An untyped span allows black only;
+  - runs the motion audit;
+  - writes **full-rate strips** (`strips/`, every frame at the sequence's rate, cropped to `--window`) of the hook, every designed span and every REVIEW shot.
+
+  Tested on v3b in three ways: typed spans FAIL on shot 01; the old untyped call FAILs with a "type the span" hint; with shot 01 passed off as a title, it still lands in REVIEW, which the editor can't waive.
+- **`watch.py`:** `--crop x,y,w,h`; at full rate it lands on each frame (it used to sample midway and slip into the next shot).
+- **The reviewer (`reel-reviewer.md`):**
+  - reads every strip and gives each one a verdict;
+  - treats a designed span as the editor's intent to be judged, and **the brief as intent, not fact**;
+  - gets a **Cinematic** line: steady motion, a sharp subject, clear intent, and an effect in the hook that reads as a fault is a major.
+
+  `review-gate.md`: REVIEW shots can't be waived by the editor, and focused reviews still read the hook and designed-span strips.
+- **Step-print source rule** (effects-playbook §C, story-montage): only from a smooth camera path (locked off, a steady pan, or ≤ 2 px residual shake), never random shake or the inside of a moving vehicle. Check the render's hold shift before placing it.
+- **CLAUDE.md §5:** the pregate line names the motion audit and the strips.
+
+Reels in flight: could-not-go-home-diwali, at its next gate. It must type its spans and pass `--window 0,505,1080,810`; shot 01 needs a steadier source or real-time playback.
+
 ## 0.10.1 — 2026-11-11
 **First Veo vs Omni gap-fill test** (patch, safe mid-reel). The director approved both runs ($0.40). Both models got the same two stills, 4 s apart, from Diwali C047, and the real 4 s between them was the ground truth.
 

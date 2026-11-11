@@ -14,6 +14,13 @@ The editor's `scripts/pregate.py` has already passed the file checks, the frame 
 - For a **focused review**, `diff.json` from `scripts/render_diff.py`: the frame spans that changed since the last reviewed version. Judge those shots fully, and confirm that nothing outside them changed (frames and audio).
 - `scan.json` from `scripts/frame_scan.py`: every frame checked for blur or smear dips, frozen frames, flicker and black or white frames. 2 fps sheets miss defects shorter than about 0.5 s; the scan doesn't.
 - `watch/index.md` and `watch/sheet_NN.jpg`: one contact sheet per shot, sampled at 2 fps. Tiles are stamped with timecodes; the strip under them is the audio waveform of the same span.
+- **`strips/index.md` and `strips/sheet_NN.jpg`: every frame, at the sequence's rate,** of:
+  - the hook (0–3 s);
+  - every designed span (a step-print, a title, an end card…);
+  - every shot `motion.json` marks REVIEW (camera jerk or jumps over the limit).
+
+  2 fps sheets can't show anything that happens 8 times a second. Diwali v3b's step-print jumped 6–21 px on every held image and passed four reviews that saw only the 2 fps sheets.
+- `motion.json` from `scripts/motion_audit.py`: the camera's shake per shot (jitter, jerk, jumps), measured on the frame's outer ring so a moving subject isn't counted, and the hold-to-hold shift of every step-print.
 - The export file itself, so you can pull any frame at full size.
 - `brief.md`: the approved plan (intent, look, effects, type, must and must-not lists).
 - The reel's **playbook** (`.claude/skills/cinematic-reel/playbooks/<name>.md`, named in the brief): the style rules and QA thresholds for this kind of video. Where the brief overrides a playbook rule, the brief wins.
@@ -24,6 +31,13 @@ The editor's `scripts/pregate.py` has already passed the file checks, the frame 
 
 ## How to review
 1. Read `scan.json` first. **Every flagged span** gets a look at full size (pull 3–4 frames across it), and a verdict: a defect, or designed (a flash, a fade, a transition). In the pilot, camera-jerk smear (C073, 0.2 s) and Timewarp smear (C076) were invisible on 2 fps sheets but obvious in the scan.
+1b. **Read every full-rate strip** (`strips/`), and give each one a verdict in your table or the pass list:
+   - **the hook;**
+   - **each designed span:** a span marked designed is the editor's intent, not proof that it works. Judge it like any other shot;
+   - **each REVIEW shot.**
+
+   On the strip, follow a fixed edge (a door frame, a horizon, a vehicle's pillar) from tile to tile. If it jumps, the shot jerks. A step-print must jump only in the moving subject, never in the frame itself.
+1c. **The brief describes the editor's intent, not a fact.** "The driver sits still" is what the editor wanted. Check it on the frames, and report the difference when they disagree.
 2. Read `watch/index.md`, then **every** sheet. Don't sample.
 3. For anything suspicious, pull a full-size frame and look again:
    `ffmpeg -v error -ss <t> -i <export> -frames:v 1 <your scratch dir>/f_<t>.png`
@@ -36,6 +50,12 @@ The editor's `scripts/pregate.py` has already passed the file checks, the frame 
    - **Looks and effects:** effects that cheapen the image (glitter, heavy leaks, rays or embers that read as a filter rather than light); **haze or veil**: an overlay lifting the blacks and flattening contrast across a shot. Compare against the same look on neighbouring shots; the pilot's rays did this on C029 and C006 and slipped past the first review; grain that's too heavy; a look that fights the brief's intended grade; transitions that call attention to themselves or land off the beat.
    - **Pictures and words** (VO or dialogue reels): each shot against the brief's line table. A shot that doesn't show its line, a picture change that lands in a pause instead of on the words, or the same person carrying two lines (unless the brief calls it a callback) is a major.
    - **Edit:** cuts that should land on audio hits (use the waveform); a shot held too long or too short for the music's energy; the same shot repeated; the hook (first 3 s) not grabbing.
+   - **Cinematic** (the director: "not cinematic enough"). For every shot, not only the defective ones, ask whether it looks deliberate:
+     - smooth or steady motion, never jerky;
+     - the subject sharp;
+     - a clear intent in the framing and the move.
+
+     A shot that's technically clean but reads as amateur (a wobbly handheld move, a jerky effect, a soft subject) is a major. **An effect in the hook that reads as a fault rather than a style** (a step-print or glitch that looks like dropped frames) is a major. "Glitchy" is the director's word for it.
    - **Sound:** an SFX with no visible cause, or one that lands late against its cause (use the waveform); a whoosh or swish under text or a title; anything the playbook's Sound section rules out.
    - **AI-generated shots** (labelled in the brief): shown as proof of something real (a crowd, a result, a screen); two in a row; a seam or colour jump against the real footage around it; melting detail; hands with the wrong number of fingers, or tools that bend or merge; a generated person whose face, clothes or age drift during the shot or don't match the real shots of them around it; text or signs that are gibberish; details from the anchor still that the model dropped; a gap-fill (between two stills) whose motion doesn't continue the shots either side. Any of these on a generated subject is a major.
    - **Brief compliance:** every must-have present, every must-not absent, the playbook's QA thresholds met, and the director-profile preferences respected.

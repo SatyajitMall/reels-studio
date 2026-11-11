@@ -205,7 +205,7 @@ The Scale numbers in the table below assume 1080-wide footage; on 4K vertical cl
 | **Freeze + text** | `freeze_frame` on the beat, then a title / HyperFrames card on top | "this is me 2 years ago" moments |
 | **Rewind** | `reverse_clip` 0.3–0.6 s + rewind SFX | callbacks, "wait, go back" |
 | **Stutter** | razor 3–4 identical 2-frame slices back-to-back | beat drops |
-| **Step-print** | `scripts/step_print.py <clip> -o renders/fx/<shot>_step.mov --start S --dur D --fps <seq>`: 12 images/s, each held 2–3 frames, long-shutter smear (`--blur 3`). The render replaces the shot. Premiere's Posterize Time (12) does the hold without the smear | Chaos peaks on fast handheld moves or traffic passing close; barely reads on slow shots. 1–2 s, at most twice a reel (story-montage) |
+| **Step-print** | `scripts/step_print.py <clip> -o renders/fx/<shot>_step.mov --start S --dur D --fps <seq>`: 12 images/s, each held 2–3 frames, long-shutter smear (`--blur 3`). The render replaces the shot. Premiere's Posterize Time (12) does the hold without the smear | Chaos peaks: traffic or people passing close, or a fast but **smooth** move. It barely reads on slow shots. 1–2 s, at most twice a reel (story-montage). **The camera's path must be smooth** (v0.10.2): a locked-off frame, a steady pan, or a shot stabilised to ≤ 2 px residual shake. A step-print turns every bump into a 3-frame jump, so never use it on random shake, and never from inside a moving vehicle unless the frame is locked to the vehicle (Diwali v3b, "glitchy"). **Check the render before placing it:** `motion_audit.py <render> --shots <[[name,0,D]]> --step-print 0-D -o m.json` must show a hold shift ≤ 4 px. Pregate fails it otherwise |
 
 ## D. Transitions (between shots)
 

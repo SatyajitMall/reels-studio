@@ -74,6 +74,7 @@ def main() -> None:
     ap.add_argument("--per-sheet", type=int, default=16, help="max frames per sheet")
     ap.add_argument("--cols", type=int, default=4)
     ap.add_argument("--tile", type=int, default=270, help="tile width in px")
+    ap.add_argument("--crop", help="x,y,w,h: show only this part of the frame (a 4:3 or 4:5 picture window)")
     args = ap.parse_args()
 
     info = probe(args.video)
@@ -94,7 +95,10 @@ def main() -> None:
             t += span
 
     tile_w = args.tile
-    tile_h = int(tile_w * (info["height"] / info["width"])) if info["width"] else int(tile_w * 16 / 9)
+    crop = [int(v) for v in args.crop.split(",")] if args.crop else None
+    fw, fh = (crop[2], crop[3]) if crop else (info["width"], info["height"])
+    tile_h = int(tile_w * (fh / fw)) if fw else int(tile_w * 16 / 9)
+    pre = f"crop={crop[2]}:{crop[3]}:{crop[0]}:{crop[1]}," if crop else ""
     f_lab, f_head = font(18), font(24)
     index = {"video": str(args.video), **info, "sample_fps": args.fps, "sheets": []}
     n_sheet = 0
@@ -103,7 +107,10 @@ def main() -> None:
         for name, a, b in sections:
             # Frame times inside the section, centred in each sample slot; at least one per section.
             step = 1.0 / args.fps
-            times = [a + step / 2 + i * step for i in range(max(int((b - a) * args.fps), 1))]
+            if info["fps"] and args.fps >= info["fps"] * 0.99:      # full rate: land on each frame, not between two
+                times = [a + i * step + 0.002 for i in range(max(int(round((b - a) * args.fps)), 1))]
+            else:
+                times = [a + step / 2 + i * step for i in range(max(int((b - a) * args.fps), 1))]
             times = [t for t in times if t < b] or [(a + b) / 2]
             for part in range(0, len(times), args.per_sheet):
                 chunk = times[part:part + args.per_sheet]
@@ -111,7 +118,7 @@ def main() -> None:
                 for k, t in enumerate(chunk):
                     fp = tmp / f"f_{n_sheet}_{k}.jpg"
                     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.3f}", "-i", str(args.video), "-frames:v", "1",
-                                    "-vf", f"scale={tile_w}:{tile_h}", str(fp)], capture_output=True)
+                                    "-vf", f"{pre}scale={tile_w}:{tile_h}", str(fp)], capture_output=True)
                     if fp.exists():
                         tiles.append((t, Image.open(fp).convert("RGB")))
                 if not tiles:
@@ -119,7 +126,7 @@ def main() -> None:
                 cols = min(args.cols, len(tiles))
                 rows = (len(tiles) + cols - 1) // cols
                 head = 40
-                sa, sb = chunk[0] - step / 2, min(chunk[-1] + step / 2, b)
+                sa, sb = max(chunk[0] - step / 2, a), min(chunk[-1] + step / 2, b)
                 wave = waveform(args.video, sa, sb, cols * tile_w, tmp) if info["audio"] else None
                 sheet = Image.new("RGB", (cols * tile_w, head + rows * tile_h + (wave.height + 6 if wave else 0)), (18, 18, 18))
                 d = ImageDraw.Draw(sheet)
