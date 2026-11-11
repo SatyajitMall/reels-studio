@@ -1,4 +1,7 @@
 {
+  "permissions": {
+    "ask": ["mcp__higgsfield"]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -12,6 +15,12 @@
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
           { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_architecture.py\"" }
+        ]
+      },
+      {
+        "matcher": "mcp__higgsfield__.*",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/ask_paid_ai.py\"" }
         ]
       }
     ]

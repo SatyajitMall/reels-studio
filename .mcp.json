@@ -7,6 +7,10 @@
         "PREMIERE_MCP_TELEMETRY": "0",
         "PREMIERE_TEMP_DIR": "/tmp/premiere-mcp-bridge"
       }
+    },
+    "higgsfield": {
+      "type": "http",
+      "url": "https://mcp.higgsfield.ai/mcp"
     }
   }
 }

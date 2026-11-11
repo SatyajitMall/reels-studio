@@ -96,6 +96,54 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
 
 **No fallback provider since v0.10.0.** The Gemini API's Veo `-preview` models were shut down on 2026-10-22. Google's replacement on that API is Omni, which needs a `GEMINI_API_KEY` and is untested here. If OpenRouter is down, wait or ask HQ.
 
+**Higgsfield (MCP): connected in v0.10.3, tested once on C047 (below).** The director asked for it on 2026-11-11, to compare with Omni on gap fills.
+- It's in `.mcp.json` as Higgsfield's official server, `https://mcp.higgsfield.ai/mcp`. Sign in with `/mcp`; it needs a paid Higgsfield plan. Tools appear as `mcp__higgsfield__*`.
+- **Every Higgsfield tool call asks the director.** A `permissions.ask` rule and the `.claude/hooks/ask_paid_ai.py` hook enforce this, even for calls that spend nothing. The permission prompt is the director's yes. Never answer it for them, and never ask a peer session to.
+- **It spends Higgsfield credits, which `gen_video.py` and `ai-spend.jsonl` don't count.** Name the shot, model and expected credits in the brief before the first call.
+- **Caps (director, 2026-11-11): 90 credits per reel and 450 credits per calendar month** for the whole studio, HQ tests included. These are on top of the OpenRouter dollar caps. The 4 shots and 24 s per reel count both providers together.
+  - Before each paid job, add its `get_cost` price to the reel's total and the month's total in `studio/ledger/higgsfield-credits.jsonl`. If either would go over its cap, stop and ask the director.
+  - After the job, append one line to that file (append only, never edit past lines): `time`, `reel`, `shot`, `model`, `job`, `credits`, `balance_after`, `output`. Log it in `project.md` too.
+  - Count from this file, not from Higgsfield's `transactions`. The account's history also holds the director's own Higgsfield use.
+- The rest of this section still applies:
+  - the last step of the ladder;
+  - stills only;
+  - subjects allowed, never proof;
+  - the label;
+  - draft before final;
+  - the `film-emulation-prompts` block.
+- Use it only when the brief names it. For a gap fill on Higgsfield, use Kling 3.0 pro (test below); Seedance 2.0 and Cinema Studio 4.0 don't hold the end frame.
+- **Price a job before running it:** call `generate_video` with `params.get_cost: true`, and keep `balance` before and after. The `get_cost` call submits no job; this was verified on 2026-11-11, when the balance stayed 4246.49 and no transaction or generation appeared.
+
+  Prices measured on 2026-11-11 (4 s, 16:9, no stills passed). For the three models in the C047 test, `get_cost` with both stills gave the same price, and the balance dropped by exactly that:
+
+  | Model | Settings | Credits | Notes |
+  |---|---|---|---|
+  | Veo 3.1 Lite | `generate_audio: false` | 6 | 1080p accepted but not confirmed |
+  | Kling 3.0 | `mode: pro`, `sound: off` | 7 | |
+  | Omni 1.2 Flash | 720p | 9 | no audio switch |
+  | Omni 1.2 Flash | 1080p | 13 | no audio switch |
+  | Seedance 2.0 | 1080p, `std` | 48 | |
+  | Cinema Studio 4.0 | 1080p, `t2v` or `omni_reference` mode | 64 | only `omni_reference` takes stills |
+
+  The dollar value of a credit depends on the director's plan (`max`) and is unconfirmed, so Higgsfield caps are in credits. At an assumed $0.044 per credit, 90 credits is about $4 and 450 about $20.
+
+- **Gap-fill test on Higgsfield (HQ, 2026-11-11, 119 credits, director approved).** The same C047 stills, prompt and 4 s as the Omni test below, run on Fable 5.2 through the MCP. The balance went from 4246.49 to 4127.49 (`projects/_hqtest/renders/gen/hf_c047_*`, `cmp_c047_splice_kling3_0.json`; measured with `projects/_hqtest/tools/hf_compare.py`).
+
+  | | Kling 3.0 pro (7 cr) | Seedance 2.0 1080p std (48 cr) | Cinema Studio 4.0 1080p (64 cr) | Omni + camera block (OpenRouter, $0.42) |
+  |---|---|---|---|---|
+  | First frame vs still A (0–255; camera 2.4) | **3.4** | 12.2 | 14.5 | 4.2 |
+  | Last frame vs still B (camera 2.4) | **4.3**, at 4.00 s | 37.4: ends on another view | 29.9: ends on another street | 6.9, at 3.96 s |
+  | Biggest frame step (camera 0.012) | 0.019 | 0.047 | **0.149: a hard cut at 2.54 s** | 0.016 |
+  | Saturation (camera 0.354) | 0.375 | 0.345 | 0.398 | 0.290 |
+  | Content | **invents a masked motorbike rider** passing close on the left, 2.3–2.9 s; driver faces forward | new people close on the left; a red "19" sign appears | cuts to an unrelated street; the driver's shirt changes colour | nothing invented near the camera |
+
+  - **Kling 3.0 pro is the best gap fill measured so far**, and the cheapest Higgsfield model tested. Spliced into the real take like Omni (`gap_fill_splice.py`, sigma 1.0, 3-frame dissolves), it used all 4.00 s, and the seams measured 0.012 in and 0.009 out, against the camera's 0.009 frame step. Omni's were 0.012 and 0.011. Its one fault is the invented rider, even though the prompt said "No new vehicles or people close to the auto" and the "Avoid:" list named them. Wording didn't prevent it, so check every Kling draft for invented people and vehicles near the camera, and re-roll one that has them (7 credits). This rests on one test.
+  - **Seedance 2.0 and Cinema Studio 4.0 treat the stills as references, not as first and last frames.** They don't land on still B, so they aren't gap-fill models.
+  - **Cinema Studio 4.0 needs `mode: "omni_reference"` to take stills.** The default `t2v` mode refuses them with a 422, which isn't charged. `get_cost` doesn't check the mode.
+  - None of the three has a negative-prompt parameter. Append " Avoid: " and the negative list to the prompt.
+  - Output: 1920×1080, 24 fps, 4.04 s, no audio. Kling and Seedance return H.264, and Cinema Studio returns HEVC. `conform_clip.py` retimes and re-encodes them.
+  - Stills uploaded with `media_upload` stay in the Higgsfield account.
+
 **Facts:**
 - 9:16 is supported, at 4, 6 or 8 s.
 - Every Veo clip has Google's **SynthID** AI watermark (Omni: assumed the same, not verified).
@@ -116,7 +164,7 @@ These are three capabilities HQ tested on 2026-10-18 (v0.5.1), inspired by the "
     - the street falls off softly.
 
     **The camera block fixed what the plain prompt broke.** "The motion stays smooth and continuous right to the last frame" plus naming what stays sharp removed the end snap and the head turn.
-  - **Pick:** Omni with the camera block for gap fills; Veo Lite for cheap first drafts of a new idea. This rests on one test, so re-check it on the next reel.
+  - **Pick:** Omni with the camera block for gap fills on OpenRouter; Veo Lite for cheap first drafts of a new idea. Kling 3.0 pro on Higgsfield landed closer (above), within its credit caps. This rests on one test, so re-check it on the next reel.
   - **Round 3, depth-aware clarity:**
     - the AI fill's background was blurred (sigma 2.4) until its detail matched the real bokeh (0.0061 against 0.0056);
     - its near plane was softened (sigma 0.8) until it matched the real near plane after clarity (0.0141 against 0.0132);

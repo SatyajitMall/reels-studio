@@ -1,5 +1,24 @@
 # Studio Changelog
 
+## 0.10.3 — 2026-11-11
+**Higgsfield MCP connected, behind a director-only gate** (patch, safe mid-reel). The director asked to connect Higgsfield. On 2026-11-10 they planned to use it with Fable 5.2, "because those give better results".
+- **`.mcp.json`:** Higgsfield's official server `https://mcp.higgsfield.ai/mcp`, over streamable HTTP. It signs in with OAuth through Higgsfield's Clerk login (`claude-code` is a listed client; probed: 401 plus protected-resource metadata). There's no API key. It needs a paid Higgsfield plan. Every session loads it on start, after the director signs in once with `/mcp`.
+- **Guard:** `permissions.ask: ["mcp__higgsfield"]` in `.claude/settings.json`, plus a new PreToolUse hook `.claude/hooks/ask_paid_ai.py` (matcher `mcp__higgsfield__.*`) that returns `ask` with the tool and its input. Every Higgsfield call needs the director's yes, because every MCP generation spends credits on any plan and the ledger only counts OpenRouter dollars. Hook tested: it asks on a Higgsfield call, stays silent on other tools and on bad input.
+- **Rule:** motion-and-ai.md §3 ("Higgsfield (MCP)"), with a pointer in CLAUDE.md §5. A reel uses it only when the brief names it.
+- **Caps (director, 2026-11-11):** 90 credits per reel and 450 per calendar month for the whole studio, HQ tests included, on top of the OpenRouter dollar caps. The 4 shots and 24 s per reel count both providers together. Every job is appended to a new `studio/ledger/higgsfield-credits.jsonl`, seeded with the three test jobs (November so far: 119 of 450). Totals come from that file, not from Higgsfield's `transactions`, which also holds the director's own use.
+- **Surveyed and priced** (2026-11-11, from a Fable 5.2 session, every call approved by the director, 0 credits spent):
+  - about 140 tools;
+  - 59 video models, 21 of which take a start + end frame;
+  - balance 4,246 credits on `max`;
+  - `get_cost: true` prices a job without submitting it.
+
+  The price table is in motion-and-ai.md §3: Veo 3.1 Lite 6, Kling 3.0 pro 7, Omni 9 (720p) or 13 (1080p), Seedance 2.0 48, Cinema Studio 4.0 64 credits per 4 s.
+- **C047 gap-fill test** (2026-11-11, 119 credits, director approved; balance 4246.49 → 4127.49). The same stills and prompt as the Omni test, run on Kling 3.0 pro (7), Seedance 2.0 (48) and Cinema Studio 4.0 (64). Each charge matched its `get_cost` price.
+  - **Kling 3.0 pro landed closest to still B of any model tested:** 4.3 off at 4.00 s, against Omni's 6.9. Spliced into the real take, its seams measured 0.012 and 0.009, against the camera's 0.009. It invented a masked motorbike rider passing close, although the prompt and its "Avoid:" list already ruled that out, so the rule is to check every Kling draft and re-roll one that invents.
+  - **Seedance 2.0 and Cinema Studio 4.0 don't hold the end frame.** Seedance ends on another view; Cinema Studio hard-cuts to another street at 2.54 s. Cinema Studio needs `mode: "omni_reference"` for stills (the 422 from `t2v` isn't charged).
+  - The full table is in motion-and-ai.md §3.
+- **Next:** the dollar value of a credit on the director's plan. The Higgsfield CLI and the `higgsfield-ai/skills` pack aren't installed: they're third-party, so that waits for the director's OK.
+
 ## 0.10.2 — 2026-11-11
 **The review gate can't be talked past** (patch, safe mid-reel; blocker CR from could-not-go-home-diwali). The director asked "how certain glitchy videos are passing the review cut". Diwali v3b's opening step-print was made from a handheld shot inside a moving auto, so every held image jumped 6–21 px. It passed pregate and four reviews.
 
