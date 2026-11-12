@@ -149,7 +149,11 @@ Every reel has a **reel type**: `talking-head`, `music-montage` or `hybrid` (`st
 - Story devices: `scripts/step_print.py` (step-printed stutter render) and `scripts/photo_prints.py` (photo-print inserts on paper), used by the story-montage playbook.
 - Look previews: `scripts/look_preview.py` renders Premiere's own film-stock looks (effects-playbook §A3) on the director's stills, for Round 2.
 - FFmpeg colour and keying (look previews on stills, keying green-screen elements to ProRes 4444 alpha, pre-rendered effect shots): the `ffmpeg-color-grading-chromakey` skill. Never for the reel's grade, which stays in Premiere.
-- SFX prep: `scripts/sfx_prep.py` (trim leading silence, peak −3 dBFS) before placing sounds. Generated or stock clips: `scripts/conform_clip.py` (frame rate, 1080×1920, colour match to the footage).
+- Sound effects (effects-playbook §F):
+  - `scripts/sfx_fetch.py` finds real CC0 recordings on Openverse, with no key. It ranks them by listening with earshot, keeps a pick with its licence and prints the credits.
+  - `scripts/sfx_prep.py` trims leading silence and peaks at −3 dBFS before placing sounds.
+  - `scripts/sfx_sync.py` finds each placed sound in the export's own audio, for the pregate.
+  - earshot (`~/.local/bin/earshot`, MIT, pinned in `scripts/earshot_util.py`) is Claude's ears: `rank`, `find`, `sheet`, and a code-made bank (`scripts/earshot_bank.py` → `assets/sfx/earshot/`). Never use its `llm` command: it uploads audio. Generated or stock clips: `scripts/conform_clip.py` (frame rate, 1080×1920, colour match to the footage).
 - Transcription: `scripts/transcribe_reel.sh <reel-name> [files]`, local Whisper by default (`scripts/transcribe_local.py`: free, offline, word-level, the same JSON as Scribe). `--scribe` uses ElevenLabs Scribe (`.vendor/video-use/helpers/transcribe.py`) when `.env` has a working `ELEVENLABS_API_KEY`.
 - Packing: `pack_transcripts.py` → `projects/<name>/transcripts/takes_packed.md`. Read this, not raw frames.
 - Cut inspection: `.vendor/video-use/helpers/timeline_view.py <video> <start> <end> -o out.png`.

@@ -76,7 +76,7 @@ Specific notes work best:
 |---|---|
 | `assets/luts/` | `.cube` LUTs (your go-to looks) |
 | `assets/music/` | Licensed music beds |
-| `assets/sfx/` | Whooshes, risers, hits, clicks (`.wav`) |
+| `assets/sfx/` | Whooshes, risers, hits, clicks (`.wav`): the Gemini starter set, `earshot/` (code-made, `scripts/earshot_bank.py`) and `openverse/` (real CC0 recordings kept by `scripts/sfx_fetch.py`, each with its licence sidecar) |
 | `assets/overlays/` | Grain, light leaks, textures |
 | `assets/mogrts/` | Premiere Essential Graphics templates |
 | `assets/presets/` | Export presets (`.epr`) |

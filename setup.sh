@@ -64,6 +64,20 @@ npx -y skills add sergebulaev/instagram-skills -a claude-code -y \
 # Starter LUTs / SFX / grain (regenerable, git-ignored). Skipped if the director already has LUTs.
 ls assets/luts/*.cube >/dev/null 2>&1 || ./.venv/bin/python scripts/gemini_generate_starter_pack.py
 
+# earshot: the studio's ears for sound effects (github.com/Leonxlnx/earshot, MIT), CLI only (no `llm` extra, so no
+# upload), pinned to the commit HQ reviewed. First use downloads its two models (~1.1 GB) into ~/.cache/earshot.
+EARSHOT_PIN=$(sed -n 's/^PIN = "\([0-9a-f]*\)".*/\1/p' scripts/earshot_util.py)
+command -v uv >/dev/null || brew install uv
+if [ ! -x "$HOME/.local/bin/earshot" ]; then
+  uv tool install --python 3.12 "earshot @ git+https://github.com/Leonxlnx/earshot@${EARSHOT_PIN}" \
+    && "$HOME/.local/bin/earshot" doctor --fetch >/dev/null \
+    && ok "earshot installed at ${EARSHOT_PIN:0:7} (models fetched)" \
+    || warn "earshot didn't install: sfx_fetch.py --rank and the pregate's sound sheet need it (sfx_sync.py doesn't)"
+else
+  ok "earshot present ($HOME/.local/bin/earshot)"
+fi
+[ -x "$HOME/.local/bin/earshot" ] && ./.venv/bin/python scripts/earshot_bank.py >/dev/null && ok "earshot sound set in assets/sfx/earshot/"
+
 step "5/6  API keys"
 if [ ! -f .env ]; then cp .env.example .env; warn "Created .env (API keys are optional: transcripts use local Whisper)."; fi
 # video-use looks for .env in its own folder too

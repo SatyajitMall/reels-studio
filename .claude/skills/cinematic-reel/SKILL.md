@@ -203,7 +203,11 @@ For shots that need **denoise, a real speed-ramp curve, Timewarp slow-mo or glow
 Plan which shots go through After Effects in the brief's Treatment, and say so in the round summary. Stabilisation stays in Premiere (Phase 5): AE's Warp Stabilizer can't be run by script.
 
 ## Phase 6: Sound design & mix
-- SFX on A2 where **this reel's playbook** allows them (its Sound section), from the menu in `effects-playbook.md` §F. Run `scripts/sfx_prep.py` first and place each by its transient. Levels: the playbook's (cinematic-montage swishes about −13 dB; otherwise −14…−18 dB).
+- SFX on A2 where **this reel's playbook** allows them (its Sound section), from the menu in `effects-playbook.md` §F. Levels: the playbook's (cinematic-montage swishes about −13 dB; otherwise −14…−18 dB).
+  - **Source real sounds first** (§F "Where sounds come from"): the director's own, then Openverse CC0 via `scripts/sfx_fetch.py`, picked with earshot's `--rank` and trimmed with `earshot find`, then the designed sets.
+  - Run `scripts/sfx_prep.py`, place each by its transient, and list each one in the EDL `audio` list (or `analysis/sfx_cues_v<N>.json`) so the pregate can find it in the export.
+  - Credit lines (`sfx_fetch.py credits`) go in `project.md`, and a CC BY credit in the Instagram caption.
+  - A sound new to the studio goes to the director as an A/B before the reel relies on it.
 - Music on A3:
   - section changes on the beat;
   - planned silence drops;

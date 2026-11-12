@@ -1,5 +1,47 @@
 # Studio Changelog
 
+## 0.11.0 — 2026-11-12
+**Real sound effects, and the pregate checks every one in the export** (minor, safe mid-reel: sourcing is opt-in, and the new pregate step runs only when an EDL `--map` lists sound effects or `--sfx-cues` is given; Diwali's maps have none). The director picked "Openverse + earshot" after HQ checked three tools from a post (Openverse, Real SFX, earshot) at their source.
+- **Openverse → `scripts/sfx_fetch.py`** (`search`, `get`, `keep`, `credits`).
+  - Verified 2026-11-12: there's no key. Anonymous use allows 20 requests a minute, 200 a day and 240 results per search; responses are cached for 24 h.
+  - `category=sound_effect` drops every Freesound result, so it isn't used.
+  - Files are Freesound's 128 kb/s MP3 previews.
+  - CC0 hits: whoosh 240, firecracker 155, temple bell 57.
+  - Licences: CC0 / PDM by default; CC BY only on request, marked credit_required; BY-SA, NC, ND and Sampling+ refused.
+  - `keep` writes a new WAV plus a licence sidecar into `assets/sfx/openverse/` and never overwrites.
+  - Tested on "temple bell": 6 downloads, ranked by earshot (5 "strong"), a `find` trim, `keep`, its overwrite refusal, `sfx_prep`, `credits`.
+- **earshot v0.4.1** (github.com/Leonxlnx/earshot, MIT, commit `4ac3d2a`, pinned in `scripts/earshot_util.py`). Reviewed before install:
+  - it shells out only to ffmpeg/ffprobe;
+  - its models (CLAP, Apache-2.0; AST, BSD-3) are pinned safetensors revisions;
+  - the network is used only for that one model download;
+  - Gemini upload exists only in the `llm` extra, which isn't installed.
+
+  Installed with `uv tool` as a CLI at `~/.local/bin/earshot`, with 1.1 GB of models in `~/.cache/earshot`; `setup.sh` installs the same pin.
+- **earshot set → `scripts/earshot_bank.py`.** Nine code-made sounds in `assets/sfx/earshot/` (riser, sub hit, whip, swell, flick, shutter, pop, sub drop, reverse swell).
+  - Seeds are fixed, so a re-render is byte-identical (checked by md5).
+  - All nine are clean on earshot's audit. No recorded audio, so no credit.
+  - The director has a 31 s A/B against the Gemini starter sounds. The Gemini column stays the default in effects-playbook §F until their verdict.
+- **`scripts/sfx_sync.py` + pregate step 3b.** Every placed sound effect, from the EDL `audio` list or a cue sheet, is found in the export's own audio by its file's waveform: GCC-PHAT, with a local refinement for sub-bass.
+  - Missing, or more than 2 frames off its plan: FAIL.
+  - A weak match, a level outside −6…+9 dB of the plan, or masking in every band: WARN.
+  - With earshot installed it also draws `sfx/sound_sheet.png` for the reviewer.
+  - Validated on kolkata v6 / v6_3 and puja-night-2 v5c:
+    - all 13 real placements were found on frame;
+    - all 8 fakes were rejected (the same files at wrong times);
+    - a 3-frame shift read −3.0 frames.
+  - The masking line (−10 dB) has no ground truth yet.
+- **Rejected, with the measurements:**
+  - **earshot's own cue sync** for this job: in a music-led mix some onset is always near. It scored a cue with no sound effect "on frame" (puja), and on kolkata its hit rate equalled chance (0.333 vs 0.336).
+  - **Real SFX (Clipwing):** it mixes outside Premiere into a new MP4, its 78 bundled sounds are UI clicks, and it needs `ffmpeg-full`.
+- **Rules:**
+  - effects-playbook §F gets "Where sounds come from" (the director's own, then Openverse, then the designed sets), both columns, and an "SFX in the EDL" line;
+  - skill Phase 6;
+  - CLAUDE.md §5;
+  - review-gate.md and the reel-reviewer brief (the reviewer judges Sound from `SFX_SYNC.md` and the sheet);
+  - README `assets/sfx/`.
+- **Numbering:** the queued process and tools batches move to v0.12 and v0.13 (BACKLOG).
+- **Next:** the director's A/B verdict, which decides §F's default column. The first reel that hears a buried effect logs its `sfx_sync` number in a CR, to set the masking line.
+
 ## 0.10.3 — 2026-11-11
 **Higgsfield MCP connected, behind a director-only gate** (patch, safe mid-reel). The director asked to connect Higgsfield. On 2026-11-10 they planned to use it with Fable 5.2, "because those give better results".
 - **`.mcp.json`:** Higgsfield's official server `https://mcp.higgsfield.ai/mcp`, over streamable HTTP. It signs in with OAuth through Higgsfield's Clerk login (`claude-code` is a listed client; probed: 401 plus protected-resource metadata). There's no API key. It needs a paid Higgsfield plan. Every session loads it on start, after the director signs in once with `/mcp`.

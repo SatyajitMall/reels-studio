@@ -242,23 +242,40 @@ Default is a **hard cut**. Transitions are seasoning: at most 3–4 non-cut tran
 
 The menu below is what's available, not a list to use everywhere.
 
-| Moment | SFX |
-|---|---|
-| Hook / title | riser into sub-hit (`gemini_riser_sub_hit.wav`: the hit lands 1.0 s in, 0.70 s after `sfx_prep.py`) |
-| Whip / fast pan / flash transition | soft whoosh (`gemini_whoosh_soft.wav`); never under text |
-| Punch-in / snap zoom | short swish or tick (`gemini_snap_swish.wav`) |
-| Text pop | click / pop (`gemini_text_pop_click.wav`), only where the playbook allows a sound on type |
-| Flash cut | camera shutter (`gemini_camera_shutter.wav`) |
-| Reveal / big turn | bass drop (`gemini_bass_drop_boom.wav`) |
-| Emotional turn | music drops out for 0.5–1 s (silence is an effect) |
+**Where sounds come from**, best first (v0.11.0):
+1. **The director's own recordings** and the clips' natural sound.
+2. **Real recordings from Openverse** (`scripts/sfx_fetch.py`) for the sounds the footage implies: firecrackers, temple bells, dhak, traffic, a crowd.
+   - CC0 and public domain by default. CC BY only with `--license cc0,by`, and then its credit goes in the Instagram caption. BY-SA, NC and ND are refused.
+   - Claude can't hear, so the pick is made by listening with earshot: `get "<search>" --rank "<what it should sound like>"` downloads the top candidates and ranks them.
+   - In a long recording, `earshot find <file> "<the moment>"` gives the trim.
+   - `keep <file> --name <name> [--from S --to E]` copies the pick into `assets/sfx/openverse/` with its licence sidecar.
+   - `sfx_fetch.py credits projects/<reel>/sfx` prints the credit lines for the Instagram package.
+3. **Designed transition sounds:** the earshot set in `assets/sfx/earshot/` (`scripts/earshot_bank.py`), or the Gemini starter sounds.
+   - Any other earshot bank sound renders by id, aimed at its cut: `earshot sfx render whoosh_fast/whip -o x.wav --sr 48000 --dur 0.8 --apex 0.30`. It's audited for clicks, cut tails and clipping on render.
+
+The director judges a sound new to the studio by ear before a reel relies on it. Their A/B of the earshot set against the Gemini starter sounds (2026-11-12) decides which column is the default; until then it's the Gemini one.
+
+| Moment | Gemini starter (`assets/sfx/`) | earshot set (`assets/sfx/earshot/`) |
+|---|---|---|
+| Hook / title | riser into sub-hit (`gemini_riser_sub_hit.wav`: the hit lands 1.0 s in, 0.70 s after `sfx_prep.py`) | `earshot_riser_dark` (peaks 0.99 s in, 0.78 s after prep) with `earshot_cut_hit_sub` on that peak |
+| Whip / fast pan / flash transition | soft whoosh (`gemini_whoosh_soft.wav`); never under text | `earshot_whoosh_whip` (peak 0.30 s in: put the peak about 1 frame after the cut); `earshot_whoosh_swell` for a slow move; never under text |
+| Punch-in / snap zoom | short swish or tick (`gemini_snap_swish.wav`) | `earshot_swish_flick` |
+| Text pop | click / pop (`gemini_text_pop_click.wav`), only where the playbook allows a sound on type | `earshot_pop_soft` |
+| Flash cut | camera shutter (`gemini_camera_shutter.wav`) | `earshot_shutter_dslr` |
+| Reveal / big turn | bass drop (`gemini_bass_drop_boom.wav`) | `earshot_sub_drop` |
+| Section change | — | `earshot_reverse_swell` (swells into the cut, peaks 0.52 s in, just after it) |
+| Emotional turn | music drops out for 0.5–1 s (silence is an effect) | |
 
 **Prepare SFX before placing them:**
 ```
 .venv/bin/python scripts/sfx_prep.py assets/sfx/*.wav -o projects/<name>/sfx
 ```
 It trims leading silence and peak-normalises to −3 dBFS. Originals are untouched. Library files differ about 10× in level and often start late, so this way one clip gain means the same thing for every file.
-- **Place each SFX by its transient**, not its file start: the report gives the transient time (≈ 0 after prep, except risers). It should land within 2 frames of its visual cause.
-- The starter SFX in `assets/sfx/` are synthesised placeholders. Prefer the director's real SFX when there are any.
+- **Place each SFX by its transient**, not its file start: the report gives the transient time (≈ 0 after prep, except risers and whooshes, whose peak is the sync point). It should land within 2 frames of its visual cause.
+- **List every placed SFX** in the EDL's `audio` list (`file`, `start`, `in`, `gain_db`) or in `analysis/sfx_cues_v<N>.json`, in the same form. The pregate then finds each one in the export (`scripts/sfx_sync.py`):
+  - missing, or more than 2 frames off its plan, is a FAIL;
+  - a weak match, a level off the plan or masking in every band is a WARN that someone listens to;
+  - with earshot installed, it also draws `sfx/sound_sheet.png` for the reviewer.
 
 Music: cut on the beat for section changes, duck under speech, last note lands on the final frame.
 

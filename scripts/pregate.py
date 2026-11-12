@@ -16,6 +16,11 @@ script can see. This runs them first, and the reviewer is only called on a clean
                         full-rate strip. The editor can't waive it (CR gate-missed-glitch).
   3. camera_fidelity.py each shot against its camera file: brightness, colour, crush, burn, framing         FAIL → stop
                         (skipped with --no-fidelity, or when the map has no camera clips)
+  3b. sfx_sync.py       every sound effect found in the export's own audio (its file's waveform, GCC-PHAT): missing,
+                        or more than 2 frames off its plan                                                FAIL → stop
+                        weak match, level off the plan, or under the mix in every band → WARN: listen at that time.
+                        Runs when the --map EDL has an `audio` list with effects, or with --sfx-cues; with earshot
+                        installed it also draws sfx/sound_sheet.png (frames, events, spectrogram, loudness) for the reviewer.
   4. render_diff.py     with --reviewed: what changed since the last version that PASSED the gate, so the review can
                         be focused. Not merely the previous export: after an unreviewed in-between version the
                         scope would miss changes (kolkata v8 → v8b missed the title). --prev is the old name.
@@ -32,7 +37,8 @@ Usage (from the studio root):
       --map projects/<reel>/analysis/map_v4.json -o projects/<reel>/analysis/pregate_v4 \
       --fps 25 --expect 29.84 --designed 0-1.56:step-print 27.3-29.84:end-card [--window 0,505,1080,810] \
       [--reviewed projects/<reel>/renders/exports/<reel>_v3.mp4 --reviewed-map projects/<reel>/analysis/map_v3.json] \
-      [--allow 01_C010] [--exclude-band 0.72,0.82] [--look] [--profile ig-quiet] [--min-mbps 12]
+      [--allow 01_C010] [--exclude-band 0.72,0.82] [--look] [--profile ig-quiet] [--min-mbps 12] \
+      [--sfx-cues projects/<reel>/analysis/sfx_cues_v4.json]
 --designed takes typed spans in seconds of reel time, T0-T1:type. Types and the scan flags each one expects:
   fade (black, luma_jump) · end-card (black, frozen, luma_jump, blur_dip, white) · title (frozen, blur_dip, luma_jump)
   step-print (frozen; plus the hold-shift check) · flash (luma_jump, white, blur_dip) · transition (blur_dip, luma_jump)
@@ -98,6 +104,8 @@ def main() -> None:
     ap.add_argument("--exclude-band", action="append", default=[], metavar="Y0,Y1")
     ap.add_argument("--look", action="store_true", help="a creative look is on (camera_fidelity --look)")
     ap.add_argument("--no-fidelity", action="store_true")
+    ap.add_argument("--sfx-cues", type=Path, help="the sound effects as placed, when the --map has no EDL audio list: "
+                                                    "[{id, file, start, in, dur, gain_db}] (sfx_sync.py)")
     a = ap.parse_args()
 
     if not a.export.exists():
@@ -106,7 +114,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     for old in ("scan.json", "diff.json", "PREGATE.md", "shots.json", "motion.json", "strips.json"):
         (out / old).unlink(missing_ok=True)
-    for old in ("fidelity", "watch", "strips"):
+    for old in ("fidelity", "watch", "strips", "sfx"):
         shutil.rmtree(out / old, ignore_errors=True)
     smap = json.loads(a.map.read_text())
     smap = smap["shots"] if isinstance(smap, dict) else smap         # an EDL (preview_edl.py) or a plain map
@@ -209,6 +217,33 @@ def main() -> None:
             rows.append(("FAIL" if bad or rc else "PASS", "camera_fidelity", detail + "; see fidelity/FIDELITY.md for WARNs"))
             hard_fail |= bool(bad) or rc != 0
 
+    # 3b. the sound effects, in the export's own audio
+    sfx_args = None
+    if a.sfx_cues:
+        sfx_args = ["--cues", str(a.sfx_cues)]
+    elif isinstance(json.loads(a.map.read_text()), dict) and json.loads(a.map.read_text()).get("audio"):
+        sfx_args = ["--edl", str(a.map)]
+    if sfx_args is None:
+        rows.append(("SKIP", "sfx_sync", "no sound-effect list (an EDL --map with `audio`, or --sfx-cues)"))
+    else:
+        rc, txt = run([str(HERE / "sfx_sync.py"), str(a.export), *sfx_args, "-o", str(out / "sfx"), "--fps", f"{seq_fps:g}",
+                       "--sheet"])
+        sj = out / "sfx" / "sfx_sync.json"
+        if not (out / "sfx" / "SFX_SYNC.md").exists():
+            rows.append(("FAIL", "sfx_sync", f"didn't run: {last_line(txt)}"))
+            hard_fail = True
+        elif not sj.exists():
+            rows.append(("SKIP", "sfx_sync", "the list has no sound effects (music and guides are skipped)"))
+        else:
+            rep = json.loads(sj.read_text())
+            bad = [x for x in rep["sounds"] if x["verdict"] == "FAIL"]
+            warn = [x for x in rep["sounds"] if x["verdict"] == "WARN"]
+            detail = "; ".join(f"{x['id']}: {x['why']}" for x in bad + warn) or \
+                f"{len(rep['sounds'])} effect(s) found, each within 2 frames of its plan"
+            rows.append(("FAIL" if bad else "WARN" if warn else "PASS", "sfx_sync",
+                         detail + (" → listen at those times (sfx/SFX_SYNC.md)" if warn and not bad else "")))
+            hard_fail |= bool(bad)
+
     # 4. what changed
     scope = "full review (first review of this cut)"
     changed: list[str] = []
@@ -256,7 +291,7 @@ def main() -> None:
     md += ["", "Fix every FAIL before calling the reviewer. On PASS, give the reviewer this folder: `shots.json`, `scan.json`, "
            "`motion.json`, `watch/index.md`, **`strips/index.md` (every frame of the hook, the designed spans and the REVIEW "
            "shots: the reviewer must give each a verdict)**, `fidelity/FIDELITY.md` + `fidelity/fidelity_sheet.jpg`, and "
-           "`diff.json` for a focused review."]
+           "`diff.json` for a focused review, plus `sfx/SFX_SYNC.md` and `sfx/sound_sheet.png` when the reel has sound effects."]
     (out / "PREGATE.md").write_text("\n".join(md) + "\n")
     for r, c, d in rows:
         print(f"{r:5s} {c:16s} {d}")
