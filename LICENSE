@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-This licence covers the studio's own code and documentation. Folders that carry
-their own LICENSE file (for example .claude/skills/ffmpeg-color-grading-chromakey/
-and .claude/skills/film-emulation-prompts/) keep that licence. Third-party tools
-installed by setup.sh (earshot, video-use, HyperFrames, the Premiere Pro MCP
-server, Instagram skills) are not included in this repository and keep their own
-licences.
