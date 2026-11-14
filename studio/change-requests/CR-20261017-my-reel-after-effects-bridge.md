@@ -64,3 +64,11 @@ First use: my-reel v7. Denoise the 6 darkest shots (C027, C003, C034, C041, C036
 **Docs:** `.claude/skills/cinematic-reel/after-effects.md` and skill Phase 5b.
 
 Ready for my-reel v7: the denoise, ramp, Timewarp and halation shots.
+
+
+## Follow-up from my-reel v8 (2026-10-17, reel session)
+- Proposed new ops for `ae_roundtrip.py`: `light_rays` (CC Light Rays; center from the brightest blob, intensity 110–140, radius 55–60 — verified visible on night lamp shots), `handles` (pad in/out so Premiere transitions don't freeze). Reel-local version: `projects/my-reel/analysis/ae_looks/looks.py`.
+- Not working by script on 26.5: CC Particle World (renders black with property sets by name) and a Fractal-Noise light leak (flat wash). Reel used procedural overlays instead (`analysis/ae_looks/overlays.py`: amber light leaks, bokeh embers, ProRes, Screen blend) — candidate `scripts/overlays.py`.
+- `frame_match` gives false mismatches on `rotate: 180` shots (compares with the unrotated source).
+- Premiere rule for the skill: Warp clips + transitions → align the transition to the non-Warp side (QE alignment 0) or Warp only after the transition exists; never centre a transition on a Warp clip.
+- **Update after v9:** the director rejected the decorative looks (rays, leaks, embers) as "cringe", and v9 removed them. So **withdraw the `light_rays` op proposal**, and don't promote the reel-local procedural leak/ember overlays. `handles`, the frame_match rotate fix and the Warp+transition rule still stand.

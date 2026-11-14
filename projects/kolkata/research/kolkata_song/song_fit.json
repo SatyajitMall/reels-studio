@@ -1,0 +1,64 @@
+[
+ {
+  "file": "projects/kolkata/music/kolkata.wav",
+  "bpm": 117.5,
+  "bar_s": 2.043,
+  "feel": "as is",
+  "feel_bar_s": 2.04,
+  "duration_s": 301.23,
+  "hold_median_s": 3.9,
+  "bars_per_shot": 2,
+  "shot_s": 4.09,
+  "shots_in_length": 9,
+  "windows": [
+   {
+    "start": 210.88,
+    "end": 246.22,
+    "len": 35.34,
+    "arc_err": 0.124,
+    "clean_end": true,
+    "score": 92.6,
+    "energy": [
+     0.56,
+     0.7,
+     0.63,
+     0.86,
+     1.0,
+     0.77
+    ]
+   },
+   {
+    "start": 140.71,
+    "end": 175.89,
+    "len": 35.18,
+    "arc_err": 0.116,
+    "clean_end": false,
+    "score": 88.4,
+    "energy": [
+     0.51,
+     0.5,
+     0.88,
+     0.87,
+     0.88,
+     0.83
+    ]
+   },
+   {
+    "start": 49.62,
+    "end": 84.87,
+    "len": 35.25,
+    "arc_err": 0.136,
+    "clean_end": false,
+    "score": 86.4,
+    "energy": [
+     0.56,
+     0.54,
+     0.79,
+     0.83,
+     0.8,
+     0.74
+    ]
+   }
+  ]
+ }
+]

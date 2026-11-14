@@ -21,17 +21,19 @@ Always open sessions at the `reels-studio/` root, never inside `projects/<reel>/
 | Path | Owner | Notes |
 |---|---|---|
 | `CLAUDE.md`, `README.md`, `setup.sh`, `.mcp.json` | HQ | Studio rules and setup |
+| `docs/` (`GUIDE.md` + `GUIDE.pdf`), `LICENSE`, `.gitignore` | HQ | The end-to-end guide (rebuild the PDF with `scripts/build_guide_pdf.py` after editing it), the MIT licence, and what the public repo leaves out |
 | `.claude/` (skills, hooks, settings) | HQ | The harness |
 | `scripts/` | HQ | Shared tooling |
 | `studio/` | HQ | Except the two carve-outs below |
-| `studio/director-profile.md` | HQ | Director's branding and preferences. Every reel reads it; changes arrive by CR |
+| `studio/director-profile.md` | HQ | Director's branding and preferences. Every reel reads it; changes arrive by CR. Local only (git-ignored): `setup.sh` creates it from `director-profile.example.md` |
 | `studio/upstream/` | HQ | Drafted bug reports for third-party tools. Filing them is the director's call |
+| `studio/reviews/` | HQ | Outside reviews of the studio (e.g. the Gemini review). Each claim is a hypothesis until verified (BACKLOG) |
 | `studio/change-requests/` | Any session | Reel sessions file requests here |
 | `studio/retros/` | Any session | Reel sessions copy their finished retro here |
-| `studio/ledger/` | Any session (scripts) | Append-only spend logs, e.g. `ai-spend.jsonl` from `gen_video.py`. Never edit past entries |
+| `studio/ledger/` | Any session (scripts) | Append-only spend logs, e.g. `ai-spend.jsonl` from `gen_video.py`. Never edit past entries. Local only (git-ignored `*.jsonl`, see its README) |
 | `studio/ai-budget.json` | HQ | Monthly AI-generation limit, set by the director |
 | `projects/_template/` | HQ | New reels are copied from it |
-| `projects/<reel>/` | That reel's session | Brief, log, analysis, renders, retro |
+| `projects/<reel>/` | That reel's session | Brief, log, analysis, renders, retro. Only its text and code are in git; media, renders and deliveries stay local (`.gitignore`) |
 | `assets/` | Shared | Any session may **add** files. Only HQ renames or deletes |
 
 **Enforcement.** `.claude/hooks/guard_architecture.py` denies Edit/Write on HQ-owned paths from any session that isn't the current HQ. A prompt starting with `/studio-hq` claims HQ by writing its session id to `.claude/state/hq_session`. Shell writes aren't intercepted, so `CLAUDE.md` §0.1 also states the rule.

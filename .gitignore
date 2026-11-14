@@ -1,19 +1,58 @@
-# Media and generated output: tracked by the director, not git
+# ── Reel folders (projects/<reel>/): text and code only ────────────────────────────────────────────
+# The repo is public. Camera media, music, voice takes, renders, deliveries, fonts, models and anything
+# copyrighted (songs, reference audio, lyric transcripts) stay on the director's Mac.
+projects/*/**
+!projects/*/**/
+!projects/*/**/*.md
+!projects/*/**/*.py
+!projects/*/**/*.sh
+!projects/*/**/*.swift
+!projects/*/**/*.jsx
+!projects/*/**/*.html
+!projects/*/**/*.json
+!projects/*/**/*.txt
+# ...and these folders hold media or generated output whatever the extension
 projects/*/raw/
 projects/*/references/
 projects/*/renders/
 projects/*/analysis/
 projects/*/transcripts/
+projects/*/audio/
+projects/*/music/
+projects/*/sfx/
+projects/*/grade/
+projects/*/stock/
+projects/**/renders/
+projects/**/transcripts/
+projects/**/.hyperframes/
+projects/**/assets/
+projects/**/node_modules/
+projects/*/tools/realesrgan/
+# The template is tracked whole (its empty folders keep a .gitkeep)
+!projects/_template/**
+
+# Studio assets: regenerable or licensed per file, never in git (setup.sh rebuilds the starter set)
 assets/**/*
 !assets/**/
 !assets/**/.gitkeep
 
-# Environments, secrets, vendored tools, local state
+# ── Personal, kept on this Mac only ────────────────────────────────────────────────────────────────
+# setup.sh creates director-profile.md from director-profile.example.md; scripts append to the ledgers.
+studio/director-profile.md
+studio/ledger/*.jsonl
+# Set aside (studio/BACKLOG.md): unreviewed Gemini additions, one of which publishes to Instagram directly
+GEMINI_IG_STUDIO_INTEGRATION.md
+scripts/gemini_ig_studio_cli.py
+scripts/gemini_setup_premiere_mcp.sh
+
+# ── Environments, secrets, vendored tools, local state ─────────────────────────────────────────────
 .env
+.env.*
+!.env.example
 .venv/
 .vendor/
 .claude/state/
-.DS_Store
+.claude/settings.local.json
 *.prproj.lock
 
 # Third-party skills: reinstalled by setup.sh, pinned in skills-lock.json. Studio-owned skills stay tracked.
@@ -24,10 +63,6 @@ assets/**/*
 !.claude/skills/ffmpeg-color-grading-chromakey/
 !.claude/skills/film-emulation-prompts/
 
-# Keep the template's empty folders
-!projects/_template/**
-**/.DS_Store
-
 # Premiere project files, auto-saves and caches (saved by Premiere, not versioned here)
 *.prproj
 *.prin
@@ -35,8 +70,10 @@ assets/**/*
 **/Adobe Premiere Pro Audio Previews/
 **/Adobe Premiere Pro Video Previews/
 
-# Python bytecode
+# OS, Python, build output
+.DS_Store
+**/.DS_Store
 __pycache__/
-
-# Compiled studio tools (built by setup.sh from their sources in scripts/)
+*.pyc
+*.log
 scripts/bin/

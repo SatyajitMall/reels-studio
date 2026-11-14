@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VO Recorder</title>
+<style>
+  :root { --bg:#0e0e10; --panel:#18181b; --fg:#f5f0e6; --dim:#9a9aa0; --green:#3cc86e; --red:#e5484d; --amber:#f0aa28; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 16px; }
+  video { width:100%; border-radius:10px; background:#000; display:block; }
+  .bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:var(--panel); padding:12px 14px; border-radius:10px; margin:12px 0; }
+  select, button, label { font:inherit; color:var(--fg); }
+  select { background:#26262b; border:1px solid #3a3a40; border-radius:8px; padding:7px 10px; max-width:320px; }
+  button { background:#26262b; border:1px solid #3a3a40; border-radius:8px; padding:8px 14px; cursor:pointer; }
+  button.rec { background:var(--red); border-color:var(--red); font-weight:600; padding:10px 22px; font-size:16px; }
+  button:disabled { opacity:.45; cursor:default; }
+  .meter { width:160px; height:10px; background:#2a2a30; border-radius:6px; overflow:hidden; }
+  .meter i { display:block; height:100%; width:0; background:var(--green); transition:width .05s; }
+  .status { font-weight:600; }
+  .status.on { color:var(--red); }
+  ol { padding-left:20px; margin:6px 0; }
+  .takes { background:var(--panel); border-radius:10px; padding:10px 14px; }
+  .take { display:flex; gap:12px; align-items:center; padding:6px 0; border-top:1px solid #26262b; flex-wrap:wrap; }
+  .take:first-child { border-top:0; }
+  audio { height:32px; }
+  .tips { color:var(--dim); font-size:14px; }
+  .warn { color:var(--amber); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Voiceover recorder: Pujo ki Asolei Sobar?</h1>
+  <p class="sub">Har take seedha project mein save hota hai (audio/vo_director/). Green SPEAK pe line bolo; ticks wale words pe cut hai.</p>
+  <video id="guide" src="/guide.mp4" playsinline preload="auto"></video>
+  <div class="bar">
+    <label>Mic <select id="mic"><option>Mic allow karo…</option></select></label>
+    <div class="meter" title="Mic level"><i id="lvl"></i></div>
+    <label><input type="checkbox" id="guideVoice" checked> Guide voice (sirf headphones ke saath)</label>
+    <button class="rec" id="rec">● Record take</button>
+    <button id="stop" disabled>■ Stop</button>
+    <span class="status" id="status">Ready</span>
+  </div>
+  <div class="takes" id="takes"><div class="take tips">Abhi koi take nahi.</div></div>
+  <div class="tips">
+    <ol>
+      <li><b>Headphones lagao</b>, warna guide voice recording mein aa jaayegi. Headphones nahi hain toh "Guide voice" off karo.</li>
+      <li>Mic: <b>iPhone Microphone</b> best hai (phone muh se ~20 cm). Warna MacBook mic, laptop ke paas baith ke.</li>
+      <li><b>● Record take</b> dabao, guide shuru hoga. <b>CLAP!</b> pe ek taali, phir 3-2-1, phir lines. Take apne aap 44 s pe ruk jaayega.</li>
+      <li>2–3 takes karo. Galti ho toh rukna mat, agla take. Main best lines chun ke har line uske cut pe set kar dunga.</li>
+    </ol>
+    <p class="warn" id="warn"></p>
+  </div>
+</main>
+<script>
+const v = document.getElementById('guide'), micSel = document.getElementById('mic'), lvl = document.getElementById('lvl');
+const recBtn = document.getElementById('rec'), stopBtn = document.getElementById('stop'), st = document.getElementById('status');
+const gv = document.getElementById('guideVoice'), takesEl = document.getElementById('takes'), warn = document.getElementById('warn');
+let ctx, stream, src, proc, chunks = [], recording = false, startCtxT = 0, playCtxT = null, meterAn;
+
+async function openMic(deviceId) {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({ audio: {
+    deviceId: deviceId ? { exact: deviceId } : undefined,
+    echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, sampleRate: 48000 } });
+  ctx = ctx || new AudioContext({ sampleRate: 48000 });
+  if (src) src.disconnect();
+  src = ctx.createMediaStreamSource(stream);
+  meterAn = ctx.createAnalyser(); meterAn.fftSize = 1024; src.connect(meterAn);
+  proc = proc || ctx.createScriptProcessor(4096, 1, 1);
+  src.connect(proc); proc.connect(ctx.destination);
+  proc.onaudioprocess = e => { if (recording) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); e.outputBuffer.getChannelData(0).fill(0); };
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+  const cur = stream.getAudioTracks()[0].getSettings().deviceId;
+  micSel.innerHTML = devs.map(d => `<option value="${d.deviceId}" ${d.deviceId === cur ? 'selected' : ''}>${d.label || 'Mic'}</option>`).join('');
+}
+function meter() {
+  if (meterAn) { const a = new Float32Array(meterAn.fftSize); meterAn.getFloatTimeDomainData(a);
+    let p = 0; for (const x of a) p = Math.max(p, Math.abs(x)); lvl.style.width = Math.min(100, p * 140) + '%';
+    lvl.style.background = p > 0.9 ? 'var(--red)' : 'var(--green)'; }
+  requestAnimationFrame(meter);
+}
+function wav(chunks, rate) {
+  const n = chunks.reduce((s, c) => s + c.length, 0), buf = new ArrayBuffer(44 + n * 2), d = new DataView(buf);
+  const w = (o, s) => [...s].forEach((c, i) => d.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); d.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true);
+  d.setUint16(22, 1, true); d.setUint32(24, rate, true); d.setUint32(28, rate * 2, true); d.setUint16(32, 2, true); d.setUint16(34, 16, true);
+  w(36, 'data'); d.setUint32(40, n * 2, true);
+  let o = 44; for (const c of chunks) for (const x of c) { d.setInt16(o, Math.max(-1, Math.min(1, x)) * 0x7fff, true); o += 2; }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+async function loadTakes() {
+  const names = await (await fetch('/takes')).json();
+  takesEl.innerHTML = names.length ? names.map(n => `<div class="take"><b>${n.replace('.wav','')}</b><audio controls src="/takes/${n}?${Date.now()}"></audio><span class="tips">saved ✓ audio/vo_director/${n}</span></div>`).join('')
+                                   : '<div class="take tips">Abhi koi take nahi.</div>';
+}
+async function finish() {
+  if (!recording) return;
+  recording = false; v.pause(); recBtn.disabled = false; stopBtn.disabled = true;
+  st.textContent = 'Saving…'; st.classList.remove('on');
+  const offset = playCtxT === null ? 0 : playCtxT - startCtxT;
+  const blob = wav(chunks, ctx.sampleRate); chunks = [];
+  const r = await fetch('/save', { method: 'POST', body: blob, headers: { 'X-Offset': offset.toFixed(4),
+    'X-Device': micSel.options[micSel.selectedIndex]?.text || '', 'X-Guide-Voice': gv.checked ? 'on' : 'off' } });
+  const m = await r.json(); st.textContent = `Saved ${m.file} ✓`; loadTakes();
+}
+recBtn.onclick = async () => {
+  try { if (!stream) await openMic(); } catch (e) { warn.textContent = 'Mic nahi mila: ' + e.message + '. Browser ko microphone allow karo.'; return; }
+  await ctx.resume(); chunks = []; playCtxT = null; v.muted = !gv.checked; v.currentTime = 0;
+  recording = true; startCtxT = ctx.currentTime; recBtn.disabled = true; stopBtn.disabled = false;
+  st.textContent = '● Recording…'; st.classList.add('on');
+  v.addEventListener('playing', () => { if (playCtxT === null) playCtxT = ctx.currentTime; }, { once: true });
+  setTimeout(() => v.play(), 300);
+};
+stopBtn.onclick = finish; v.onended = finish;
+micSel.onchange = () => openMic(micSel.value).catch(e => warn.textContent = e.message);
+openMic().catch(() => { warn.textContent = 'Mic allow karne ke liye ● Record take dabao.'; });
+meter(); loadTakes();
+</script>
+</body>
+</html>

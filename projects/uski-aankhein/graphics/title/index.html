@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Uski Aankhein title</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Local font only (design.md): DIN Condensed Bold. */
+      @font-face {
+        font-family: "DIN Condensed";
+        src: url("assets/fonts/DINCondensed-Bold.ttf") format("truetype");
+        font-weight: 700; font-style: normal; font-display: block;
+      }
+      /* uski-aankhein: cream text + DARK soft halo (calm reel; sits over the red Durga's neck/jewellery, below her face). */
+      :root { --c-text: #f5e6c8; --c-halo-rgb: 26, 15, 5; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
+      #stage { position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+      /* tracking-in (registry component, customised: centring fix kept, no glow punch) */
+      .hf-tracking-in {
+        opacity: 0;
+        color: var(--c-text);
+        letter-spacing: var(--hf-tracking-value, 0.08em);
+        padding-left: var(--hf-tracking-value, 0.08em);
+        will-change: opacity, letter-spacing, transform, filter;
+      }
+      .line {
+        position: absolute; left: 0; right: 0; width: max-content; margin-inline: auto; display: block;
+        font-family: "DIN Condensed", sans-serif; font-weight: 700; font-synthesis: none; font-kerning: normal;
+        line-height: 1; white-space: nowrap; text-align: center; -webkit-font-smoothing: antialiased;
+        /* Dark soft halo, ~20 % stronger than the v2 PNG (review v2 #6): wide halo, tight halo, drop. */
+        text-shadow:
+          0 0 22px rgba(var(--c-halo-rgb), 0.85),
+          0 0 7px rgba(var(--c-halo-rgb), 0.70),
+          0 5px 18px rgba(0, 0, 0, 0.65);
+      }
+      /* DIN Condensed cap height = 0.712 em and the line box top sits on the cap line,
+         so top = cap top. */
+      #l1 { top: 1376px; font-size: 120px; --hf-tracking-value: 0.08em; }
+      #l2 { top: 1512px; font-size: 50px; --hf-tracking-value: 0.10em; }
+    </style>
+  </head>
+  <body>
+    <div id="stage" data-composition-id="main" data-start="0" data-duration="3.0" data-fps="25" data-width="1080" data-height="1920">
+      <h1 id="l1" class="clip line hf-tracking-in" data-start="0" data-duration="3.0" data-track-index="0">USKI AANKHEIN</h1>
+      <h1 id="l2" class="clip line hf-tracking-in" data-start="0" data-duration="3.0" data-track-index="1">if her eyes were music</h1>
+    </div>
+    <script>
+      (function () {
+        "use strict";
+        function build() {
+          var tl = gsap.timeline({ paused: true });
+          // Hook: calm focus-pull settle (opacity, blur, tracking and a small rise in one gesture).
+          // Line 2 (the meaning) follows line 1 by 0.35 s.
+          ["#l1", "#l2"].forEach(function (sel, i) {
+            var t0 = i * 0.35;
+            tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, t0);
+            tl.fromTo(sel,
+              { "--hf-tracking-value": "0.18em", filter: "blur(12px)", y: 8 },
+              { "--hf-tracking-value": "0.08em", filter: "blur(0px)", y: 0, duration: 1.0, ease: "power3.out" }, t0);
+          });
+          // Clean hold, then fade out ~0.4 s before the 4.18 s swell cut (placed at reel 0.6 s).
+          tl.to(["#l1", "#l2"], { opacity: 0, filter: "blur(8px)", duration: 0.7, ease: "sine.inOut" }, 2.3);   // v4: placed at reel 4.48-7.48, over her eye in the near-silence, gone before the drop blink   // review v2b #6: 0.7 s blur-out mirrors the focus-pull in (was a 0.5 s power1.in pop-off)
+          window.__timelines = window.__timelines || {};
+          window.__timelines["main"] = tl;
+          tl.seek(0);
+          if (typeof window.__hfForceTimelineRebind === "function") window.__hfForceTimelineRebind();
+        }
+        var ready = document.fonts && document.fonts.load
+          ? document.fonts.load('700 96px "DIN Condensed"', "USKI AANKHEIN if her eyes were music").then(function () { return document.fonts.ready; })
+          : Promise.resolve();
+        ready.then(build, build);
+      })();
+    </script>
+  </body>
+</html>

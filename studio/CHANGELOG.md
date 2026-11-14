@@ -1,5 +1,21 @@
 # Studio Changelog
 
+## 0.11.1 — 2026-11-14
+**Public GitHub repo: a clean layout, a complete guide with PDFs, and nothing personal or copyrighted in git** (patch, safe mid-reel: no workflow rule changed; reel sessions see only that their media stays out of git, as before). The director asked for the repo on GitHub with a clean structure and enough guides, and chose a public repo, reel text and code only, MIT, every branch pushed, and history rewritten so the personal files leave it.
+- **`.gitignore` rebuilt for a public repo.** Reel folders keep only text and code (`.md .py .sh .swift .jsx .html .json .txt`), minus their `audio/ music/ sfx/ grade/ stock/ renders/ transcripts/ .hyperframes/ assets/` folders and the Real-ESRGAN binaries. Before this, `git add -A` would have added 601 files and 1.1 GB, including commercial songs, audio from reference reels, the director's voice takes, posted reels and lyric transcripts. Now it's 371 files, 3.3 MB.
+- **Personal files are local only**:
+  - `studio/director-profile.md` is git-ignored, with a blank `studio/director-profile.example.md` that `setup.sh` copies into place;
+  - `studio/ledger/*.jsonl` is git-ignored, with `studio/ledger/README.md` explaining both logs (`gen_video.py` already creates its ledger on first use);
+  - the three files were removed from every commit on every branch with `git filter-branch`. A full bundle of the old history was saved first.
+- **Set aside, not pushed** (BACKLOG open decision): `scripts/gemini_ig_studio_cli.py` (it publishes to Instagram directly), `scripts/gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md` stay on the Mac, git-ignored. `GEMINI_ARCHITECTURE_REVIEW.md` moved to `studio/reviews/gemini-architecture-review-2026-10-15.md`, and BACKLOG points there.
+- **The complete guide**: `docs/GUIDE.md` (22 sections, from install to a posted reel), built from CLAUDE.md, the skill, ARCHITECTURE and the review gate, plus `docs/GUIDE.pdf` (19 pages) and `docs/shooting-guide.pdf`.
+  - `scripts/build_guide_pdf.py` rebuilds the PDFs: markdown-it-py (CommonMark and tables, so lists and code render as on GitHub), then headless Chrome with a throwaway profile, on A4 with page numbers.
+  - `setup.sh` installs `markdown-it-py` into `.venv`.
+- **README rewritten for public readers**: what you need, setup, making a reel, layout, what's not in the repo, licence and credits. The long sections moved into the guide.
+- **`LICENSE`: MIT.** Folders with their own licence keep it (the two forked skills).
+- **ARCHITECTURE §2**: rows added for `docs/`, `LICENSE`, `.gitignore` and `studio/reviews/`, plus local-only notes on the profile, the ledger and reel media.
+- **Personal paths**: 36 old per-reel scripts now use `$HOME` / `Path.home()` instead of `/Users/<name>`; every edited script passed `bash -n` / `py_compile`. Five lines keep the absolute path: four ExtendScript `var K` paths in old Premiere build scripts, which Premiere needs absolute, and one Adobe Fonts path.
+
 ## 0.11.0 — 2026-11-12
 **Real sound effects, and the pregate checks every one in the export** (minor, safe mid-reel: sourcing is opt-in, and the new pregate step runs only when an EDL `--map` lists sound effects or `--sfx-cues` is given; Diwali's maps have none). The director picked "Openverse + earshot" after HQ checked three tools from a post (Openverse, Real SFX, earshot) at their source.
 - **Openverse → `scripts/sfx_fetch.py`** (`search`, `get`, `keep`, `credits`).

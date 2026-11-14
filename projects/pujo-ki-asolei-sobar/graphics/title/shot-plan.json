@@ -1,0 +1,166 @@
+{
+  "status": "final",
+  "category": "kinetic-type",
+  "duration_s": 3.0,
+  "fps": 25,
+  "frames": 75,
+  "canvas": { "w": 1080, "h": 1920, "aspect": "9:16", "background": "transparent" },
+  "style": "Reverent, cinematic, premium film-title lockup for Durga Puja night footage. Calm and confident: letters drift together into focus like a lens pulling focus on the idol, then one warm gold glow swells and settles. No glitter, no particles, no glitch, no chromatic fringe, no shimmer or sparkle sweeps. Sits on Premiere V5 above the grade.",
+  "palette": ["#F5E6C8", "#D4A017", "rgba(0,0,0,0.6)"],
+  "palette_roles": {
+    "text": "#F5E6C8",
+    "glow": "#D4A017",
+    "shadow": "rgba(0,0,0,0.6)",
+    "rule": "No other colours anywhere, including during transitions."
+  },
+  "font": "DIN Condensed Bold",
+  "font_source": {
+    "family": "DIN Condensed",
+    "file": "assets/fonts/DINCondensed-Bold.ttf",
+    "load": "@font-face from the local file only (no CDN). Resolve the url() relative to the composition file. font-weight 700, font-synthesis: none, font-kerning: normal. Block the first frame on the font being loaded (document.fonts.load / fonts.ready) so no frame renders in a fallback face.",
+    "metrics_measured": {
+      "units_per_em": 1000,
+      "cap_height_em": 0.712,
+      "ascent_em": 0.712,
+      "descent_em": 0.288,
+      "advance_DURGA_PUJA_em": 3.87,
+      "advance_2026_em": 1.488,
+      "note": "Advance sums exclude kerning. Because ascent equals cap height, a line box with line-height: 1 has its top edge exactly on the cap line."
+    }
+  },
+  "beats": [0.0, 0.24, 1.04, 1.6, 2.24],
+  "beats_frames": [0, 6, 26, 40, 56],
+  "export": "alpha-overlay",
+  "render": {
+    "format": "mov",
+    "codec_note": "MOV renders as alpha-preserving ProRes 4444, which is what Premiere V5 needs.",
+    "fps": 25,
+    "command_hint": "(cd \"$PROJECT_DIR\" && npx --yes hyperframes@0.8.171 render --format mov --fps 25 -o renders/durga-title-alpha.mov)",
+    "root_requirements": "Root composition 1080x1920, data-fps=\"25\", data-duration=\"3\", html/body/root background fully transparent (replace the scaffold's #0a0a0a and its 1920x1080 viewport)."
+  },
+  "asset_needs": [],
+
+  "block": "tracking-in",
+  "customize": {
+    "install": "npx hyperframes add tracking-in (component). It drives one CSS var --hf-tracking-value (letter-spacing), opacity and translateY from a paused timeline. Customize in place; do not install the other candidates.",
+    "borrowed_recipe": "Blur pull from focus-blur-resolve: add filter: blur() to the same tween as the tracking-in settle on the same element. Recipe only, do not install focus-blur-resolve (its own markup and font would conflict).",
+    "emphasis_recipe": "Gold glow swell = motion-vocabulary `glow` primitive, hand-authored on the same timeline (no catalog block fits: caption-neon-glow is cyan/magenta).",
+    "variables": { "tracking": "custom (values below replace the shipped 0.28em -> 0.02em curve)", "rise": "standard (8px)", "tone": "custom #F5E6C8 (not ink/paper/accent)" },
+    "lines": [
+      {
+        "id": "title-main",
+        "text": "DURGA PUJA",
+        "font_size_px": 150,
+        "line_height": 1,
+        "letter_spacing_start_em": 0.16,
+        "letter_spacing_end_em": 0.04,
+        "rendered_width_px": { "start": 797, "end": 635 }
+      },
+      {
+        "id": "title-year",
+        "text": "2026",
+        "font_size_px": 72,
+        "line_height": 1,
+        "letter_spacing_start_em": 0.8,
+        "letter_spacing_end_em": 0.5,
+        "rendered_width_px": { "start": 280, "end": 215 }
+      }
+    ],
+    "centering_fix": "CSS letter-spacing adds trailing space after the last glyph, which pushes the ink left of centre and drifts as tracking animates. Add padding-left equal to the live letter-spacing (e.g. padding-left: calc(var(--hf-tracking-value) * var(--hf-tracking-reach))) so the ink stays centred on x = 540 on every frame.",
+    "palette": ["#F5E6C8", "#D4A017", "rgba(0,0,0,0.6)"],
+    "font": "DIN Condensed Bold (local file)"
+  },
+
+  "layout": {
+    "hero_frame": "f56-f74 (2.24-3.00 s): two-line centred lockup, glow settled.",
+    "anchor": "Horizontally centred on x = 540, so it sits over the centred idol. Lockup cap-box vertical centre at y = 525, the middle of design.md's safest band (y 350-700).",
+    "lines": {
+      "title-main": { "line_box_top_y": 429, "cap_top_y": 429, "baseline_y": 536, "cap_height_px": 107, "x_extent_end": [222, 858], "x_extent_widest_f0": [142, 938] },
+      "title-year": { "line_box_top_y": 570, "cap_top_y": 570, "baseline_y": 621, "cap_height_px": 51, "x_extent_end": [432, 648] },
+      "gap_baseline_to_year_cap_px": 34
+    },
+    "lockup_ink_box": { "x": [142, 938], "y": [429, 621] },
+    "with_glow_and_shadow_box": {
+      "glow_phase_f28_f74": { "x": [186, 894], "y": [393, 657] },
+      "entrance_f2_onward": "right edge of ink + 24px shadow + live blur stays <= ~954",
+      "f0_f1": "the theoretical shadow box reaches x ~962, but opacity is 0 to 0.13 there, so nothing visible crosses x = 960"
+    },
+    "safe_zone": "Clear of top 220 px, bottom 320 px (y <= 1600), right 120 px (x <= 960) on every visible frame. The widest tracking is at f0 (opacity 0, ink right edge 938). Builder verifies with npm run check / layout bounding boxes.",
+    "do_not": "No background plate, no scrim, no rule lines, no extra graphic elements. Transparent everywhere outside the glyphs, glow and shadow."
+  },
+
+  "content": {
+    "block": "tracking-in",
+    "customize": "see top-level customize",
+    "scenes": [
+      {
+        "id": "s1-title",
+        "start": 0.0,
+        "end": 3.0,
+        "text": "DURGA PUJA 2026",
+        "lines": ["DURGA PUJA", "2026"],
+        "emphasis_words": ["DURGA", "PUJA"],
+        "emotion": "reverent, calm, premium",
+        "motion": "Dominant motif: a focus-pull tracking settle. Both lines arrive blurred, faintly wide-tracked and 8 px low, then drift together into crisp focus (tracking-in + blur pull), the year following the title by 6 frames. Pattern interrupt (the one change): a gold glow swells from nothing, peaks at 1.60 s and settles to a resting glow. Then a clean, fully static hold.",
+        "beats": [0.0, 0.24, 1.04, 1.6, 2.24],
+        "phases": [
+          { "role": "hook", "start": 0.0, "end": 0.88, "frames": [0, 22], "what": "DURGA PUJA resolves into focus; legible by about f8 (0.32 s)." },
+          { "role": "build", "start": 0.24, "end": 1.04, "frames": [6, 26], "what": "2026 joins below with the same settle." },
+          { "role": "punch", "start": 1.12, "end": 2.24, "frames": [28, 56], "what": "Gold glow swells, peaks on the 1.60 s beat (f40), settles." },
+          { "role": "resolve", "start": 2.24, "end": 3.0, "frames": [56, 74], "what": "Clean static hold, nothing moves." }
+        ]
+      }
+    ],
+    "timeline": [
+      {
+        "target": "title-main",
+        "tweens": [
+          { "prop": "opacity", "from": 0, "to": 1, "start_s": 0.0, "dur_s": 0.56, "frames": [0, 14], "ease": "power2.out" },
+          { "prop": "--hf-tracking-value (letter-spacing)", "from": "0.16em", "to": "0.04em", "start_s": 0.0, "dur_s": 0.88, "frames": [0, 22], "ease": "power3.out" },
+          { "prop": "filter blur", "from": "16px", "to": "0px", "start_s": 0.0, "dur_s": 0.88, "frames": [0, 22], "ease": "power3.out" },
+          { "prop": "y", "from": 8, "to": 0, "start_s": 0.0, "dur_s": 0.88, "frames": [0, 22], "ease": "power3.out" }
+        ]
+      },
+      {
+        "target": "title-year",
+        "tweens": [
+          { "prop": "opacity", "from": 0, "to": 1, "start_s": 0.24, "dur_s": 0.48, "frames": [6, 18], "ease": "power2.out" },
+          { "prop": "--hf-tracking-value (letter-spacing)", "from": "0.80em", "to": "0.50em", "start_s": 0.24, "dur_s": 0.8, "frames": [6, 26], "ease": "power3.out" },
+          { "prop": "filter blur", "from": "12px", "to": "0px", "start_s": 0.24, "dur_s": 0.8, "frames": [6, 26], "ease": "power3.out" },
+          { "prop": "y", "from": 8, "to": 0, "start_s": 0.24, "dur_s": 0.8, "frames": [6, 26], "ease": "power3.out" }
+        ]
+      },
+      {
+        "target": "title-main + title-year (glow)",
+        "note": "Tween text-shadow with an identical 3-layer structure at every keyframe so it interpolates cleanly: [gold wide, gold tight, dark drop]. The dark drop layer is constant from f0. title-year uses the same values with gold alphas x 0.6 (hierarchy: the emphasis words carry the full glow).",
+        "keyframes": [
+          { "t_s": 0.0, "frame": 0, "text_shadow": "0 0 0px rgba(212,160,23,0), 0 0 0px rgba(212,160,23,0), 0 6px 24px rgba(0,0,0,0.6)" },
+          { "t_s": 1.12, "frame": 28, "text_shadow": "0 0 0px rgba(212,160,23,0), 0 0 0px rgba(212,160,23,0), 0 6px 24px rgba(0,0,0,0.6)" },
+          { "t_s": 1.6, "frame": 40, "ease_in": "sine.inOut", "text_shadow": "0 0 36px rgba(212,160,23,0.65), 0 0 12px rgba(212,160,23,0.45), 0 6px 24px rgba(0,0,0,0.6)" },
+          { "t_s": 2.24, "frame": 56, "ease_in": "sine.out", "text_shadow": "0 0 28px rgba(212,160,23,0.38), 0 0 8px rgba(212,160,23,0.25), 0 6px 24px rgba(0,0,0,0.6)" }
+        ]
+      }
+    ],
+    "exit": "Clean hold, no fade. Every tween is complete by f56 (2.24 s) and f56-f74 are pixel-identical, so the editor can extend it with a frame hold and dissolve it out in Premiere.",
+    "rejected_candidates": {
+      "focus-blur-resolve": "Recipe borrowed (blur pull) but not installed: its built-in markup, Inter font and blur-out exit conflict with design.md.",
+      "soft-blur-in": "Fine reveal, but no tracking settle, so it reads generic rather than film-title.",
+      "text-shimmer / shimmer-sweep": "A specular sweep reads as sparkle, too close to the rejected 'glitter' look; accent enum is green/blue/violet only.",
+      "titlecard-calm": "Left-aligned kicker-over-headline with a built-in fade-out; wrong hierarchy and exit for this brief.",
+      "yt-prism-title": "Red/blue chromatic fringe breaks the palette; 16:9 block.",
+      "caption-neon-glow": "Cyan/magenta gaming glow; off-palette.",
+      "caption-* (other)": "Built for word-by-word spoken captions, not a static title lockup."
+    },
+    "acceptance": [
+      "1080x1920, 25 fps, 75 frames, transparent background (alpha MOV / ProRes 4444).",
+      "Only #F5E6C8, #D4A017 and rgba(0,0,0,0.6) appear.",
+      "DIN Condensed Bold from the local file on every frame (no fallback face).",
+      "All ink, glow and shadow stay inside x <= 960, 220 <= y <= 1600 on every frame; the lockup sits within the y 350-700 band.",
+      "The title is legible by f8 (0.32 s) and stays legible to the end.",
+      "The ink stays centred on x = 540 while tracking animates (centering fix applied).",
+      "f56-f74 are static and identical."
+    ]
+  },
+
+  "shot_brief": "Over a dark, glowing Durga Puja idol shot, the words DURGA PUJA surface out of a soft blur in warm cream, centred in the upper-middle band above the idol's face. The letters are faintly wide-set and drift together into tight, crisp focus within the first second, like a lens finding the idol. Six frames later a smaller, widely tracked 2026 settles beneath with the same gesture. With the title fully read, a single gold glow swells around the letters, peaking at 1.6 s like lamp-light catching metal, and eases back to a quiet resting glow. The lockup then holds perfectly still on a transparent background, so the editor can extend or dissolve it in Premiere. One dominant motion idea: a reverent focus-pull settle, nothing flashy."
+}

@@ -2,105 +2,88 @@
 
 > Claude writes this file after the interview and footage analysis. The director only answers questions, shares references, and approves. Don't fill it in by hand; ask Claude to change anything.
 
-**Status:** approved on 2026-10-16 (hook 1, words as proposed, English only; handle @satyajitmall; font Anton/Bebas-style)
+**Status:** current as of v10 (round 10 build, 2026-10-17). The v1 brief (approved 2026-10-16) has been superseded by director notes in rounds 2–10; see the changelog at the end and `project.md`.
 
 ## 1. The idea
-- **Reel type:** `music-montage` (no speech; CLAUDE.md §4a + §4c)
-- **One-line concept:** *Many faces, one Shakti.* Four goddesses hit on the track's four opening accents, then a beat-cut tour of the pandals' craft, a roar on the last accent, and a quiet blue goddess to close.
-- **Story arc:**
-  - setup: blue chandelier tilts down to reveal Durga (0–2.2 s);
-  - turn: four idol faces slam in on the four accents with DUM · DUM · DURGA · MAA (2.2–12.4 s);
-  - build: pandal craft tour, one shot per bar (12.4–31.7 s);
-  - payoff: Narasimha roar on the last accent, push into gold idols, blue Durga hold + end title (31.7–41.3 s).
-- **Goal:** goosebumps / pride.
-- **Audience:** filmmaker / creator crowd, so the craft (grade, beat-sync, camera moves) has to be visible.
-- **Target length:** 41.3 s (music 61.88 → 103.15 s of Dum Durga, natural outro).
+- **Reel type:** `music-montage` (no speech; CLAUDE.md §4a + §4c).
+- **One-line concept:** *Many faces, one Shakti.* A slow, reverent open, then the track drops into gold goddesses and a beat-cut tour of pandal craft, a roar, and a quiet blue goddess to close.
+- **Energy arc:**
+  - OPEN, slow (0–8.48): temple wide + slow-mo white goddess, over the track's beatless intro;
+  - RISE (8.48–10.72): blue chandelier tilts down to Durga;
+  - UP (10.72–27.92): first hit on gold Durga (speed ramp), idol accents, then 2-beat / 1-bar craft cuts;
+  - DOWN (27.92–44.64): 3.5 s holds, slow-mo, pan-in/pan-out, roar on the last accent (40.24);
+  - OUTRO (42.00–49.76): blue Durga: slow push through the light grid to her face, then the wide with the chandelier + end card, dip to black.
+- **Goal:** goosebumps / pride. **Audience:** filmmaker / creator crowd, so the craft (grade, cuts, motion) has to be visible.
+- **Runtime:** 49.76 s (over the 30–45 s default; the director approved it in round 2 for the slow open).
 
-## 2. Hook (0–3 s)
-- **Moment:** C010 (blue-lit Durga), src 0.30 → 2.62 s: camera tilts down from the blue chandelier to her face. Hard cut on **accent 64.11 s (reel 2.23 s)** to C077 (gold Durga slaying Mahishasura), src 7.60 s.
-- **Visual move:** slow push 100 → 106 % on C010; snap zoom 100 → 118 % over 5 frames on C077; cool → gold colour jump is the hit.
-- **On-screen text:** "DUM" pops on the hit.
-- **Sound:** riser from 1.23 s, sub-hit / bass drop on 2.23 s.
+## 2. Hook (0–3 s) — deliberate slow build
+- Approved in round 2 ("slow build on intro"): **not** a 3-second hard hook. C027 temple wide with an eased push 100→118 % and the title "DURGA PUJA 2026" fading in at 0.8 s. The first hard hit is at 10.72 s (C077 gold Durga, 250 % → 60 % ramp, white flash, sub-hit + bass drop).
 
 ## 3. References → concrete parameters
-| Reference | What we take from it | Measured |
+| Reference | Take | Measured |
 |---|---|---|
-| `ref1-filmmakerguy.mp4` (@the.filmmaker.guy, 21.6 s, 30 fps) | Dark, beam-lit, idol-led framing; detail inserts (face, hands) between wides; reverent pace; gold type on dark. **Not** taken: its 7 s opening hold (breaks our 3 s hook) and its cool blue grade (our footage is gold; blue kept only on C010/C011 as an accent). | 8 cuts, avg shot 2.41 s, median 1.6 s, shortest 0.57 s, first cut 7.1 s. Exposure 0.12, cool (−0.05), 25 % crushed shadows |
-
-Our measured plan: 20 shots, avg 2.06 s, median 1.76 s (one bar at 136 BPM), shortest 0.88 s (2 beats).
+| `ref1-filmmakerguy.mp4` (21.6 s) | Dark, lamp-lit, idol-led framing; detail inserts between wides; reverent pace; gold type on dark | 8 cuts, avg shot 2.41 s, median 1.6 s, first cut 7.1 s (we take the slow open: first cut 4.24) |
+v10: 20 shots, avg 2.49 s.
 
 ## 4. Treatment
-### Pace
-- 136 BPM: beat 0.441 s, bar (4 beats) 1.765 s.
-- Accents section (2.23–12.38 s): cut on every accent (64.11, 66.32, 68.96, 71.61 → reel 2.23, 4.44, 7.08, 9.73).
-- Groove (12.38–31.74 s): one shot per bar, cut on every 4th beat; one 2-beat flurry at 28.24 s.
-- Payoff: accent 93.62 (reel 31.74), last beat 98.03 (reel 36.15), outro hold to 41.27.
-- Hard cuts by default; match the camera direction of adjacent shots where possible (tilt-down → tilt-down).
+### Structure (v10 cut plan, reel time; 25 fps; * = 24 fps clip interpreted at 25)
+| # | Time | Clip | Content | Speed / motion | Out |
+|---|---|---|---|---|---|
+| 1 | 0.00–4.24 | C027 | temple gateway wide + title | push 110→134, framed down to crop a phone bottom-left | film dissolve 0.6 s |
+| 2 | 4.24–8.48 | C003* | white ten-armed goddess | 50 % Timewarp (AE), native zoom | lens blur 0.4 s |
+| 3 | 8.48–10.72 | C010* | blue chandelier → Durga tilt | Warp | white flash 3 fr |
+| 4 | 10.72–12.92 | C077 | gold Durga + Mahishasura | AE time-remap ramp 250→60 %, Warp | cut |
+| 5 | 12.92–15.56 | C058 | orange Durga (src 1.00–3.64, before the phones rise) | push 104→114, Warp | cut |
+| 6 | 15.56–18.24 | C023 | gold Durga + halo (shot inverted, rotated 180°) | push 120→126, framed down to crop phones | whip 0.2 s |
+| 7 | 18.24–19.12 | C029 | temple facade, red cloth | push 105→118, glow | cut |
+| 8–13 | 19.12–27.92 | C034 (112 %), C071 (Gupta coin gallery, src 0.60–1.48, push 100→108), C057, C038, C068 (150 %), C017 | craft tour: bamboo figure, gold coins on stone plinths, gold spiral, hand-painted pattachitra panels (eased pull 112→100), glowing panels, engraved ceiling | Warp where handheld; C017 pull 118→100 | cuts (film dissolve 0.48 s into 14) |
+| 14 | 27.92–31.44 | C073 | gold procession relief (src 5.72–9.24) | push 100→120, Warp | cut |
+| 15 | 31.44–34.96 | C055 | lattice panel hold (src 4.08–7.60, in focus) | pull 120→100 | film dissolve 0.48 s |
+| 16 | 34.96–38.48 | C076 | push into gold idols | 60 % Timewarp (AE), push 100→110 | cut |
+| 17 | 38.48–40.24 | C006* | diya-lined arcade | dolly, push 100→114, glow | dip to white 3 fr |
+| 18 | 40.24–42.00 | C072 | Narasimha roar (last accent) | Warp | cut |
+| 19 | 42.00–46.84 | C012* | blue Durga: slow push through the light grid to her face | 60 % Timewarp (AE, src 2.85–5.99), push 100→112 | film dissolve 0.4 s |
+| 20 | 46.84–49.76 | C009* | blue Durga wide, chandelier above, end card | 50 % Timewarp (AE, src 0–1.46), push 110→118 | dip to black 0.48 s |
+- Cuts land on the beat grid (136 BPM; music edit intro 4.00–12.48 + 61.88–103.15). Only 4.24 sits off the grid, deliberately, inside the beatless intro.
+- **Transitions only at section changes** (round 8, "cinematic, at sections"): the film dissolves at 4.24, 27.92, 34.96 and the outro (46.84) are approved, plus the signature moves approved in round 8: lens blur 8.48, white flash 10.72, whip 18.24 (C023 → C029) and dip to white on the roar (40.24). Everything else is a hard cut.
 
 ### Colour
-- **Sequence:** 1080×1920, **25 fps** (65 of 77 clips are 25 fps). C003, C006, C010, C011 are 24 fps → `speed_change` 104.17 % to conform frame-for-frame (source span = slot × 1.0417).
-- **Primary correction (per clip, V1, one `color_correct` each):** footage is 1–2 stops under (exposure 0.14–0.38), very saturated, warm. Direction:
-  - brightness +15…+25 on C044, C041, C077, C076, C074 (exposure < 0.2); +5…+10 on the rest;
-  - highlights −20…−30 on C046 (yellow wall 0.5) and C072, C056 (bright lamps);
-  - saturation −10…−15 at clip level where the analyser says "very saturated" (all but C056);
-  - temperature: leave C010/C011 blue; trim warm cast −5…−10 on C029, C058, C077 only where skin/idol faces go orange;
-  - no log footage (all Rec.709 SDR, 8-bit), so no conversion LUT.
-- **Shot matching:** idol run C077 → C003 → C058 → C044 within ±0.04 exposure; groove run matched to C029 as the anchor.
-- **Creative look — "Gold & Shadow" (V3 adjustment layer):** `gemini_warm_film_2383.cube` at 50 %, contrast +15, saturation −15, shadows −10 (deep blacks, gold highlights), vignette −1.0. Blue shots will pick up a little warmth from the LUT; accepted so they still read as the cool accent.
-- **Texture (V4):** `gemini_film_grain_16mm.mp4` looped end to end, Overlay, 40 % (also hides 8-bit noise from lifting shadows). No light leaks.
+- Primary per clip (one Lumetri: exposure, contrast, highlights/shadows, tint −12…−40, saturation 78–88), matched shot to shot; luma 0.15–0.29.
+- Look on the V3 adjustment layer: Adobe "Fuji F125 Kodak 2393" at 45 %, temp +12, tint −26, Faded Film 8, lifted blacks (v5 grade, approved as final colour).
+- Texture: 16 mm grain, Overlay 12 % on V4, faded with the end.
 
-### Effects & transitions (signature moments only)
-| Reel time | Move (playbook) | Where |
-|---|---|---|
-| 0.00–2.23 | Slow push 100→106 % | C010 |
-| 2.23 | Snap zoom 100→118 % in 5 fr | C077 entry |
-| 4.44 | Flash cut, Dip to White 3 fr | C077 → C003 |
-| 7.08 | Impact shake ±12 px, 6 fr decay | C058 entry |
-| 21.20 | Whip / zoom blur, 5 fr each side | C041 → C046 |
-| 30.00–31.74 | Speed ramp: 200 % → 100 % | C076 (Shakti Stambha text) |
-| 31.74 | Flash cut + impact shake | → C072 Narasimha roar |
-| 36.15–41.27 | Slow push 100→108 %, fade to black last 0.5 s | C011 |
-Non-cut transitions: 4 in 41 s (flash ×2, whip, fade). No fake slow-mo (all footage ≤ 25 fps).
+### After Effects finishing
+- Denoise (Remove Grain 0.6, 2 passes) on dark shots; Timewarp slow-mo (C003, C076, C012, C009); time-remap ramp (C077); halation glow on C029/C006 (threshold 80, intensity 0.25). Rotate 180° on C023, C032.
+- **Must not** (round 9): no light leaks, light rays, particles/embers, or Premiere *Light Leaks* transitions. No decorative look stacked on a hero shot.
 
-### Type & graphics (kinetic beat words, V5)
-- Words on accents: **DUM** (2.23) · **DUM** (4.44) · **DURGA** (7.08) · **MAA** (9.73) · **SHAKTI** (31.74). Each holds to the next cut or ~1.5 s.
-- End card 37.0–41.27: "DURGA PUJA 2026" + @satyajitmall.
-- Style: bold condensed sans (Anton / Bebas Neue), warm white #F5E6C8 with a soft gold glow, centred at y ≈ 700 px (inside safe zone), pop-in scale 120→100 % in 3 frames. Built with `/hyperframes` → alpha `.mov` in `renders/overlays/`, or `add_text_overlay` if it renders clean.
+### Type & graphics
+- Title "DURGA PUJA 2026": DIN Condensed, smaller with wide tracking, cream + gold glow, 0.8–4.0 s (round 2 approval). End card "@satyajitmall" 46.0–49.76. **No words during the montage** (round 2: the beat words were removed).
 
 ### Sound
-- **A3 music:** `inhaleexhalestudio-dum-durga-530246.mp3`, 61.88 → 103.15 s, full level, peaks −1…−3 dB, no ducking, natural outro ends the reel.
-- **A1:** clip natural sound muted.
-- **A2 SFX (−14…−18 dB):** riser 1.23 s (hit at 2.23) · bass drop 2.23 · camera shutter 4.44 · snap swish 7.08 · whoosh 21.20 · shutter + bass drop 31.74 · text-pop click on each word (−18 dB).
+- A3: Dum Durga edit (intro + 61.88–103.15), lead, peaks about −2 dB, true peak −1.9 dBFS; the mix is −11.5 LUFS.
+- A1: natural sound muted.
+- SFX: riser 9.72 → sub-hit 10.72, whoosh 10.80, bass drop 40.24 (roar). Nothing else.
 
-## 5. Clips
-| Clip | Role | Notes from the analysis |
-|---|---|---|
-| C010 | hook | blue Durga, tilt-down reveal 0.3–3.0 s, 24 fps, exp 0.21, cool/magenta (keep) |
-| C077 | hero (accent 1) | gold Durga + Mahishasura, revealed 3.7–9.6 s, exp 0.175 |
-| C003 | hero (accent 2) | white ten-armed goddess, zoom-in 0.6–5.3 s, 24 fps, exp 0.22 |
-| C058 | hero (accent 3) | orange Durga, exp 0.32, phone-holders enter frame after ~5 s |
-| C044 | hero (accent 4) | red Durga + lion tableau, exp 0.14 (needs lift) |
-| C006 | groove | diya-lined arcade, 24 fps, exp 0.24 |
-| C029 | groove / match anchor | temple facade, exp 0.31 |
-| C031 | groove | lantern street, people walking in, exp 0.27 |
-| C034 | groove | bamboo umbrella figure vs night sky, exp 0.24 |
-| C041 | groove | colourful wide pandal, exp 0.145 |
-| C046 | groove (whip in) | yellow "Tel" wall, exp 0.5 — pull highlights |
-| C056 | groove | gold lattice panels, exp 0.38 |
-| C068 | groove | glowing panels tracking shot, exp 0.32 |
-| C064 | groove | Kaalrekha pillars, dusk, exp 0.33 |
-| C016 | flurry | engraved gold disc, exp 0.28 (check orientation in rough cut) |
-| C074 | flurry | Khambeshwari face carving, exp 0.22 |
-| C076 | ramp + payoff | "SHAKTI STAMBHA" text 0–4 s, push into gold idols 16–19 s, exp 0.21 |
-| C072 | payoff (accent 5) | Narasimha roar, exp 0.38 |
-| C011 | outro | blue Durga hold, 24 fps |
-Rejected: C001, C002, C025, C042, C049–C053 (exposure ≤ 0.06, unrecoverable); C008, C018, C022, C023, C032 (recorded upside down; usable with 180° rotate if wanted).
+## 5. Must-haves / must-NOT-haves
+- Must: slow open → hit at 10.72; cuts on the beat grid; stable images (Warp on handheld, no visible smear); every shot checked frame by frame with written reasoning before the director sees it.
+- Must not:
+  - fake slow-mo on 25 fps (Timewarp only on calm shots);
+  - creative LUTs on clips;
+  - the decorative AE looks listed above;
+  - shakes or snap zooms (removed in round 2);
+  - upside-down clips left unused (rotate them).
 
-## 6. Must-haves / must-NOT-haves
-- Must: every cut on the beat grid; hook hit at 2.23 s; music's real outro ends the reel.
-- Must not: fake slow-mo; creative LUT on clips; cut off the grid except the outro hold.
+## 6. Open questions
+- None; v10 goes to the director after the review gate.
 
-## 7. Open questions
-- ~~Handle~~ resolved: @satyajitmall, Anton/Bebas-style. All moves built from own footage (no outside stock).
-- Kinetic words OK as DUM · DUM · DURGA · MAA · SHAKTI? Bengali script instead of / alongside English?
-- OK to remove the 17 Adobe sample clips + auto `Sequence 01` from the project?
+## Changelog
+- **v1 brief** (2026-10-16): 41.3 s, hard 3 s hook on C010 → C077 at 2.23, kinetic words DUM · DUM · DURGA · MAA · SHAKTI, impact shakes, snap zoom, whip, one shot per bar, grain 40 %, no light leaks.
+- **R2:** slow build on the intro, runtime 49.76 s, tempo arc, Optical Flow slow-mo on 4 shots; beat words, shakes and snap zoom removed; title + end card only; grain 12 %.
+- **R3:** Warp Stabilizer on handheld shots.
+- **R4:** random street shot (C031) replaced.
+- **R5:** regrade (look-layer temp/tint, per-clip green tint), approved as final colour.
+- **R6:** 5 selects swaps (C029, C057, C017, C073, C006).
+- **R7:** After Effects denoise / Timewarp / ramp / glow.
+- **R8:** rotated C023/C032 in; pan-in/pan-out; transitions at section changes; AE looks (rays, leaks, embers).
+- **R9:** decorative AE looks removed; Light Leaks transitions → film dissolves; C073 window and C076 tail fixed; C058 reframed; per-shot QA.
+- **R10** (review-gate fixes): C058, C032 and C055 re-windowed; C056 → C038 (no repeated panel); C027 phone cropped; C023 push capped + cooler; C032 → C071 (C032 smeared throughout); C011 dropped (no sharp window) → outro is C012 (longer) + C009 wide; the C012→outro cut moves 44.64 → 46.84 (on a beat).

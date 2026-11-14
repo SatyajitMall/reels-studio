@@ -1,0 +1,306 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    { "id": "tracking", "type": "enum", "role": "style", "label": "Tracking", "description": "Multiplies the letter-spacing the timeline drives, so the reveal starts and settles proportionally wider or tighter.", "default": "standard", "options": [{ "value": "tight", "label": "Tight" }, { "value": "standard", "label": "Standard" }, { "value": "wide", "label": "Wide" }] },
+    { "id": "rise", "type": "enum", "role": "motion", "label": "Rise", "description": "Vertical offset the text starts from, which the timeline reads as the start of its travel and eases to zero.", "default": "standard", "options": [{ "value": "subtle", "label": "Subtle" }, { "value": "standard", "label": "Standard" }, { "value": "bold", "label": "Bold" }] },
+    { "id": "tone", "type": "enum", "role": "style", "label": "Tone", "description": "Text colour, limited to the design.md palette: cream (default) or gold.", "default": "cream", "options": [{ "value": "cream", "label": "Cream" }, { "value": "gold", "label": "Gold" }] }
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Durga Puja Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Local font only (design.md): DIN Condensed Bold, resolved relative to this file. */
+      @font-face {
+        font-family: "DIN Condensed";
+        src: url("assets/fonts/DINCondensed-Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: block;
+      }
+
+      /* Palette (design.md): the only three colours in this composition. */
+      :root {
+        --c-text: #f5e6c8;
+        --c-glow: #d4a017;
+        --c-glow-rgb: 212, 160, 23; /* #D4A017 as an rgb triplet, for alpha-only glow tweens */
+        --c-shadow: rgba(0, 0, 0, 0.6);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      #stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      /*
+        Hero-frame end-state (f56-f74): two-line lockup centred on x = 540.
+        Each line is a timed leaf clip, which the runtime positions absolutely, so
+        the plan's measured line-box tops place them. DIN Condensed: hhea ascent
+        712 = cap height, descent 288, so with line-height: 1 the line-box top sits
+        exactly on the cap line.
+          DURGA PUJA  line box 429-579, cap top 429, baseline 536
+          2026        line box 570-642, cap top 570, baseline 621 (34 px under the
+                      title baseline; the title's 43 px descent zone is empty, all caps)
+        Horizontal: shrink-wrapped and auto-centred, plus the tracking-in centring fix.
+        (Line tops live on #title-main / #title-year below.)
+      */
+
+      /* ---- tracking-in (registry component, customised in place) ---- */
+      .hf-tracking-in {
+        opacity: 0;
+        color: var(--hf-tracking-color, var(--c-text));
+        letter-spacing: calc(var(--hf-tracking-value, 0.28em) * var(--hf-tracking-reach, 1));
+        /* Centring fix: letter-spacing also trails the last glyph, which pushes the
+           ink left of centre and drifts as tracking animates. Matching left padding
+           keeps the ink centred on x = 540 on every frame. */
+        padding-left: calc(var(--hf-tracking-value, 0.28em) * var(--hf-tracking-reach, 1));
+        /* The rise (--hf-tracking-y) is read by the timeline as the start of its
+           y travel instead of a CSS transform, so GSAP owns the transform. */
+        will-change: opacity, letter-spacing, transform, filter;
+      }
+      /* ---- end tracking-in ---- */
+
+      .title-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: max-content;
+        margin-inline: auto;
+        display: block;
+        font-family: "DIN Condensed", sans-serif;
+        font-weight: 700;
+        font-style: normal;
+        font-synthesis: none;
+        font-kerning: normal;
+        line-height: 1;
+        white-space: nowrap;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+
+        /* Gold glow channels, driven on the timeline. Every keyframe keeps the same
+           3-layer text-shadow structure: [gold wide, gold tight, dark drop]. */
+        --glow-wide-blur: 0px;
+        --glow-wide-a: 0;
+        --glow-tight-blur: 0px;
+        --glow-tight-a: 0;
+        text-shadow:
+          0 0 var(--glow-wide-blur) rgba(var(--c-glow-rgb), var(--glow-wide-a)),
+          0 0 var(--glow-tight-blur) rgba(var(--c-glow-rgb), var(--glow-tight-a)),
+          0 6px 24px var(--c-shadow);
+      }
+
+      #title-main {
+        top: 380px;
+        font-size: 84px;
+        --hf-tracking-value: 0.04em;
+      }
+
+      #title-year {
+        top: 490px;
+        font-size: 72px;
+        --hf-tracking-value: 0.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-xqjx"
+      id="stage"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3.76"
+      data-fps="25"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- s1-title: one full-duration scene, one timed row per line. -->
+      <h1 data-hf-id="hf-6qd9"
+        id="title-main"
+        class="clip title-line hf-tracking-in"
+        data-start="0"
+        data-duration="3.76"
+        data-track-index="0"
+      >@satyajitmall</h1>
+      <p data-hf-id="hf-702o"
+        id="title-year"
+        class="clip title-line hf-tracking-in"
+        data-start="0"
+        data-duration="3.76"
+        data-track-index="1"
+      ></p>
+    </div>
+
+    <!-- tracking-in variable resolution (registry component, customised: palette-only tones). -->
+    <script>
+      (function () {
+        "use strict";
+
+        var vars =
+          window.__hyperframes && window.__hyperframes.getVariables
+            ? window.__hyperframes.getVariables()
+            : {};
+
+        // Unrecognised overrides return to their declared defaults.
+        var reaches = { tight: 0.6, standard: 1, wide: 1.8 };
+        var rises = { subtle: "4px", standard: "8px", bold: "18px" };
+        var tones = {
+          cream: "var(--c-text)",
+          gold: "var(--c-glow)",
+        };
+
+        function pick(table, value, fallback) {
+          return Object.prototype.hasOwnProperty.call(table, value) ? value : fallback;
+        }
+
+        var reach = reaches[pick(reaches, vars.tracking, "standard")];
+        var rise = rises[pick(rises, vars.rise, "standard")];
+        var tone = tones[pick(tones, vars.tone, "cream")];
+
+        // The class is applied to arbitrary host elements, so the resolved values
+        // ride the document root and inherit down to every one of them.
+        var host = document.documentElement;
+        host.style.setProperty("--hf-tracking-reach", String(reach));
+        host.style.setProperty("--hf-tracking-y", rise);
+        host.style.setProperty("--hf-tracking-color", tone);
+      })();
+    </script>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var COMPOSITION_ID = "main";
+
+        function build() {
+          var rise =
+            parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue("--hf-tracking-y"),
+            ) || 8;
+
+          var tl = gsap.timeline({ paused: true });
+
+          // ---- Hook (f0-f22): DURGA PUJA pulls into focus ----
+          tl.fromTo(
+            "#title-main",
+            { opacity: 0 },
+            { opacity: 1, duration: 0.56, ease: "power2.out" },
+            0,
+          );
+          // tracking-in settle + borrowed focus-blur-resolve pull, one tween.
+          tl.fromTo(
+            "#title-main",
+            { "--hf-tracking-value": "0.16em", filter: "blur(16px)", y: rise },
+            {
+              "--hf-tracking-value": "0.04em",
+              filter: "blur(0px)",
+              y: 0,
+              duration: 0.88,
+              ease: "power3.out",
+            },
+            0,
+          );
+
+          // ---- Build (f6-f26): 2026 follows 6 frames later, same gesture ----
+          tl.fromTo(
+            "#title-year",
+            { opacity: 0 },
+            { opacity: 1, duration: 0.48, ease: "power2.out" },
+            0.24,
+          );
+          tl.fromTo(
+            "#title-year",
+            { "--hf-tracking-value": "0.8em", filter: "blur(12px)", y: rise },
+            {
+              "--hf-tracking-value": "0.5em",
+              filter: "blur(0px)",
+              y: 0,
+              duration: 0.8,
+              ease: "power3.out",
+            },
+            0.24,
+          );
+
+          // ---- Punch (f28-f56): one gold glow swells, peaks on f40, settles ----
+          // Year carries the gold alphas x 0.6 (the emphasis words get the full glow).
+          var GLOW_OFF = { wideBlur: 0, wideA: 0, tightBlur: 0, tightA: 0 };
+          var GLOW_PEAK = { wideBlur: 36, wideA: 0.65, tightBlur: 12, tightA: 0.45 };
+          var GLOW_REST = { wideBlur: 28, wideA: 0.38, tightBlur: 8, tightA: 0.25 };
+
+          function glow(g, k) {
+            return {
+              "--glow-wide-blur": g.wideBlur + "px",
+              "--glow-wide-a": +(g.wideA * k).toFixed(4),
+              "--glow-tight-blur": g.tightBlur + "px",
+              "--glow-tight-a": +(g.tightA * k).toFixed(4),
+            };
+          }
+
+          [
+            ["#title-main", 1],
+            ["#title-year", 0.6],
+          ].forEach(function (line) {
+            var sel = line[0];
+            var k = line[1];
+            tl.fromTo(
+              sel,
+              glow(GLOW_OFF, k),
+              Object.assign(glow(GLOW_PEAK, k), { duration: 0.48, ease: "sine.inOut" }),
+              1.12,
+            );
+            tl.fromTo(
+              sel,
+              glow(GLOW_PEAK, k),
+              Object.assign(glow(GLOW_REST, k), {
+                duration: 0.64,
+                ease: "sine.out",
+                immediateRender: false,
+              }),
+              1.6,
+            );
+          });
+
+          // ---- Resolve (f56-f74): clean static hold, nothing tweens past 2.24 s ----
+
+          window.__timelines[COMPOSITION_ID] = tl;
+          tl.seek(0);
+          if (typeof window.__hfForceTimelineRebind === "function") {
+            window.__hfForceTimelineRebind();
+          }
+        }
+
+        // Block the first frame on the local face so no frame renders in a fallback.
+        var fontsReady =
+          document.fonts && document.fonts.load
+            ? Promise.all([
+                document.fonts.load('700 150px "DIN Condensed"', "DURGA PUJA"),
+                document.fonts.load('700 72px "DIN Condensed"', "2026"),
+              ]).then(function () {
+                return document.fonts.ready;
+              })
+            : Promise.resolve();
+
+        fontsReady.then(build, build);
+      })();
+    </script>
+  </body>
+</html>

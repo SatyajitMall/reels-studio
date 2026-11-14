@@ -1,0 +1,203 @@
+[
+ {
+  "file": "projects/kolkata/music/shantiniketan.wav",
+  "bpm": 103.4,
+  "bar_s": 2.322,
+  "feel": "as is",
+  "feel_bar_s": 2.32,
+  "duration_s": 262.06,
+  "hold_median_s": 4.0,
+  "bars_per_shot": 2,
+  "shot_s": 4.64,
+  "shots_in_length": 10,
+  "windows": [
+   {
+    "start": 9.03,
+    "end": 54.43,
+    "len": 45.4,
+    "arc_err": 0.17,
+    "clean_end": false,
+    "score": 83.0,
+    "energy": [
+     0.0,
+     0.73,
+     0.79,
+     0.8,
+     0.78,
+     0.74
+    ]
+   },
+   {
+    "start": 58.86,
+    "end": 105.33,
+    "len": 46.47,
+    "arc_err": 0.22,
+    "clean_end": true,
+    "score": 83.0,
+    "energy": [
+     0.73,
+     0.79,
+     0.86,
+     0.92,
+     0.91,
+     0.84
+    ]
+   },
+   {
+    "start": 174.78,
+    "end": 220.17,
+    "len": 45.39,
+    "arc_err": 0.238,
+    "clean_end": true,
+    "score": 81.2,
+    "energy": [
+     0.87,
+     0.77,
+     0.87,
+     0.97,
+     0.93,
+     0.84
+    ]
+   }
+  ],
+  "vocals": {
+   "words_per_10s": 2.6,
+   "longest_gap_s": 26.8,
+   "first_word_s": 26.8
+  }
+ },
+ {
+  "file": "projects/kolkata/music/chiltey_roud.wav",
+  "bpm": 92.3,
+  "bar_s": 2.601,
+  "feel": "as is",
+  "feel_bar_s": 2.6,
+  "duration_s": 376.14,
+  "hold_median_s": 4.0,
+  "bars_per_shot": 2,
+  "shot_s": 5.2,
+  "shots_in_length": 9,
+  "windows": [
+   {
+    "start": 97.64,
+    "end": 144.1,
+    "len": 46.46,
+    "arc_err": 0.167,
+    "clean_end": true,
+    "score": 88.3,
+    "energy": [
+     0.76,
+     0.69,
+     0.81,
+     0.84,
+     0.87,
+     0.84
+    ]
+   },
+   {
+    "start": 18.3,
+    "end": 64.74,
+    "len": 46.44,
+    "arc_err": 0.159,
+    "clean_end": false,
+    "score": 84.1,
+    "energy": [
+     0.21,
+     0.62,
+     0.66,
+     0.79,
+     0.62,
+     0.76
+    ]
+   },
+   {
+    "start": 54.43,
+    "end": 100.24,
+    "len": 45.81,
+    "arc_err": 0.163,
+    "clean_end": false,
+    "score": 83.7,
+    "energy": [
+     0.48,
+     0.73,
+     0.73,
+     0.84,
+     0.81,
+     0.76
+    ]
+   }
+  ],
+  "vocals": {
+   "words_per_10s": 6.5,
+   "longest_gap_s": 18.9,
+   "first_word_s": 18.9
+  }
+ },
+ {
+  "file": "projects/kolkata/music/mayabee.wav",
+  "bpm": 123.0,
+  "bar_s": 1.95,
+  "feel": "half-time",
+  "feel_bar_s": 3.9,
+  "duration_s": 246.74,
+  "hold_median_s": 4.0,
+  "bars_per_shot": 1,
+  "shot_s": 3.9,
+  "shots_in_length": 12,
+  "windows": [
+   {
+    "start": 184.41,
+    "end": 230.37,
+    "len": 45.96,
+    "arc_err": 0.234,
+    "clean_end": true,
+    "score": 81.6,
+    "energy": [
+     0.56,
+     0.7,
+     0.67,
+     0.7,
+     0.74,
+     0.58
+    ]
+   },
+   {
+    "start": 160.4,
+    "end": 206.45,
+    "len": 46.05,
+    "arc_err": 0.249,
+    "clean_end": true,
+    "score": 80.1,
+    "energy": [
+     0.27,
+     0.93,
+     0.88,
+     0.77,
+     0.89,
+     0.62
+    ]
+   },
+   {
+    "start": 80.39,
+    "end": 126.39,
+    "len": 46.0,
+    "arc_err": 0.255,
+    "clean_end": true,
+    "score": 79.5,
+    "energy": [
+     0.93,
+     0.74,
+     0.76,
+     0.74,
+     0.69,
+     0.79
+    ]
+   }
+  ],
+  "vocals": {
+   "words_per_10s": 7.8,
+   "longest_gap_s": 1.5,
+   "first_word_s": 1.5
+  }
+ }
+]

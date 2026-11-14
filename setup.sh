@@ -48,7 +48,7 @@ else
 fi
 python3 -m venv .venv
 ./.venv/bin/pip install -q --upgrade pip
-./.venv/bin/pip install -q requests librosa matplotlib pillow numpy faster-whisper
+./.venv/bin/pip install -q requests librosa matplotlib pillow numpy faster-whisper markdown-it-py
 mkdir -p .claude/skills
 ln -sfn ../../.vendor/video-use .claude/skills/video-use
 ok "video-use ready (Python env in .venv)"
@@ -78,8 +78,13 @@ else
 fi
 [ -x "$HOME/.local/bin/earshot" ] && ./.venv/bin/python scripts/earshot_bank.py >/dev/null && ok "earshot sound set in assets/sfx/earshot/"
 
-step "5/6  API keys"
+step "5/6  API keys and director profile"
 if [ ! -f .env ]; then cp .env.example .env; warn "Created .env (API keys are optional: transcripts use local Whisper)."; fi
+# The profile is personal (git-ignored); every reel session reads it in Phase 0.
+if [ ! -f studio/director-profile.md ]; then
+  cp studio/director-profile.example.md studio/director-profile.md
+  warn "Created studio/director-profile.md from the blank template: reel sessions fill it in as they learn your taste."
+fi
 # video-use looks for .env in its own folder too
 ln -sfn ../../.env .vendor/video-use/.env
 grep -q '^ELEVENLABS_API_KEY=.\+' .env && ok "ElevenLabs key present (optional: transcribe_reel.sh --scribe)" || ok "No ElevenLabs key: transcripts use local Whisper"

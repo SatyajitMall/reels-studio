@@ -21,9 +21,9 @@ v0.9.1 shipped the rules, notes and small fixes from the kolkata retro and its 1
 - **Open decisions for the director:**
   - a shared footage catalogue, `studio/footage/<shoot>.md`, that reel sessions append to (an ARCHITECTURE change; CR footage-catalogue 1–2);
   - Bengali shaping: try `brew install fribidi` (Pillow's wheels load it at run time; needs the director's OK), else the HTML cards;
-  - delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`, which can publish to Instagram directly (the director taps Share), plus `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md`.
+  - ~~delete or set aside the untracked `scripts/gemini_ig_studio_cli.py`~~ **set aside 2026-11-14** (v0.11.1, public repo): it, `gemini_setup_premiere_mcp.sh` and `GEMINI_IG_STUDIO_INTEGRATION.md` stay on the director's Mac, git-ignored, never pushed. The CLI can publish to Instagram directly, which the studio doesn't do (the director taps Share).
 
-## Untriaged: external review (`GEMINI_ARCHITECTURE_REVIEW.md`, added 2026-10-15 by another tool)
+## Untriaged: external review (`studio/reviews/gemini-architecture-review-2026-10-15.md`, added 2026-10-15 by another tool)
 Each item needs to be verified before it's adopted. The scripts it ships (`scripts/gemini_*.py`) haven't been reviewed yet.
 
 | # | Claim | Verify by | Status |
@@ -57,6 +57,20 @@ Each item needs to be verified before it's adopted. The scripts it ships (`scrip
 - Text behind the subject on moving shots needs motion tracking: either track the word to the subject, or limit it to holds (as now).
 - Gemini Omni video-to-video restyle (the creator's "text behind the head"): not on Google's pricing page as of 2026-10-18. `text_behind.py` covers the need locally for free.
 - A per-format motion-graphics kit (reusable title, end card and lower-third in the director's style) once v0.5.1-style formats exist.
+- **Null Motion (nullmotion.com): parked 2026-11-12 by the director.** The director asked to add it "for motion graphics which we can use in future". HQ checked the site:
+  - **What it is:** a paid editor that runs in a browser tab (Null Studio). You sign in with Google and pay through Stripe.
+  - **Plans:** the motion-graphics library comes only with Creator ($29 a month, or $21 billed yearly) or Studio ($99, or $69 yearly). Starter ($10) doesn't include it.
+  - **The MCP:** a local server at `127.0.0.1:4350/mcp` with 17 tools, which edits Null's own timeline only while its tab is open. Setup: `claude mcp add --transport http null-studio http://127.0.0.1:4350/mcp`.
+  - **Export:** MP4 only (1080p from the MCP, 4K in the browser on Creator), with no transparent background.
+  - **Templates:** 13 live ones (titles, lower thirds, kinetic type) and 45 pre-rendered transparent overlays. The overlays are landscape 1920×1080 and in a tech/creator style (charts, leaderboards, chat bubbles, confetti).
+  - **Source code:** the GitHub repos it links (blixvip/NullMotion, arnoldwender/nullmotion) return 404. The other "nullmotion" repos are 0-star accounts, so there's no code to review.
+
+  **Why parked:**
+  - Graphics have to sit on V5 above the grade with a transparent background (HyperFrames → ProRes 4444). Null's MP4 would arrive baked onto footage.
+  - It's a second editor competing with Premiere.
+  - HyperFrames already makes 9:16 titles, lower thirds and kinetic type with a transparent background.
+
+  **Look again if** Null exports with a transparent background (ProRes 4444, or WebM with alpha), ships 9:16 overlays in a style that fits the reels, and its local server's code can be reviewed. If adopted, it goes behind the same ask-first guard as Higgsfield, after the director subscribes.
 
 ## From v0.6.0 (playbooks + the WeAreNoCode kit)
 - **Group B: talking-head tools (next minor version):** an audio cut audit (clipped words at cut edges; his most important finding), a paper-cut script from the transcript, dead-air detection on the cut, and camera-move helpers (local transcription: done in v0.9.0) for the `creator-explainer` rules. Build them before or during the first talking-head pilot.

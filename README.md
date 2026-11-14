@@ -6,93 +6,102 @@ You direct, Claude edits, in Adobe Premiere Pro. You drop in your clips, answer 
 - punch-ins and camera moves;
 - speed ramps and transitions;
 - graphics and captions;
-- sound design.
+- sound design;
+- an independent review on a second model before you see any cut.
+
+It runs on **Claude Code** driving **Premiere Pro** through an MCP bridge, with a set of local tools for analysis, previews, quality checks and delivery.
+
+📘 **The complete guide**, from install to a posted reel: [`docs/GUIDE.md`](docs/GUIDE.md) · [PDF](docs/GUIDE.pdf)
+🎥 **Before you shoot**: [`studio/shooting-guide-blackmagic-cam.md`](studio/shooting-guide-blackmagic-cam.md) · [PDF](docs/shooting-guide.pdf)
+
+## What you need
+- A Mac with **macOS 14+**, **Homebrew**, and **Adobe Premiere Pro** (built on Premiere 2026; After Effects 2026 is optional).
+- **Claude Code**: the Claude desktop app's Code tab, or the `claude` CLI.
+- Optional keys in `.env` (ElevenLabs, Pexels, OpenRouter). Nothing needs them by default: transcripts use local Whisper.
 
 ## One-time setup (≈15 min)
 
-1. Open **Terminal**, `cd` into this folder, then run:
+1. Clone and run the setup script (safe to re-run):
    ```bash
+   git clone https://github.com/SatyajitMall/reels-studio.git
+   cd reels-studio
    bash setup.sh
    ```
-   This installs the Premiere MCP bridge, ffmpeg, local Whisper for word-level transcripts, and the HyperFrames and Instagram skills.
-2. Optional: an ElevenLabs key in `.env` (`ELEVENLABS_API_KEY=...`). Transcripts use local Whisper without it; the key only adds `transcribe_reel.sh --scribe`.
-3. In **Premiere Pro** (one time):
-   - Settings → Plugins → turn on **UXP developer mode**, then restart Premiere
-   - Window → Extensions → **MCP Bridge (CEP)**
-   - Set Temp Directory to `/tmp/premiere-mcp-bridge` → **Save Configuration** → **Start Bridge** → **Test Connection**
-4. Quit and reopen the Claude app.
+   It installs:
+   - the Premiere MCP bridge, ffmpeg and local Whisper;
+   - the HyperFrames and Instagram skills;
+   - earshot and the starter LUTs, sound effects and grain.
 
-## How the studio runs: HQ + one session per reel
-
-- **HQ session** (`/studio-hq`): one chat that owns the architecture. It covers the rules, skills, scripts, hooks and templates.
-- **Reel sessions** (`/cinematic-reel <name>`): a new chat per reel, which only touches `projects/<name>/`. When a reel session hits a gap, it files a change request in `studio/change-requests/` instead of patching the studio.
-- **Pilot reels**: these log friction and write a retro, which HQ turns into improvements.
-
-Open every session at the `reels-studio/` root. Details are in `studio/ARCHITECTURE.md`, and history is in `studio/CHANGELOG.md`.
+   It also creates `.env` and your `studio/director-profile.md` from their templates.
+2. In **Premiere Pro** (one time):
+   - Settings → Plugins → turn on **UXP developer mode**, then restart Premiere;
+   - Window → Extensions → **MCP Bridge (CEP)**;
+   - set Temp Directory to `/tmp/premiere-mcp-bridge` → **Save Configuration** → **Start Bridge** → **Test Connection**.
+3. Quit and reopen the Claude app (or start `claude` in this folder).
 
 ## Making a reel
 
 ```bash
 scripts/new_reel.sh gym-morning-routine
 ```
-1. Put your main or talking-head clips in `projects/gym-morning-routine/raw/a-roll/` and cutaways in `raw/b-roll/`. For a music-only reel, all clips can go in `raw/b-roll/`. If your footage already lives somewhere else, link it in without copying it:
-   ```bash
-   scripts/link_footage.sh gym-morning-routine "/path/to/your/footage"
-   ```
-2. Optionally, put reference reels you like in `references/`. Screen recordings are fine.
+1. Put your main or talking-head clips in `projects/gym-morning-routine/raw/a-roll/` and cutaways in `raw/b-roll/`. If your footage lives somewhere else, link it without copying: `scripts/link_footage.sh gym-morning-routine "/path/to/footage"`.
+2. Optionally, put reference reels you like in `references/`.
 3. Open Premiere with a project open and the bridge started.
 4. Open a **new** Code session at the `reels-studio/` root and say **`/cinematic-reel gym-morning-routine`**.
 
 Claude will:
-1. **Ask you a few quick questions**: the idea, the goal, references, then look and pace options picked to fit your footage.
-2. **Analyse every clip and reference**: exposure, colour cast, slow-mo headroom, and the reference's cut pacing.
-3. **Write `brief.md`** with the full treatment, plus 3 hooks and a cut list, then send a **storyboard and an offline preview** of the planned cut to watch on your phone. ⏸ *You approve, or change pace and picks before Premiere is touched.*
-4. Cut it in a **duplicate sequence**, so your original is never touched.
-5. Colour: correct each clip toward its camera file → match the shots → a look or texture only if you picked one.
-6. Add the planned moves, transitions, B-roll, graphics and captions, then the sound design and a music mix that dips under speech.
-7. Export `renders/exports/<name>_v1.mp4`. ⏸ *You give notes, and Claude makes `_v2` with only those changes.*
-8. Write the Instagram caption, hook lines and hashtags. ⏸ *You approve.*
+1. Interview you in two short multiple-choice rounds.
+2. Analyse every clip and reference.
+3. Write the brief, plus a storyboard and an offline preview. ⏸ *You approve.*
+4. Cut a duplicate sequence; your original is never touched.
+5. Do the colour (camera-true unless you pick a look), motion, graphics, captions and the sound mix.
+6. Pass the scripted checks and an independent review. ⏸ *You review on your phone and give notes; each round is a new version.*
+7. Write the Instagram package. ⏸ *You approve; you tap Share.*
 
-The full menu of looks, moves and transitions is in `.claude/skills/cinematic-reel/effects-playbook.md`. You can ask for any of them by name, e.g. "Warm Film look, a speed ramp on the gym shot, flash cuts on the beat".
+The guide covers every phase, rule and tool.
 
-Each kind of video has an **editing playbook** with its own style rules (pace, camera, type, sound), in `.claude/skills/cinematic-reel/playbooks/`: `cinematic-montage` for music montages, `story-montage` for narrated montages with one recurring character, `creator-explainer` for talking to camera. Claude proposes one in the first interview round; you can override any rule for a single reel.
+## How the studio runs
+- **HQ session** (`/studio-hq`): one chat that owns the architecture, meaning the rules, skills, scripts, hooks and templates.
+- **Reel sessions** (`/cinematic-reel <name>`): a new chat per reel, which only touches `projects/<name>/`. A reel session that hits a gap files a change request in `studio/change-requests/` instead of patching the studio.
+- A hook (`.claude/hooks/guard_architecture.py`) enforces the split.
 
-## Before you shoot
+Details are in [`studio/ARCHITECTURE.md`](studio/ARCHITECTURE.md), and history is in [`studio/CHANGELOG.md`](studio/CHANGELOG.md).
 
-The one-page camera guide is `studio/shooting-guide-blackmagic-cam.md`. It covers 25 fps at 1/50 s under Indian lamps, white balance set to the light, and a LUT for the monitor only (or its name in the slate notes). It comes from what the Pujo 2026 footage measured.
-
-## Giving notes after a cut
-
-Specific notes work best:
-- "Open on the line about waking up at 5am."
-- "Faster, about 2 s per shot."
-- "Less grain."
-- "Bold yellow captions, 3 words max."
-- "Cut the part about protein shakes entirely."
-- "Make the ending feel like [reference]."
-
-## Library: drop your stuff here
-| Folder | What goes in |
-|---|---|
-| `assets/luts/` | `.cube` LUTs (your go-to looks) |
-| `assets/music/` | Licensed music beds |
-| `assets/sfx/` | Whooshes, risers, hits, clicks (`.wav`): the Gemini starter set, `earshot/` (code-made, `scripts/earshot_bank.py`) and `openverse/` (real CC0 recordings kept by `scripts/sfx_fetch.py`, each with its licence sidecar) |
-| `assets/overlays/` | Grain, light leaks, textures |
-| `assets/mogrts/` | Premiere Essential Graphics templates |
-| `assets/presets/` | Export presets (`.epr`) |
-
-## Layout
+## Repository layout
 ```
-CLAUDE.md                     rules Claude follows (tracks, guardrails, editing style)
-.claude/skills/cinematic-reel the 7-phase workflow behind /cinematic-reel
-.mcp.json                     Premiere MCP config for Claude Code in Terminal
-scripts/                      the studio's tools (CLAUDE.md §5 lists them): ingest and footage analysis, camera check,
-                              offline previews, storyboards and pick sheets, delivery encode, file check, pregate,
-                              review sheets, After Effects round-trip, local Whisper transcripts, and more
-projects/<reel>/              brief.md (Claude writes) · project.md · raw/ · references/ · analysis/ · transcripts/ · renders/
+CLAUDE.md          the editor's operating contract (tracks, guardrails, editing rules)
+docs/              the complete guide (Markdown + PDF) and the shooting guide PDF
+.claude/           skills (/cinematic-reel, /studio-hq), the reviewer agent, hooks
+scripts/           the studio's tools: analysis, previews, storyboards, checks, delivery, sound, After Effects
+studio/            architecture, version, changelog, backlog, change requests, retros, plans, guides
+projects/_template the folder every new reel starts from
+projects/<reel>/   each finished reel's brief, log, retro, research and one-off tools (notes and code only)
+assets/            your LUTs, music, SFX, overlays, MOGRTs, presets (folders only; filled locally)
 ```
+
+## What's not in this repository
+The repository is public. It holds the studio's code, rules and each reel's written record, and nothing else:
+- **No media.** Camera footage, music, voice, renders, deliveries, fonts, LUTs and sound effects stay on the director's Mac. `setup.sh` regenerates the starter assets.
+- **Nothing copyrighted.** No songs, audio from reference reels, or lyric transcripts.
+- **Nothing personal.** No `.env`, no director profile, no spend ledgers.
+
+The reel folders' notes describe how each reel was made. Without their media they won't re-render elsewhere.
 
 ## Troubleshooting
-- **"Premiere not connected"**: Premiere must be open with a project loaded, and the CEP panel must show the bridge as started. If it still fails, right-click the panel and choose **Reload**.
-- **Health check**: run `premiere-pro-mcp --doctor`.
-- **No transcript**: run `scripts/transcribe_reel.sh <reel>` (local Whisper; the first run downloads the model, about 0.5 GB). For an external voiceover, name the file: `scripts/transcribe_reel.sh <reel> projects/<reel>/audio/vo.wav`.
+- **"Premiere not connected"**: Premiere must be open with a project loaded, and the CEP panel must show the bridge as started. If it still fails, right-click the panel → **Reload**.
+- **Health check**: `premiere-pro-mcp --doctor`.
+- **No transcript**: `scripts/transcribe_reel.sh <reel>` (local Whisper; the first run downloads about 0.5 GB).
+- More in the guide, section 20.
+
+## Licence and credits
+MIT, see [`LICENSE`](LICENSE). Folders with their own licence keep it. Built on:
+- the Adobe Premiere Pro MCP server (hetpatel-11);
+- video-use (browser-use);
+- HyperFrames (HeyGen);
+- earshot (Leonxlnx);
+- faster-whisper;
+- Openverse;
+- the Instagram skills (sergebulaev);
+- ffmpeg.
+
+Each is installed by `setup.sh` and keeps its own licence.
